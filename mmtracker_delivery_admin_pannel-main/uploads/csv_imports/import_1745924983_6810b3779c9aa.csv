@@ -1,0 +1,8 @@
+Order ID,Customer Name,Customer Email,Customer Phone,Address Line 1,Address Line 2,City,State,Postal Code,Country,Product SKU,Product Name,Quantity,Price Per Item,QR Code,Notes,Requires Image Proof,Requires Signature Proof
+ORD1001,Alice Wonderland,alice@example.com,555-1234,123 Rabbit Hole Ln,,Wonderland,WL,12345,Fictionland,BUNNY001,Carrot Cake Slice,2,4.5,QR-BUNNY001,Leave by the big mushroom.,1,0
+ORD1001,Alice Wonderland,alice@example.com,555-1234,123 Rabbit Hole Ln,,Wonderland,WL,12345,Fictionland,TEA005,Mad Hatter Tea Bags (Box),1,8.0,QR-TEA005,Leave by the big mushroom.,1,0
+ORD1002,Bob The Builder,bob@example.com,555-5678,456 Construction Ave,Unit B,Builderville,BV,67890,Toonland,TOOL010,Hammer,1,15.99,QR-TOOL010,,0,0
+ORD1002,Bob The Builder,bob@example.com,555-5678,456 Construction Ave,Unit B,Builderville,BV,67890,Toonland,NAIL002,Nails (1kg Box),3,5.5,QR-NAIL002,,0,0
+ORD1002,Bob The Builder,bob@example.com,555-5678,456 Construction Ave,Unit B,Builderville,BV,67890,Toonland,TAPE001,Measuring Tape,1,7.25,QR-TAPE001,,0,0
+ORD1003,Charlie Chaplin,charlie@silentfilms.com,555-9900,789 Silent Street,,Hollywood,CA,90210,USA,HAT001,Bowler Hat,1,25.0,QR-HAT001,"Handle with care, it's fragile!",1,1
+ORD1003,Charlie Chaplin,charlie@silentfilms.com,555-9900,789 Silent Street,,Hollywood,CA,90210,USA,CANE001,Walking Cane,1,18.5,QR-CANE001,"Handle with care, it's fragile!",1,1

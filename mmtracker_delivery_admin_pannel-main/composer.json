@@ -1,0 +1,18 @@
+{
+    "name": "bbt/deliveryapp",
+    "autoload": {
+        "psr-4": {
+            "Bbt\\Deliveryapp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "mnaveedpaki",
+            "email": "53542278+mnaveedpaki@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "cboden/ratchet": "^0.4.4",
+        "kreait/firebase-php": "^7.16"
+    }
+}

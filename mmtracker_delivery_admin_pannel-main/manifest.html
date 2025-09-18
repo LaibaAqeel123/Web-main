@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manifest</title>
+</head>
+<body>
+    <h1>Manifest</h1>
+    <script>
+        const myHeaders = new Headers();
+        myHeaders.append("Accept", "application/json");
+        myHeaders.append("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxNSwiaWF0IjoxNzM2MTQ2NDc0LCJleHAiOjE3MzYyMzI4NzR9.Fl25l4ltObV7F1BDD91W0xJUrnzcdWAJbmzpSESNB9I");
+        myHeaders.append("Cookie", "PHPSESSID=5s33auqbrc8ab9bf66m0nj5n71");
+
+        const requestOptions = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+        };
+
+        fetch("http://localhost/deliveryapp/api/rider/manifests.php", requestOptions)
+        .then((response) => response.text())
+        .then((result) => console.log(result))
+        .catch((error) => console.error(error));
+    </script>
+</body>
+</html>
