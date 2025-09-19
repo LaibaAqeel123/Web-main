@@ -11,7 +11,7 @@ $company_id = (!isSuperAdmin() && !empty($_SESSION['company_id']))
 // Recent orders (left column, below Riders) - Updated to show assignment status
 $recent_orders_sql = "SELECT 
     o.id, o.order_number, o.status, o.created_at,
-    c.name AS customer_name,
+    CASE WHEN o.customer_id > 0 THEN c.name ELSE 'N/A' END AS customer_name,
     c.phone AS customer_phone,
     o.latitude, o.longitude,
     m.id as manifest_id, u.name as assigned_rider_name
@@ -54,13 +54,10 @@ if ($company_id) {
   $route_orders_sql .= " AND o.company_id = $company_id";
 }
 
-$route_orders_sql .= " ORDER BY 
-  CASE WHEN m.id IS NOT NULL THEN 0 ELSE 1 END,
-  m.id ASC,
-  o.created_at DESC 
-  LIMIT 50";
+$route_orders_sql .= " ORDER BY o.created_at DESC LIMIT 50";
 
 $route_orders_result = mysqli_query($conn, $route_orders_sql);
+
 
 // Riders list with order count - FIXED
 $riders_sql = "SELECT DISTINCT u.id, u.name, u.phone,
