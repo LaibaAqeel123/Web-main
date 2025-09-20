@@ -51,13 +51,13 @@ $query = "SELECT DISTINCT u.*, rc.is_active as rider_active, c.name as company_n
               WHERE m.rider_id = u.id 
               AND m.status != 'delivered'
               $company_stats_condition
-          ) as active_manifests,
+          ) as active_routes,
           (
               SELECT COUNT(*) 
               FROM Manifests m 
               WHERE m.rider_id = u.id
               $company_stats_condition
-          ) as total_manifests,
+          ) as total_routes,
           (
               SELECT COUNT(*) 
               FROM Orders o 
@@ -166,14 +166,14 @@ $result = mysqli_query($conn, $query);
                                 <?php echo $rider['rider_active'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
                                             <?php echo $rider['rider_active'] ? 'Active' : 'Inactive'; ?>
                                         </span>
-                                        <?php if ($rider['active_manifests'] > 0): ?>
+                                        <?php if ($rider['active_routes'] > 0): ?>
                                             <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                                 On Delivery
                                             </span>
                                         <?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <div>Manifests: <?php echo $rider['total_manifests']; ?></div>
+                                        <div>Routes: <?php echo $rider['total_routes']; ?></div>
                                         <div>Delivered: <?php echo $rider['delivered_orders']; ?> orders</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

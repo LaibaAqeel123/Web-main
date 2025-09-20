@@ -2,8 +2,8 @@
 require_once '../../includes/config.php';
 requireLogin();
 
-$manifest = null;
-$manifest_orders = [];
+$route = null;  // Changed from $manifest to $route
+$route_orders = [];  // Changed from $manifest_orders to $route_orders
 
 if (isset($_GET['id'])) {
     $id = cleanInput($_GET['id']);
@@ -11,7 +11,7 @@ if (isset($_GET['id'])) {
     // Check access rights
     $company_condition = !isSuperAdmin() ? "AND m.company_id = " . $_SESSION['company_id'] : "";
     
-    // Fetch manifest details
+    // Fetch route details
     $query = "SELECT m.*, 
               u.name as rider_name, u.phone as rider_phone, u.email as rider_email,
               c.name as company_name,
@@ -27,14 +27,14 @@ if (isset($_GET['id'])) {
     mysqli_stmt_bind_param($stmt, "i", $id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
-    $manifest = mysqli_fetch_assoc($result);
+    $route = mysqli_fetch_assoc($result);  // Changed from $manifest to $route
 
-    if (!$manifest) {
+    if (!$route) {
         header('Location: index.php');
         exit();
     }
 
-    // Fetch orders in manifest with their statuses
+    // Fetch orders in route with their statuses
     $orders_query = "SELECT o.id, o.order_number, o.status, o.notes, 
                            c.name as customer_name, 
                            a.address_line1, a.address_line2, a.city,
@@ -50,12 +50,12 @@ if (isset($_GET['id'])) {
     mysqli_stmt_execute($stmt);
     $orders_result = mysqli_stmt_get_result($stmt);
     while ($order = mysqli_fetch_assoc($orders_result)) {
-        $manifest_orders[] = $order;
+        $route_orders[] = $order;  // Changed from $manifest_orders to $route_orders
     }
 
     // Calculate statistics
-    $total_orders = count($manifest_orders);
-    $delivered_orders = array_filter($manifest_orders, function($order) {
+    $total_orders = count($route_orders);  // Changed from $manifest_orders to $route_orders
+    $delivered_orders = array_filter($route_orders, function($order) {  // Changed from $manifest_orders to $route_orders
         return $order['status'] === 'delivered';
     });
     $delivery_progress = $total_orders > 0 ? (count($delivered_orders) / $total_orders) * 100 : 0;
@@ -67,7 +67,7 @@ if (isset($_GET['id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Manifest - <?php echo SITE_NAME; ?></title>
+    <title>View Route - <?php echo SITE_NAME; ?></title>  <!-- Changed page title -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
@@ -91,11 +91,11 @@ if (isset($_GET['id'])) {
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">Manifest #<?php echo $manifest['id']; ?></h1>
+            <h1 class="text-2xl font-bold text-gray-900">Route #<?php echo $route['id']; ?></h1>  <!-- Changed heading -->
             <div class="space-x-2">
-                <a href="edit.php?id=<?php echo $manifest['id']; ?>" 
+                <a href="edit.php?id=<?php echo $route['id']; ?>" 
                    class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
-                    Edit Manifest
+                    Edit Route  <!-- Changed button text -->
                 </a>
                 <a href="index.php" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
                     Back to List
@@ -104,11 +104,11 @@ if (isset($_GET['id'])) {
         </div>
 
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <!-- Manifest Details -->
+            <!-- Route Details -->  <!-- Changed section title -->
             <div class="lg:col-span-1">
                 <div class="bg-white shadow rounded-lg divide-y divide-gray-200">
                     <div class="px-6 py-5">
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Manifest Information</h3>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Route Information</h3>  <!-- Changed heading -->
                     </div>
                     <div class="px-6 py-5">
                         <dl class="space-y-4">
@@ -117,7 +117,7 @@ if (isset($_GET['id'])) {
                                 <dd class="mt-1">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                         <?php
-                                        switch($manifest['status']) {
+                                        switch($route['status']) {  // Changed from $manifest to $route
                                             case 'delivered':
                                                 echo 'bg-green-100 text-green-800';
                                                 break;
@@ -131,21 +131,21 @@ if (isset($_GET['id'])) {
                                                 echo 'bg-gray-100 text-gray-800';
                                         }
                                         ?>">
-                                        <?php echo ucfirst($manifest['status']); ?>
+                                        <?php echo ucfirst($route['status']); ?>  <!-- Changed from $manifest to $route -->
                                     </span>
                                 </dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Created</dt>
                                 <dd class="mt-1 text-sm text-gray-900">
-                                    <?php echo date('M d, Y H:i', strtotime($manifest['created_at'])); ?>
+                                    <?php echo date('M d, Y H:i', strtotime($route['created_at'])); ?>  <!-- Changed from $manifest to $route -->
                                 </dd>
                             </div>
                             <?php if (isSuperAdmin()): ?>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Company</dt>
                                 <dd class="mt-1 text-sm text-gray-900">
-                                    <?php echo htmlspecialchars($manifest['company_name']); ?>
+                                    <?php echo htmlspecialchars($route['company_name']); ?>  <!-- Changed from $manifest to $route -->
                                 </dd>
                             </div>
                             <?php endif; ?>
@@ -154,20 +154,20 @@ if (isset($_GET['id'])) {
                 </div>
 
                 <!-- Rider Information -->
-                <?php if ($manifest['rider_id']): ?>
+                <?php if ($route['rider_id']): ?>  <!-- Changed from $manifest to $route -->
                 <div class="bg-white shadow rounded-lg mt-6">
                     <div class="px-6 py-5">
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Assigned Rider</h3>
                         <dl class="mt-4 space-y-4">
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Name</dt>
-                                <dd class="mt-1 text-sm text-gray-900"><?php echo htmlspecialchars($manifest['rider_name']); ?></dd>
+                                <dd class="mt-1 text-sm text-gray-900"><?php echo htmlspecialchars($route['rider_name']); ?></dd>  <!-- Changed from $manifest to $route -->
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Contact</dt>
                                 <dd class="mt-1 text-sm text-gray-900">
-                                    <?php echo htmlspecialchars($manifest['rider_phone']); ?><br>
-                                    <?php echo htmlspecialchars($manifest['rider_email']); ?>
+                                    <?php echo htmlspecialchars($route['rider_phone']); ?><br>  <!-- Changed from $manifest to $route -->
+                                    <?php echo htmlspecialchars($route['rider_email']); ?>  <!-- Changed from $manifest to $route -->
                                 </dd>
                             </div>
                         </dl>
@@ -178,7 +178,7 @@ if (isset($_GET['id'])) {
                 <!-- Delivery Progress -->
                 <div class="bg-white shadow rounded-lg mt-6">
                     <div class="px-6 py-5">
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Manifest Progress</h3>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Route Progress</h3>  <!-- Changed heading -->
                         <div class="mt-4">
                             <div class="relative pt-1">
                                 <div class="flex mb-2 items-center justify-between">
@@ -209,7 +209,7 @@ if (isset($_GET['id'])) {
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Warehouse Information</h3>
                     </div>
                     <div class="px-6 py-5">
-                        <?php if ($manifest['warehouse_name']): ?>
+                        <?php if ($route['warehouse_name']): ?>  <!-- Changed from $manifest to $route -->
                             <div class="flex items-start space-x-4">
                                 <div class="flex-shrink-0">
                                     <div class="p-2 bg-indigo-100 rounded-lg">
@@ -221,7 +221,7 @@ if (isset($_GET['id'])) {
                                 </div>
                                 <div class="flex-1">
                                     <h4 class="text-lg font-medium text-gray-900">
-                                        <?php echo htmlspecialchars($manifest['warehouse_name']); ?>
+                                        <?php echo htmlspecialchars($route['warehouse_name']); ?>  <!-- Changed from $manifest to $route -->
                                     </h4>
                                     <div class="mt-2 space-y-2">
                                         <div class="flex items-center text-sm text-gray-500">
@@ -231,7 +231,7 @@ if (isset($_GET['id'])) {
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                                       d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                             </svg>
-                                            <span><?php echo htmlspecialchars($manifest['warehouse_address']); ?></span>
+                                            <span><?php echo htmlspecialchars($route['warehouse_address']); ?></span>  <!-- Changed from $manifest to $route -->
                                         </div>
                                         <div class="flex items-center text-sm text-gray-500">
                                             <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,16 +239,16 @@ if (isset($_GET['id'])) {
                                                       d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                                             </svg>
                                             <span>
-                                                <?php echo htmlspecialchars($manifest['warehouse_city'] . ', ' . $manifest['warehouse_state']); ?>
+                                                <?php echo htmlspecialchars($route['warehouse_city'] . ', ' . $route['warehouse_state']); ?>  <!-- Changed from $manifest to $route -->
                                             </span>
                                         </div>
                                     </div>
-                                    <?php if ($manifest['status'] === 'assigned' || $manifest['status'] === 'delivering'): ?>
+                                    <?php if ($route['status'] === 'assigned' || $route['status'] === 'delivering'): ?>  <!-- Changed from $manifest to $route -->
                                         <div class="mt-4">
                                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                                                <?php echo $manifest['status'] === 'delivering' ? 
+                                                <?php echo $route['status'] === 'delivering' ?  // Changed from $manifest to $route
                                                     'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'; ?>">
-                                                <?php echo ucfirst($manifest['status']); ?>
+                                                <?php echo ucfirst($route['status']); ?>  <!-- Changed from $manifest to $route -->
                                             </span>
                                         </div>
                                     <?php endif; ?>
@@ -263,7 +263,7 @@ if (isset($_GET['id'])) {
                                     </svg>
                                 </div>
                                 <h3 class="mt-2 text-sm font-medium text-gray-900">No Warehouse Assigned</h3>
-                                <p class="mt-1 text-sm text-gray-500">This manifest doesn't have a warehouse assigned yet.</p>
+                                <p class="mt-1 text-sm text-gray-500">This route doesn't have a warehouse assigned yet.</p>  <!-- Changed text -->
                             </div>
                         <?php endif; ?>
                     </div>
@@ -274,13 +274,13 @@ if (isset($_GET['id'])) {
             <div class="lg:col-span-2">
                 <div class="bg-white shadow rounded-lg">
                     <div class="px-6 py-5 border-b border-gray-200">
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Orders (<?php echo count($manifest_orders); ?>)</h3>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Orders (<?php echo count($route_orders); ?>)</h3>  <!-- Changed from $manifest_orders to $route_orders -->
                     </div>
                     
                     <?php
                     // Group orders by drop number
                     $grouped_orders = [];
-                    foreach ($manifest_orders as $order) {
+                    foreach ($route_orders as $order) {  // Changed from $manifest_orders to $route_orders
                         $drop_number = $order['drop_number'] ?? 0; // Use 0 if drop_number is null
                         if (!isset($grouped_orders[$drop_number])) {
                             $grouped_orders[$drop_number] = [];
@@ -354,9 +354,9 @@ if (isset($_GET['id'])) {
                             <?php endforeach; ?>
                         <?php endforeach; ?>
 
-                        <?php if (empty($manifest_orders)): ?>
+                        <?php if (empty($route_orders)): ?>  <!-- Changed from $manifest_orders to $route_orders -->
                             <div class="px-6 py-5">
-                                <p class="text-gray-500">No orders in this manifest.</p>
+                                <p class="text-gray-500">No orders in this route.</p>  <!-- Changed text -->
                             </div>
                         <?php endif; ?>
                     </div>
