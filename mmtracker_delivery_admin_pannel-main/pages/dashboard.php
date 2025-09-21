@@ -545,12 +545,12 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
             
             <div class="section-header">
               <div class="flex items-center gap-2">
-                <h2 class="text-lg font-semibold">Riders</h2>
+                <h2 class="text-lg font-semibold">Drivers</h2>
                 <span class="workflow-step">Step 2: Assign Routes</span>
               </div>
               <a href="riders/index.php" class="text-indigo-600 text-sm">Manage</a>
             </div>
-            <div class="workflow-indicator">Drag routes here to assign to riders</div>
+            <div class="workflow-indicator">Drag routes here to assign to drivers</div>
            <div id="ridersList" class="riders-list">
     <table class="w-full text-sm text-left text-gray-500">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -668,7 +668,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
               </div>
             </div>
             
-            <div class="workflow-indicator">Drag orders to routes first, then assign routes to riders</div>
+            <div class="workflow-indicator">Drag orders to routes first, then assign routes to drivers</div>
            <div class="orders-list" id="ordersList">
     <table class="w-full text-sm text-left text-gray-500">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -709,7 +709,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
             <div class="resize-handle resize-handle-corner"></div>
             
             <div class="flex justify-between items-center mb-3">
-              <h2 class="text-lg font-semibold">Riders Location Map</h2>
+              <h2 class="text-lg font-semibold">Drivers Location Map</h2>
               <div class="text-sm text-gray-500" id="lastUpdate">Last update: 0 riders</div>
             </div>
             <div id="map"></div>
@@ -722,11 +722,11 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
             <div class="section-header">
               <div class="flex items-center gap-2">
                 <h2 class="text-lg font-semibold">Routes</h2>
-                <span class="workflow-step">Collect Orders → Assign to Riders</span>
+                <span class="workflow-step">Collect Orders → Assign to Drivers</span>
               </div>
               <a href="manifests/index.php" class="text-indigo-600 text-sm">New</a>
             </div>
-            <div class="workflow-indicator">Drop orders here, then drag routes to riders</div>
+            <div class="workflow-indicator">Drop orders here, then drag routes to drivers</div>
            <div id="routesList" style="max-height:180px; overflow:auto;">
     <table class="w-full text-sm text-left text-gray-500">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
