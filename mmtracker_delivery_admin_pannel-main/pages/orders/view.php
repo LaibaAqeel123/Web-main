@@ -297,7 +297,7 @@ if (isset($_GET['id'])) {
                                         </span>
                                     </div>
                                     <div class="flex justify-between border-b pb-2">
-                                        <span class="font-medium">Assigned Rider</span>
+                                        <span class="font-medium">Assigned Driver</span>
                                         <span><?php echo htmlspecialchars($manifest['rider_name']); ?></span>
                                     </div>
                                     <div class="flex justify-between border-b pb-2">

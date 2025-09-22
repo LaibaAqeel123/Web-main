@@ -218,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['search_rider'])) {
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Add New Rider</h1>
+            <h1 class="text-2xl font-bold text-gray-900">Add New Driver</h1>
         </div>
 
         <?php if ($error): ?>
@@ -235,7 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['search_rider'])) {
 
         <!-- Search Existing Rider -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden p-6 mb-6">
-            <h2 class="text-lg font-medium text-gray-900 mb-4">Search Existing Rider</h2>
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Search Existing Driver</h2>
             <form action="" method="POST" class="space-y-4">
                 <div class="flex gap-4">
                     <input type="text" name="search_term" placeholder="Enter username or email" 
@@ -249,7 +249,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['search_rider'])) {
             <?php if (isset($_POST['search_rider'])): ?>
                 <?php if ($existing_user): ?>
                     <div class="mt-4 p-4 border rounded-md">
-                        <h3 class="font-medium text-gray-900">Rider Found:</h3>
+                        <h3 class="font-medium text-gray-900">Driver Found:</h3>
                         <p class="mt-2 text-sm text-gray-600">
                             Name: <?php echo htmlspecialchars($existing_user['name']); ?><br>
                             Username: <?php echo htmlspecialchars($existing_user['username']); ?>
@@ -273,14 +273,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['search_rider'])) {
                         </form>
                     </div>
                 <?php else: ?>
-                    <p class="mt-4 text-sm text-gray-600">No rider found with the provided username or email.</p>
+                    <p class="mt-4 text-sm text-gray-600">No driver found with the provided username or email.</p>
                 <?php endif; ?>
             <?php endif; ?>
         </div>
 
         <!-- Create New Rider Form -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden p-6">
-            <h2 class="text-lg font-medium text-gray-900 mb-4">Create New Rider</h2>
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Create New Driver</h2>
             <form action="" method="POST" class="space-y-6">
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <!-- Personal Information -->
@@ -353,7 +353,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['search_rider'])) {
 
                 <div class="flex justify-end space-x-3">
                     <a href="index.php" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">Cancel</a>
-                    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Create Rider</button>
+                    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Create Driver</button>
                 </div>
             </form>
         </div>

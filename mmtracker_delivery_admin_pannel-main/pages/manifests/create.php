@@ -446,16 +446,16 @@ writeLog("manifest.log", $log_message);
                                 </select>
                             </div>
                             <div class="mb-6">
-                                <label for="rider_id" class="block text-sm font-medium text-gray-700">Assign Rider</label>
+                                <label for="rider_id" class="block text-sm font-medium text-gray-700">Assign Driver</label>
                                 <select name="rider_id" id="rider_id"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">Select Rider (Optional)</option>
+                                    <option value="">Select Driver(Optional)</option>
                                     <?php while ($rider = mysqli_fetch_assoc($riders_result)): ?>
                                         <option value="<?php echo $rider['id']; ?>"><?php echo htmlspecialchars($rider['name']); ?></option>
                                     <?php endwhile; ?>
                                 </select>
                                 <p class="mt-1 text-sm text-gray-500">
-                                    Note: If no rider is selected, the manifest and orders will remain in 'pending' status.
+                                    Note: If no driver is selected, the manifest and orders will remain in 'pending' status.
                                     If a rider is selected, they will be set to 'assigned' status.
                                 </p>
                             </div>

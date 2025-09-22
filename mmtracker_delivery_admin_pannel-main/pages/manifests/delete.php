@@ -163,7 +163,7 @@ switch ($manifest['status']) {
                                         <ul class="list-disc list-inside mt-1">
                                             <li>Delete the manifest and all associated records</li>
                                             <li>Reset the status of all orders in this manifest to 'pending'</li>
-                                            <li>Remove rider assignment from this manifest</li>
+                                            <li>Remove driver assignment from this manifest</li>
                                             <li>Make orders available for new manifest creation</li>
                                         </ul>
                                     <?php endif; ?>
@@ -198,7 +198,7 @@ switch ($manifest['status']) {
                                         </span>
                                     </p>
                                     <p class="text-sm text-gray-700"><strong>Orders:</strong> <?php echo $manifest['order_count']; ?></p>
-                                    <p class="text-sm text-gray-700"><strong>Assigned Rider:</strong> <?php echo htmlspecialchars($manifest['rider_name'] ?? 'Not Assigned'); ?></p>
+                                    <p class="text-sm text-gray-700"><strong>Assigned Driver:</strong> <?php echo htmlspecialchars($manifest['rider_name'] ?? 'Not Assigned'); ?></p>
                                 </div>
                                 <div>
                                     <?php if (isSuperAdmin()): ?>

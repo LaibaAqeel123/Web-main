@@ -505,7 +505,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
           <a href="<?php echo SITE_URL; ?>pages/riders/index.php"
              class="<?php echo (strpos($_SERVER['PHP_SELF'], 'riders') !== false) ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'; ?> group flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all">
              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-             <span class="label truncate">Riders</span>
+             <span class="label truncate">Drivers</span>
           </a>
         <?php endif; ?>
 
@@ -555,7 +555,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
     <table class="w-full text-sm text-left text-gray-500">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-                <th scope="col" class="py-2 px-4">Rider</th>
+                <th scope="col" class="py-2 px-4">Drivers</th>
                 <th scope="col" class="py-2 px-4">Orders</th>
             </tr>
         </thead>
@@ -732,7 +732,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
                 <th scope="col" class="py-2 px-4">Route #</th>
-                <th scope="col" class="py-2 px-4">Rider</th>
+                <th scope="col" class="py-2 px-4">Driver</th>
                 <th scope="col" class="py-2 px-4">Orders</th>
                 <th scope="col" class="py-2 px-4">Status</th>
             </tr>

@@ -157,7 +157,7 @@ if (isset($_GET['id'])) {
                 <?php if ($manifest['rider_id']): ?>
                 <div class="bg-white shadow rounded-lg mt-6">
                     <div class="px-6 py-5">
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Assigned Rider</h3>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Assigned Driver</h3>
                         <dl class="mt-4 space-y-4">
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Name</dt>
