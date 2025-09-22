@@ -2,7 +2,7 @@
 require_once '../../includes/config.php';
 include_once('../../server/log_helper.php');
 function logException($exceptionMessage) {
-    $logFile = __DIR__ . '/manifest_exception_log.log';  
+    $logFile = __DIR__ . '/route_exception_log.log';  // Changed from manifest_exception_log.log
     $timestamp = date('Y-m-d H:i:s');
     $logMessage = "[$timestamp] Exception: $exceptionMessage" . PHP_EOL;
     file_put_contents($logFile, $logMessage, FILE_APPEND);
@@ -11,8 +11,8 @@ requireLogin();
 
 $error = '';
 $success = '';
-$manifest = null;
-$manifest_orders = [];
+$route = null;  // Changed from $manifest to $route
+$route_orders = [];  // Changed from $manifest_orders to $route_orders
 $is_delivered = false;
 
 // Get search parameters
@@ -36,7 +36,7 @@ if (isset($_GET['id'])) {
     // Check access rights
     $company_condition = !isSuperAdmin() ? "AND m.company_id = " . $_SESSION['company_id'] : "";
 
-    // Fetch manifest details
+    // Fetch route details
     $query = "SELECT m.*, u.name as rider_name, c.name as company_name,
               COUNT(mo.id) as total_orders,
               SUM(o.total_amount) as total_amount,
@@ -55,17 +55,17 @@ if (isset($_GET['id'])) {
     mysqli_stmt_bind_param($stmt, "i", $id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
-    $manifest = mysqli_fetch_assoc($result);
+    $route = mysqli_fetch_assoc($result);  // Changed from $manifest to $route
 
-    if (!$manifest) {
+    if (!$route) {
         header('Location: index.php');
         exit();
     }
 
-    // Check if manifest is delivered
-    $is_delivered = $manifest['status'] === 'delivered';
+    // Check if route is delivered
+    $is_delivered = $route['status'] === 'delivered';
 
-    // Fetch current orders in manifest with search
+    // Fetch current orders in route with search
     $orders_query = "SELECT o.id, o.order_number, o.created_at, o.total_amount,
                     cust.name as customer_name, addr.address_line1, addr.city,
                     GROUP_CONCAT(p.name SEPARATOR ', ') as products,
@@ -93,11 +93,11 @@ if (isset($_GET['id'])) {
     mysqli_stmt_execute($stmt);
     $orders_result = mysqli_stmt_get_result($stmt);
     while ($order = mysqli_fetch_assoc($orders_result)) {
-        $manifest_orders[] = $order;
+        $route_orders[] = $order;  // Changed from $manifest_orders to $route_orders
     }
 }
 
-// Only fetch available unassigned orders and riders if manifest is not delivered
+// Only fetch available unassigned orders and riders if route is not delivered
 if (!$is_delivered) {
     // Fetch available unassigned orders with search
     $unassigned_orders_query = "SELECT o.id, o.order_number, o.created_at, o.total_amount, 
@@ -137,8 +137,8 @@ if (!$is_delivered) {
     $riders_result = mysqli_query($conn, $riders_query);
 }
 
-// Add the email notification function (same as in create.php)
-function sendManifestNotificationEmail($order_id, $conn) {
+// Add the email notification function (changed from sendManifestNotificationEmail)
+function sendRouteNotificationEmail($order_id, $conn) {
     // Get order and customer details
     $query = "SELECT cust.name as customer_name, cust.email, o.order_number, u.name as rider_name 
               FROM Orders o
@@ -155,7 +155,7 @@ function sendManifestNotificationEmail($order_id, $conn) {
     $order = mysqli_fetch_assoc($result);
 
     if (!$order || !$order['email']) {
-        error_log("Could not send manifest notification email: Invalid order or missing email for order ID: $order_id");
+        error_log("Could not send route notification email: Invalid order or missing email for order ID: $order_id");
         return false;
     }
 
@@ -189,14 +189,14 @@ function sendManifestNotificationEmail($order_id, $conn) {
     </body>
     </html>";
 
-    error_log("Sending manifest notification email to: " . $order['email']);
+    error_log("Sending route notification email to: " . $order['email']);
     
     $mail_result = mail($to, $subject, $message, implode("\r\n", $headers));
     
     if ($mail_result) {
-        error_log("Manifest notification email sent successfully to {$order['email']} for order #{$order['order_number']}");
+        error_log("Route notification email sent successfully to {$order['email']} for order #{$order['order_number']}");
     } else {
-        error_log("Failed to send manifest notification email to {$order['email']} for order #{$order['order_number']}");
+        error_log("Failed to send route notification email to {$order['email']} for order #{$order['order_number']}");
     }
 
     return $mail_result;
@@ -206,18 +206,18 @@ function sendManifestNotificationEmail($order_id, $conn) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         $action = $_POST['action'];
-        $manifest_id = cleanInput($_POST['manifest_id']);
+        $route_id = cleanInput($_POST['manifest_id']);  // Note: keeping POST field name as manifest_id for compatibility
 
-        // Check if manifest is delivered before processing any action
+        // Check if route is delivered before processing any action
         $check_status_query = "SELECT status FROM Manifests WHERE id = ?";
         $stmt = mysqli_prepare($conn, $check_status_query);
-        mysqli_stmt_bind_param($stmt, "i", $manifest_id);
+        mysqli_stmt_bind_param($stmt, "i", $route_id);
         mysqli_stmt_execute($stmt);
         $status_result = mysqli_stmt_get_result($stmt);
         $current_status = mysqli_fetch_assoc($status_result)['status'];
 
         if ($current_status === 'delivered') {
-            $error = 'Cannot modify a delivered manifest';
+            $error = 'Cannot modify a delivered route';  // Changed error message
         } else {
             mysqli_begin_transaction($conn);
             try {
@@ -239,13 +239,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             break;
                         }
 
-                        // Remove order from manifest
+                        // Remove order from route
                         $remove_query = "DELETE FROM ManifestOrders WHERE manifest_id = ? AND order_id = ?";
                         $stmt = mysqli_prepare($conn, $remove_query);
-                        mysqli_stmt_bind_param($stmt, "ii", $manifest_id, $order_id);
+                        mysqli_stmt_bind_param($stmt, "ii", $route_id, $order_id);
                         mysqli_stmt_execute($stmt);
-                        $log_message = "Order #$order_id removed from Manifest #$manifest_id by user #" . $_SESSION['user_id'];
-writeLog("manifest.log", $log_message);
+                        $log_message = "Order #$order_id removed from Route #$route_id by user #" . $_SESSION['user_id'];  // Changed log message
+writeLog("route.log", $log_message);  // Changed log file name
 
                         // Update order status back to pending
                         $update_order = "UPDATE Orders SET status = 'pending' WHERE id = ?";
@@ -260,14 +260,14 @@ writeLog("manifest.log", $log_message);
                         mysqli_stmt_bind_param($stmt, "ii", $order_id, $_SESSION['user_id']);
                         mysqli_stmt_execute($stmt);
 
-                        // Update manifest total orders
-                        $update_manifest = "UPDATE Manifests SET total_orders_assigned = total_orders_assigned - 1 WHERE id = ?";
-                        $stmt = mysqli_prepare($conn, $update_manifest);
-                        mysqli_stmt_bind_param($stmt, "i", $manifest_id);
+                        // Update route total orders
+                        $update_route = "UPDATE Manifests SET total_orders_assigned = total_orders_assigned - 1 WHERE id = ?";  // Changed variable name
+                        $stmt = mysqli_prepare($conn, $update_route);
+                        mysqli_stmt_bind_param($stmt, "i", $route_id);
                         mysqli_stmt_execute($stmt);
 
                         mysqli_commit($conn);
-                        $success = 'Order removed from manifest successfully';
+                        $success = 'Order removed from route successfully';  // Changed success message
                         break;
 
                     case 'add_orders':
@@ -277,10 +277,10 @@ writeLog("manifest.log", $log_message);
 
                         $selected_orders = $_POST['orders'];
 
-                        // Get current orders in the manifest
+                        // Get current orders in the route
                         $current_orders_query = "SELECT order_id FROM ManifestOrders WHERE manifest_id = ?";
                         $stmt = mysqli_prepare($conn, $current_orders_query);
-                        mysqli_stmt_bind_param($stmt, "i", $manifest_id);
+                        mysqli_stmt_bind_param($stmt, "i", $route_id);
                         mysqli_stmt_execute($stmt);
                         $result = mysqli_stmt_get_result($stmt);
                         $current_orders = array();
@@ -291,9 +291,9 @@ writeLog("manifest.log", $log_message);
                         // Find newly added orders
                         $new_orders = array_diff($selected_orders, $current_orders);
 
-                        // Add only new orders to manifest
+                        // Add only new orders to route
                         $is_rider_delivering = ($current_status === 'delivering');
-                        $rider_id = $manifest['rider_id']; // Get rider ID from the manifest being edited
+                        $rider_id = $route['rider_id']; // Get rider ID from the route being edited
                         $rider_extras = [];
 
                          // Fetch rider's pending extra items if they are currently delivering
@@ -324,16 +324,16 @@ writeLog("manifest.log", $log_message);
                         $stmt_update_extra = mysqli_prepare($conn, $update_extra_log_sql);
 
                         foreach ($new_orders as $order_id) {
-                            // Add order to manifest
+                            // Add order to route
                             $add_order = "INSERT INTO ManifestOrders (manifest_id, order_id) VALUES (?, ?)";
                             $stmt_add = mysqli_prepare($conn, $add_order);
-                            mysqli_stmt_bind_param($stmt_add, "ii", $manifest_id, $order_id);
+                            mysqli_stmt_bind_param($stmt_add, "ii", $route_id, $order_id);
                             mysqli_stmt_execute($stmt_add);
                             mysqli_stmt_close($stmt_add);
                            
     $user_id = $_SESSION['user_id'];
-    $log_message_manifest = "Order #$order_id added to Manifest #$manifest_id by user #$user_id";
-    writeLog("manifest.log", $log_message_manifest);
+    $log_message_route = "Order #$order_id added to Route #$route_id by user #$user_id";  // Changed log message
+    writeLog("route.log", $log_message_route);  // Changed log file name
 
     $log_message_order = "Order #$order_id status changed to 'assigned' by user #$user_id";
     writeLog("order.log", $log_message_order);
@@ -398,7 +398,7 @@ writeLog("manifest.log", $log_message);
                             } // end if rider is delivering and has extras
                             // --- End Auto-allocate ---
                             
-                            // Update order status to match manifest status
+                            // Update order status to match route status
                             $update_status = "UPDATE Orders SET status = ? WHERE id = ?";
                             $stmt_update_status = mysqli_prepare($conn, $update_status);
                             mysqli_stmt_bind_param($stmt_update_status, "si", $current_status, $order_id);
@@ -406,9 +406,9 @@ writeLog("manifest.log", $log_message);
                             mysqli_stmt_close($stmt_update_status);
 
                             // Send email notification
-                            $email_sent = sendManifestNotificationEmail($order_id, $conn);
+                            $email_sent = sendRouteNotificationEmail($order_id, $conn);  // Changed function name
                             if (!$email_sent) {
-                                error_log("Failed to send manifest notification email for new order #$order_id");
+                                error_log("Failed to send route notification email for new order #$order_id");
                             }
                         }
 
@@ -417,23 +417,23 @@ writeLog("manifest.log", $log_message);
                         mysqli_stmt_close($stmt_find_extra);
                         mysqli_stmt_close($stmt_update_extra);
 
-                        // Update manifest total orders
-                        $update_manifest = "UPDATE Manifests SET total_orders_assigned = (
+                        // Update route total orders
+                        $update_route = "UPDATE Manifests SET total_orders_assigned = (
                             SELECT COUNT(*) FROM ManifestOrders WHERE manifest_id = ?
                         ) WHERE id = ?";
-                        $stmt = mysqli_prepare($conn, $update_manifest);
-                        mysqli_stmt_bind_param($stmt, "ii", $manifest_id, $manifest_id);
+                        $stmt = mysqli_prepare($conn, $update_route);
+                        mysqli_stmt_bind_param($stmt, "ii", $route_id, $route_id);
                         mysqli_stmt_execute($stmt);
 
                         mysqli_commit($conn);
-                        $success = 'Orders added to manifest successfully';
-                        $manifest['warehouse_id'] = $warehouse_id;
+                        $success = 'Orders added to route successfully';  // Changed success message
+                        $route['warehouse_id'] = $warehouse_id;
                         break;
 
                     case 'update_manifest':
                         $rider_id = !empty($_POST['rider_id']) ? cleanInput($_POST['rider_id']) : null;
                         $status = cleanInput($_POST['status']);
-                        $old_rider_id = $manifest['rider_id'];
+                        $old_rider_id = $route['rider_id'];
                         $warehouse_id = cleanInput($_POST['warehouse_id']);
 
                         // Prevent setting status to delivered if there's no rider
@@ -455,7 +455,7 @@ writeLog("manifest.log", $log_message);
                             throw new Exception('A rider must be assigned before changing to ' . $status . ' status');
                         }
 
-                        // Update manifest
+                        // Update route
                         $update_query = "UPDATE Manifests SET 
                                        rider_id = ?, 
                                        status = ?,
@@ -469,17 +469,17 @@ writeLog("manifest.log", $log_message);
                         if ($rider_id === null) {
                             $rider_id = NULL; // Ensure it's NULL for database
                         }
-                        mysqli_stmt_bind_param($stmt, "isis", $rider_id, $status, $warehouse_id, $manifest_id);
+                        mysqli_stmt_bind_param($stmt, "isis", $rider_id, $status, $warehouse_id, $route_id);
                         mysqli_stmt_execute($stmt);
 
-                        // Get non-failed orders from this manifest
+                        // Get non-failed orders from this route
                         $get_valid_orders = "SELECT o.id 
                                            FROM Orders o 
                                            JOIN ManifestOrders mo ON o.id = mo.order_id 
                                            WHERE mo.manifest_id = ? 
                                            AND o.status != 'failed'";
                         $valid_orders_stmt = mysqli_prepare($conn, $get_valid_orders);
-                        mysqli_stmt_bind_param($valid_orders_stmt, "i", $manifest_id);
+                        mysqli_stmt_bind_param($valid_orders_stmt, "i", $route_id);
                         mysqli_stmt_execute($valid_orders_stmt);
                         $valid_orders_result = mysqli_stmt_get_result($valid_orders_stmt);
 
@@ -514,31 +514,31 @@ writeLog("manifest.log", $log_message);
                                 );
                                 mysqli_stmt_execute($log_stmt);
                             }
-                            writeLog("manifest.log", "Manifest #$manifest_id status changed to '$status' by user #" . $_SESSION['user_id']);
+                            writeLog("route.log", "Route #$route_id status changed to '$status' by user #" . $_SESSION['user_id']);  // Changed log message
                         }
 
                         // Send notification if a new rider is assigned
                         if ($rider_id && $old_rider_id != $rider_id) {
-                            // Get manifest details for the notification
-                            $manifest_query = "SELECT m.id, m.total_orders_assigned, w.name as warehouse_name, 
+                            // Get route details for the notification
+                            $route_query = "SELECT m.id, m.total_orders_assigned, w.name as warehouse_name, 
                                                     w.city as warehouse_city 
                                              FROM Manifests m 
                                              LEFT JOIN Warehouses w ON m.warehouse_id = w.id 
                                              WHERE m.id = ?";
-                            $manifest_stmt = mysqli_prepare($conn, $manifest_query);
-                            mysqli_stmt_bind_param($manifest_stmt, "i", $manifest_id);
-                            mysqli_stmt_execute($manifest_stmt);
-                            $manifest_result = mysqli_stmt_get_result($manifest_stmt);
-                            $manifest_details = mysqli_fetch_assoc($manifest_result);
+                            $route_stmt = mysqli_prepare($conn, $route_query);
+                            mysqli_stmt_bind_param($route_stmt, "i", $route_id);
+                            mysqli_stmt_execute($route_stmt);
+                            $route_result = mysqli_stmt_get_result($route_stmt);
+                            $route_details = mysqli_fetch_assoc($route_result);
 
                             // Create notification message
-                            $title = "Manifest Assigned";
-                            $message = "You have been assigned manifest #" . $manifest_id;
-                            if ($manifest_details['warehouse_name']) {
-                                $message .= " from " . $manifest_details['warehouse_name'] . 
-                                           " (" . $manifest_details['warehouse_city'] . ")";
+                            $title = "Route Assigned";  // Changed notification title
+                            $message = "You have been assigned route #" . $route_id;  // Changed message
+                            if ($route_details['warehouse_name']) {
+                                $message .= " from " . $route_details['warehouse_name'] . 
+                                           " (" . $route_details['warehouse_city'] . ")";
                             }
-                            $message .= " with " . $manifest_details['total_orders_assigned'] . " orders";
+                            $message .= " with " . $route_details['total_orders_assigned'] . " orders";
 
                             // Send notification to the new rider
                             sendFirebaseNotification($rider_id, $title, $message);
@@ -547,63 +547,63 @@ writeLog("manifest.log", $log_message);
                         // If status changed to delivering/delivered, notify rider
                         if ($rider_id && $current_status != $status && 
                             in_array($status, ['delivering', 'delivered'])) {
-                            $title = "Manifest Status Updated";
-                            $message = "Manifest #" . $manifest_id . " status has been updated to " . ucfirst($status);
+                            $title = "Route Status Updated";  // Changed notification title
+                            $message = "Route #" . $route_id . " status has been updated to " . ucfirst($status);  // Changed message
                             sendFirebaseNotification($rider_id, $title, $message);
                         }
 
-                        // --- NEW: Delete ALL Extra items related to this manifest if marked as delivered or failed ---
+                        // --- NEW: Delete ALL Extra items related to this route if marked as delivered or failed ---
                         if ($status === 'delivered' || $status === 'failed') {
                            $log_message_status = ($status === 'delivered') ? "delivered" : "failed";
-                           error_log("Manifest {$manifest_id} marked as {$log_message_status}. Deleting ALL related ExtraItemsLog entries (from edit).");
+                           error_log("Route {$route_id} marked as {$log_message_status}. Deleting ALL related ExtraItemsLog entries (from edit).");
                            
                            // Delete items from initial warehouse scan
                            $delete_scan_extras_sql = "DELETE FROM ExtraItemsLog WHERE source_manifest_id = ?";
                            $stmt_delete_scan = mysqli_prepare($conn, $delete_scan_extras_sql);
                            if ($stmt_delete_scan) {
-                                mysqli_stmt_bind_param($stmt_delete_scan, "i", $manifest_id);
+                                mysqli_stmt_bind_param($stmt_delete_scan, "i", $route_id);
                                 if (mysqli_stmt_execute($stmt_delete_scan)) {
                                     $deleted_scan_count = mysqli_stmt_affected_rows($stmt_delete_scan);
-                                    error_log("Deleted {$deleted_scan_count} direct manifest scan extra item records for manifest {$manifest_id} (from edit).");
+                                    error_log("Deleted {$deleted_scan_count} direct route scan extra item records for route {$route_id} (from edit).");
                                 } else {
-                                    error_log("Failed to execute delete scan extra items statement for manifest {$manifest_id} (from edit): " . mysqli_stmt_error($stmt_delete_scan));
+                                    error_log("Failed to execute delete scan extra items statement for route {$route_id} (from edit): " . mysqli_stmt_error($stmt_delete_scan));
                                 }
                                 mysqli_stmt_close($stmt_delete_scan);
                            } else {
-                                error_log("Failed to prepare delete scan extra items statement for manifest {$manifest_id} (from edit): " . mysqli_error($conn));
+                                error_log("Failed to prepare delete scan extra items statement for route {$route_id} (from edit): " . mysqli_error($conn));
                            }
 
-                           // Delete items from failed/rejected orders within this manifest
+                           // Delete items from failed/rejected orders within this route
                            $delete_order_extras_sql = "DELETE FROM ExtraItemsLog WHERE source_order_id IN (SELECT order_id FROM ManifestOrders WHERE manifest_id = ?)";
                            $stmt_delete_order = mysqli_prepare($conn, $delete_order_extras_sql);
                            if ($stmt_delete_order) {
-                               mysqli_stmt_bind_param($stmt_delete_order, "i", $manifest_id);
+                               mysqli_stmt_bind_param($stmt_delete_order, "i", $route_id);
                                if (mysqli_stmt_execute($stmt_delete_order)) {
                                    $deleted_order_count = mysqli_stmt_affected_rows($stmt_delete_order);
-                                   error_log("Deleted {$deleted_order_count} failed/rejected order extra item records for manifest {$manifest_id} (from edit).");
+                                   error_log("Deleted {$deleted_order_count} failed/rejected order extra item records for route {$route_id} (from edit).");
                                } else {
-                                   error_log("Failed to execute delete order extra items statement for manifest {$manifest_id} (from edit): " . mysqli_stmt_error($stmt_delete_order));
+                                   error_log("Failed to execute delete order extra items statement for route {$route_id} (from edit): " . mysqli_stmt_error($stmt_delete_order));
                                }
                                mysqli_stmt_close($stmt_delete_order);
                            } else {
-                                error_log("Failed to prepare delete order extra items statement for manifest {$manifest_id} (from edit): " . mysqli_error($conn));
+                                error_log("Failed to prepare delete order extra items statement for route {$route_id} (from edit): " . mysqli_error($conn));
                            }
                         }
                         // --- END NEW ---
 
                         mysqli_commit($conn);
-                        $success = 'Manifest updated successfully';
-                        $manifest['warehouse_id'] = $warehouse_id;
+                        $success = 'Route updated successfully';  // Changed success message
+                        $route['warehouse_id'] = $warehouse_id;
                         break;
                 }
 
                 // Refresh page to show updated data
-                header("Location: edit.php?id=" . $manifest_id . "&success=" . urlencode($success));
+                header("Location: edit.php?id=" . $route_id . "&success=" . urlencode($success));
                 exit();
             } catch (Exception $e) {
                 mysqli_rollback($conn);
                 $error = $e->getMessage();
-                error_log("Error updating manifest: " . $error);
+                error_log("Error updating route: " . $error);  // Changed error message
                  logException($error);
             }
         }
@@ -622,7 +622,7 @@ if (isset($_GET['success'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Manifest - <?php echo SITE_NAME; ?></title>
+    <title>Edit Route - <?php echo SITE_NAME; ?></title>  <!-- Changed page title -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
@@ -649,9 +649,9 @@ if (isset($_GET['success'])) {
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div class="mb-6 flex justify-between items-center">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">Edit Manifest #<?php echo $manifest['id']; ?></h1>
+                        <h1 class="text-2xl font-bold text-gray-900">Edit Route #<?php echo $route['id']; ?></h1>  <!-- Changed heading -->
                         <p class="mt-1 text-sm text-gray-500">
-                            Created <?php echo date('M d, Y H:i', strtotime($manifest['created_at'])); ?>
+                            Created <?php echo date('M d, Y H:i', strtotime($route['created_at'])); ?>  <!-- Changed from $manifest to $route -->
                         </p>
                     </div>
                     <div class="space-x-2">
@@ -673,15 +673,15 @@ if (isset($_GET['success'])) {
 
                 <?php if ($is_delivered): ?>
                     <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mb-4" role="alert">
-                        <span class="block sm:inline">This manifest is delivered and cannot be modified.</span>
+                        <span class="block sm:inline">This route is delivered and cannot be modified.</span>  <!-- Changed text -->
                     </div>
                 <?php endif; ?>
 
-                <!-- Manifest Details Form -->
+                <!-- Route Details Form -->  <!-- Changed section title -->
                 <div class="bg-white shadow-md rounded-lg overflow-hidden p-6 mb-6">
-                    <form action="" method="POST" id="manifestForm">
+                    <form action="" method="POST" id="routeForm">  <!-- Changed form ID -->
                         <input type="hidden" name="action" value="update_manifest">
-                        <input type="hidden" name="manifest_id" value="<?php echo $manifest['id']; ?>">
+                        <input type="hidden" name="manifest_id" value="<?php echo $route['id']; ?>">
 
                         <div class="space-y-6 bg-white px-4 py-5 sm:p-6">
                             <div>
@@ -691,7 +691,7 @@ if (isset($_GET['success'])) {
                                     <option value="">Select Warehouse</option>
                                     <?php foreach ($warehouses as $warehouse): ?>
                                         <option value="<?php echo $warehouse['id']; ?>" 
-                                                <?php echo ($manifest['warehouse_id'] == $warehouse['id']) ? 'selected' : ''; ?>>
+                                                <?php echo ($route['warehouse_id'] == $warehouse['id']) ? 'selected' : ''; ?>>  <!-- Changed from $manifest to $route -->
                                             <?php echo htmlspecialchars($warehouse['name'] . ' - ' . $warehouse['city']); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -706,7 +706,7 @@ if (isset($_GET['success'])) {
                                         <option value="">Select Rider</option>
                                         <?php if (!$is_delivered): while ($rider = mysqli_fetch_assoc($riders_result)): ?>
                                                 <option value="<?php echo $rider['id']; ?>"
-                                                    <?php echo $rider['id'] == $manifest['rider_id'] ? 'selected' : ''; ?>>
+                                                    <?php echo $rider['id'] == $route['rider_id'] ? 'selected' : ''; ?>>  <!-- Changed from $manifest to $route -->
                                                     <?php echo htmlspecialchars($rider['name']); ?>
                                                 </option>
                                         <?php endwhile;
@@ -718,10 +718,10 @@ if (isset($_GET['success'])) {
                                     <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                                     <select name="status" id="status" required <?php echo $is_delivered ? 'disabled' : ''; ?>
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 <?php echo $is_delivered ? 'bg-gray-100' : ''; ?>">
-                                        <option value="pending" <?php echo $manifest['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                        <option value="assigned" <?php echo $manifest['status'] === 'assigned' ? 'selected' : ''; ?>>Assigned</option>
-                                        <option value="delivering" <?php echo $manifest['status'] === 'delivering' ? 'selected' : ''; ?>>Delivering</option>
-                                        <option value="delivered" <?php echo $manifest['status'] === 'delivered' ? 'selected' : ''; ?>>Delivered</option>
+                                        <option value="pending" <?php echo $route['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>  <!-- Changed from $manifest to $route -->
+                                        <option value="assigned" <?php echo $route['status'] === 'assigned' ? 'selected' : ''; ?>>Assigned</option>  <!-- Changed from $manifest to $route -->
+                                        <option value="delivering" <?php echo $route['status'] === 'delivering' ? 'selected' : ''; ?>>Delivering</option>  <!-- Changed from $manifest to $route -->
+                                        <option value="delivered" <?php echo $route['status'] === 'delivered' ? 'selected' : ''; ?>>Delivered</option>  <!-- Changed from $manifest to $route -->
                                     </select>
                                 </div>
                             </div>
@@ -729,7 +729,7 @@ if (isset($_GET['success'])) {
                             <?php if (!$is_delivered): ?>
                                 <div class="mt-4">
                                     <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
-                                        Update Manifest Details
+                                        Update Route Details  <!-- Changed button text -->
                                     </button>
                                 </div>
                             <?php endif; ?>
@@ -740,9 +740,9 @@ if (isset($_GET['success'])) {
                 <!-- Current Orders Section with Products -->
                 <div class="bg-white shadow-md rounded-lg overflow-hidden p-6 mb-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-medium text-gray-900">Current Orders in Manifest</h2>
+                        <h2 class="text-lg font-medium text-gray-900">Current Orders in Route</h2>  <!-- Changed heading -->
                         <form method="GET" class="flex gap-2">
-                            <input type="hidden" name="id" value="<?php echo $manifest['id']; ?>">
+                            <input type="hidden" name="id" value="<?php echo $route['id']; ?>">  <!-- Changed from $manifest to $route -->
                             <input type="text" name="search_current"
                                 value="<?php echo htmlspecialchars($search_current); ?>"
                                 placeholder="Search current orders..."
@@ -752,7 +752,7 @@ if (isset($_GET['success'])) {
                                 Search
                             </button>
                             <?php if ($search_current): ?>
-                                <a href="?id=<?php echo $manifest['id']; ?>"
+                                <a href="?id=<?php echo $route['id']; ?>"  <!-- Changed from $manifest to $route -->
                                     class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-300 text-sm">
                                     Clear
                                 </a>
@@ -760,11 +760,11 @@ if (isset($_GET['success'])) {
                         </form>
                     </div>
 
-                    <?php if (empty($manifest_orders)): ?>
-                        <p class="text-gray-500">No orders in this manifest.</p>
+                    <?php if (empty($route_orders)): ?>  <!-- Changed from $manifest_orders to $route_orders -->
+                        <p class="text-gray-500">No orders in this route.</p>  <!-- Changed text -->
                     <?php else: ?>
                         <div class="grid grid-cols-1 gap-4">
-                            <?php foreach ($manifest_orders as $order): ?>
+                            <?php foreach ($route_orders as $order): ?>  <!-- Changed from $manifest_orders to $route_orders -->
                                 <div class="border rounded-lg p-4">
                                     <div class="flex justify-between items-start">
                                         <div class="flex-1">
@@ -806,7 +806,7 @@ if (isset($_GET['success'])) {
                                         <?php if (!$is_delivered): ?>
                                             <form method="POST" class="ml-4" onsubmit="return confirm('Are you sure you want to remove this order?');">
                                                 <input type="hidden" name="action" value="remove_order">
-                                                <input type="hidden" name="manifest_id" value="<?php echo $manifest['id']; ?>">
+                                                <input type="hidden" name="manifest_id" value="<?php echo $route['id']; ?>">  <!-- Changed from $manifest to $route -->
                                                 <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
                                                 <button type="submit" class="bg-red-100 text-red-800 px-3 py-1 rounded-md hover:bg-red-200">
                                                     Remove
@@ -824,9 +824,9 @@ if (isset($_GET['success'])) {
                     <!-- Add Orders Section with Products -->
                     <div class="bg-white shadow-md rounded-lg overflow-hidden p-6">
                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-medium text-gray-900">Add Orders to Manifest</h2>
+                            <h2 class="text-lg font-medium text-gray-900">Add Orders to Route</h2>  <!-- Changed heading -->
                             <form method="GET" class="flex gap-2">
-                                <input type="hidden" name="id" value="<?php echo $manifest['id']; ?>">
+                                <input type="hidden" name="id" value="<?php echo $route['id']; ?>">  <!-- Changed from $manifest to $route -->
                                 <input type="text" name="search_unassigned"
                                     value="<?php echo htmlspecialchars($search_unassigned); ?>"
                                     placeholder="Search available orders..."
@@ -836,7 +836,7 @@ if (isset($_GET['success'])) {
                                     Search
                                 </button>
                                 <?php if ($search_unassigned): ?>
-                                    <a href="?id=<?php echo $manifest['id']; ?>"
+                                    <a href="?id=<?php echo $route['id']; ?>"  <!-- Changed from $manifest to $route -->
                                         class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-300 text-sm">
                                         Clear
                                     </a>
@@ -847,7 +847,7 @@ if (isset($_GET['success'])) {
                         <?php if (mysqli_num_rows($unassigned_orders_result) > 0): ?>
                             <form action="" method="POST">
                                 <input type="hidden" name="action" value="add_orders">
-                                <input type="hidden" name="manifest_id" value="<?php echo $manifest['id']; ?>">
+                                <input type="hidden" name="manifest_id" value="<?php echo $route['id']; ?>">  <!-- Changed from $manifest to $route -->
 
                                 <div class="grid grid-cols-1 gap-4 mb-4">
                                     <?php while ($order = mysqli_fetch_assoc($unassigned_orders_result)): ?>
@@ -941,15 +941,15 @@ if (isset($_GET['success'])) {
                         alert('Please select at least one order to add');
                         return false;
                     }
-                    return confirm('Are you sure you want to add the selected orders to this manifest?');
+                    return confirm('Are you sure you want to add the selected orders to this route?');  // Changed confirmation message
                 });
 
                 // Handle rider and status changes
-                $('#manifestForm').on('submit', function(e) {
+                $('#routeForm').on('submit', function(e) {  // Changed form ID
                     const status = $('#status').val();
 
                     if (status === 'delivered') {
-                        return confirm('Are you sure you want to mark this manifest as delivered? This action cannot be undone and all products will be marked as delivered.');
+                        return confirm('Are you sure you want to mark this route as delivered? This action cannot be undone and all products will be marked as delivered.');  // Changed confirmation message
                     }
 
                     if ($('#rider_id').val() === '' && status !== 'pending') {

@@ -9,16 +9,14 @@ use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 
 // Database configuration
-$db_host = 'localhost';
+$db_host = '127.0.0.1';   // better than 'localhost' for TCP
 $db_user = 'root';
-$db_pass = '';
-// $db_name = 'delivery_app_db';
+$db_pass = '';            // no password
 $db_name = 'u337053559_delivery';
-
-
+$db_port = 3307;          // force correct port
 
 // Create connection
-$conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
+$conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name, $db_port);
 
 // Check connection
 if (!$conn) {
@@ -29,8 +27,8 @@ if (!$conn) {
 mysqli_set_charset($conn, "utf8mb4");
 
 // Define constants
-define('SITE_URL', 'http://localhost/MMTRACKER_DELIVERY_ADMIN_PANNEL-MAIN/');
-
+define('SITE_URL', 'http://localhost/Web-main/mmtracker_delivery_admin_pannel-main/');
+  // updated to match your htdocs folder
 define('SITE_NAME', 'MMTracker');
 define('MAPBOX_TOKEN', 'pk.eyJ1IjoibW5hMjU4NjciLCJhIjoiY2tldTZiNzlxMXJ6YzJ6cndqY2RocXkydiJ9.Tee5ksW6tXsXXc4HOPJAwg');
 
@@ -65,47 +63,36 @@ function requireLogin() {
 }
 
 // Add this function to your existing config.php file
-
 function validUser() {
     global $conn;
     
-    // Check if user is logged in
     if (!isLoggedIn()) {
         return false;
     }
     
-    // Prepare the SQL query to check user
     $query = "SELECT id, is_active FROM Users WHERE id = ?";
-    
     $stmt = mysqli_prepare($conn, $query);
     mysqli_stmt_bind_param($stmt, "i", $_SESSION['user_id']);
     mysqli_stmt_execute($stmt);
     
     $result = mysqli_stmt_get_result($stmt);
     $user = mysqli_fetch_assoc($result);
-    
-    // Close the statement
     mysqli_stmt_close($stmt);
     
-    // Check if user exists in database
     if (!$user) {
-        // User not found in database
         session_unset();
         session_destroy();
         requireLogin();
         return false;
     }
     
-    // Check if user is active
     if ($user['is_active'] != 1) {
-        // User is not active
         session_unset();
         session_destroy();
         requireLogin();
         return false;
     }
     
-    // User is valid
     return true;
 }
 
@@ -118,7 +105,6 @@ function cleanInput($data) {
     return mysqli_real_escape_string($conn, $data);
 }
 
-// Update the Firebase Configuration section
 // Firebase Configuration
 define('FIREBASE_CREDENTIALS_PATH', __DIR__ . '/../assets/firebase/mm-tracker-f54d9-firebase-adminsdk-fbsvc-088a5175d2.json');
 
@@ -127,7 +113,6 @@ function sendFirebaseNotification($user_id, $title, $message, $data = []) {
     global $conn;
     
     try {
-        // Get user's FCM token
         $query = "SELECT fcm_token FROM Users WHERE id = ? AND fcm_token IS NOT NULL";
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, "i", $user_id);
@@ -142,16 +127,11 @@ function sendFirebaseNotification($user_id, $title, $message, $data = []) {
         
         $fcm_token = $user['fcm_token'];
         
-        // Initialize Firebase
-        $factory = (new Factory)
-            ->withServiceAccount(FIREBASE_CREDENTIALS_PATH);
-        
+        $factory = (new Factory)->withServiceAccount(FIREBASE_CREDENTIALS_PATH);
         $messaging = $factory->createMessaging();
         
-        // Create notification
         $notification = Notification::create($title, $message);
         
-        // Merge default data with provided data
         $messageData = array_merge([
             'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
             'title' => $title,
@@ -159,20 +139,17 @@ function sendFirebaseNotification($user_id, $title, $message, $data = []) {
             'sound' => 'default',
         ], $data);
         
-        // Create message
         $cloudMessage = CloudMessage::withTarget('token', $fcm_token)
             ->withNotification($notification)
             ->withData($messageData);
         
-        // Send message
         $response = $messaging->send($cloudMessage);
         
-        // Log successful notification
         $log_query = "INSERT INTO NotificationLogs (user_id, title, message, status, response) 
                      VALUES (?, ?, ?, 'success', ?)";
         $log_stmt = mysqli_prepare($conn, $log_query);
         $response_json = json_encode($response);
-        $message_text = $message; // Store message text before using $message variable
+        $message_text = $message;
         mysqli_stmt_bind_param($log_stmt, "isss", $user_id, $title, $message_text, $response_json);
         mysqli_stmt_execute($log_stmt);
         
@@ -182,20 +159,17 @@ function sendFirebaseNotification($user_id, $title, $message, $data = []) {
     } catch (Exception $e) {
         error_log("Firebase Error: " . $e->getMessage());
         
-        // Log failed notification
         $log_query = "INSERT INTO NotificationLogs (user_id, title, message, status, response) 
                      VALUES (?, ?, ?, 'failed', ?)";
         $log_stmt = mysqli_prepare($conn, $log_query);
         $error_message = $e->getMessage();
-        $message_text = $message; // Store message text before using $message variable
+        $message_text = $message;
         mysqli_stmt_bind_param($log_stmt, "isss", $user_id, $title, $message_text, $error_message);
         mysqli_stmt_execute($log_stmt);
         
         return false;
     }
 }
-
-// sendFirebaseNotification(15, "New Order", "You have a new order to deliver");
 
 // Create NotificationLogs table if it doesn't exist
 $create_logs_table = "CREATE TABLE IF NOT EXISTS NotificationLogs (

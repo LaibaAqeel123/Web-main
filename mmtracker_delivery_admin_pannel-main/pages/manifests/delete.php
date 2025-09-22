@@ -2,7 +2,7 @@
 require_once '../../includes/config.php';
 include_once('../../server/log_helper.php');
 function logException($exceptionMessage) {
-    $logFile = __DIR__ . '/manifest_exception_log.log';  
+    $logFile = __DIR__ . '/route_exception_log.log';  // Changed from manifest_exception_log.log
     $timestamp = date('Y-m-d H:i:s');
     $logMessage = "[$timestamp] Exception: $exceptionMessage" . PHP_EOL;
     file_put_contents($logFile, $logMessage, FILE_APPEND);
@@ -11,7 +11,7 @@ function logException($exceptionMessage) {
 requireLogin();
 
 $error = '';
-$manifest = null;
+$route = null;  // Changed from $manifest to $route
 
 if (isset($_GET['id'])) {
     $id = cleanInput($_GET['id']);
@@ -19,7 +19,7 @@ if (isset($_GET['id'])) {
     // Check access rights
     $company_condition = !isSuperAdmin() ? "AND m.company_id = " . $_SESSION['company_id'] : "";
 
-    // Fetch manifest details
+    // Fetch route details
     $query = "SELECT m.*, u.name as rider_name, c.name as company_name,
               (SELECT COUNT(*) FROM ManifestOrders WHERE manifest_id = m.id) as order_count
               FROM Manifests m
@@ -31,9 +31,9 @@ if (isset($_GET['id'])) {
     mysqli_stmt_bind_param($stmt, "i", $id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
-    $manifest = mysqli_fetch_assoc($result);
+    $route = mysqli_fetch_assoc($result);  // Changed from $manifest to $route
 
-    if (!$manifest) {
+    if (!$route) {
         header('Location: index.php');
         exit();
     }
@@ -42,16 +42,16 @@ if (isset($_GET['id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
     $id = cleanInput($_POST['id']);
 
-    // Check manifest status
-    if ($manifest['status'] === 'delivered') {
-        $error = 'Cannot delete manifest: Orders have already been delivered';
+    // Check route status
+    if ($route['status'] === 'delivered') {
+        $error = 'Cannot delete route: Orders have already been delivered';  // Changed error message
     } else {
         mysqli_begin_transaction($conn);
         try {
             
             // Add status logs for orders being reset
             $log_query = "INSERT INTO OrderStatusLogs (order_id, status, changed_by, reason) 
-                         SELECT o.id, 'pending', ?, 'Manifest deleted'
+                         SELECT o.id, 'pending', ?, 'Route deleted'  -- Changed reason text
                          FROM Orders o 
                          JOIN ManifestOrders mo ON o.id = mo.order_id 
                          WHERE mo.manifest_id = ?";
@@ -68,27 +68,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
             mysqli_stmt_bind_param($stmt, "i", $id);
             mysqli_stmt_execute($stmt);
 
-            // Delete manifest orders
+            // Delete route orders
             $delete_orders = "DELETE FROM ManifestOrders WHERE manifest_id = ?";
             $stmt = mysqli_prepare($conn, $delete_orders);
             mysqli_stmt_bind_param($stmt, "i", $id);
             mysqli_stmt_execute($stmt);
 
-            // Delete manifest
-            $delete_manifest = "DELETE FROM Manifests WHERE id = ?";
-            $stmt = mysqli_prepare($conn, $delete_manifest);
+            // Delete route
+            $delete_route = "DELETE FROM Manifests WHERE id = ?";  // Changed variable name
+            $stmt = mysqli_prepare($conn, $delete_route);
             mysqli_stmt_bind_param($stmt, "i", $id);
             mysqli_stmt_execute($stmt);
 $user_id = $_SESSION['user_id'];
-$log_message = "Manifest #$id deleted by user #$user_id";
-writeLog("manifest.log", $log_message);
+$log_message = "Route #$id deleted by user #$user_id";  // Changed log message
+writeLog("route.log", $log_message);  // Changed log file name
             mysqli_commit($conn);
             header('Location: index.php?deleted=1');
             exit();
         } catch (Exception $e) {
             mysqli_rollback($conn);
-            $error = 'Error deleting manifest: ' . $e->getMessage();
-            error_log("Error deleting manifest: " . $e->getMessage());
+            $error = 'Error deleting route: ' . $e->getMessage();  // Changed error message
+            error_log("Error deleting route: " . $e->getMessage());  // Changed error message
     
     logException($e->getMessage());
         }
@@ -97,12 +97,12 @@ writeLog("manifest.log", $log_message);
 
 // Get the deletion status message
 $status_message = '';
-switch ($manifest['status']) {
+switch ($route['status']) {
     case 'delivered':
-        $status_message = 'This manifest cannot be deleted because it has been delivered.';
+        $status_message = 'This route cannot be deleted because it has been delivered.';  // Changed message
         break;
     default:
-        $status_message = 'Are you sure you want to delete this manifest? This action cannot be undone.';
+        $status_message = 'Are you sure you want to delete this route? This action cannot be undone.';  // Changed message
 }
 ?>
 
@@ -112,7 +112,7 @@ switch ($manifest['status']) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Manifest - <?php echo SITE_NAME; ?></title>
+    <title>Delete Route - <?php echo SITE_NAME; ?></title>  <!-- Changed page title -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -137,7 +137,7 @@ switch ($manifest['status']) {
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div class="mb-6">
-                    <h1 class="text-2xl font-bold text-gray-900">Delete Manifest #<?php echo $manifest['id']; ?></h1>
+                    <h1 class="text-2xl font-bold text-gray-900">Delete Route #<?php echo $route['id']; ?></h1>  <!-- Changed heading -->
                 </div>
 
                 <?php if ($error): ?>
@@ -158,13 +158,20 @@ switch ($manifest['status']) {
                                 <h3 class="text-sm font-medium text-red-800">Warning</h3>
                                 <div class="mt-2 text-sm text-red-700">
                                     <p><?php echo $status_message; ?></p>
-                                    <?php if ($manifest['status'] !== 'delivering' && $manifest['status'] !== 'delivered'): ?>
+                                    <?php if ($route['status'] !== 'delivering' && $route['status'] !== 'delivered'): ?>
                                         <p class="mt-2">This action will:</p>
                                         <ul class="list-disc list-inside mt-1">
+<<<<<<< HEAD
                                             <li>Delete the manifest and all associated records</li>
                                             <li>Reset the status of all orders in this manifest to 'pending'</li>
                                             <li>Remove driver assignment from this manifest</li>
                                             <li>Make orders available for new manifest creation</li>
+=======
+                                            <li>Delete the route and all associated records</li>  <!-- Changed text -->
+                                            <li>Reset the status of all orders in this route to 'pending'</li>  <!-- Changed text -->
+                                            <li>Remove rider assignment from this route</li>  <!-- Changed text -->
+                                            <li>Make orders available for new route creation</li>  <!-- Changed text -->
+>>>>>>> 58316d5408f378aa4b3cc44678087670050dcdc2
                                         </ul>
                                     <?php endif; ?>
                                 </div>
@@ -174,13 +181,13 @@ switch ($manifest['status']) {
 
                     <div class="space-y-4">
                         <div class="border rounded-lg p-4 bg-gray-50">
-                            <h3 class="font-medium text-gray-900 mb-2">Manifest Details</h3>
+                            <h3 class="font-medium text-gray-900 mb-2">Route Details</h3>  <!-- Changed heading -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <p class="text-sm text-gray-700"><strong>Status:</strong>
                                         <span class="px-2 py-1 rounded-full text-xs font-medium
                                     <?php
-                                    switch ($manifest['status']) {
+                                    switch ($route['status']) {  // Changed from $manifest to $route
                                         case 'delivered':
                                             echo 'bg-green-100 text-green-800';
                                             break;
@@ -194,25 +201,30 @@ switch ($manifest['status']) {
                                             echo 'bg-gray-100 text-gray-800';
                                     }
                                     ?>">
-                                            <?php echo ucfirst($manifest['status']); ?>
+                                            <?php echo ucfirst($route['status']); ?>  <!-- Changed from $manifest to $route -->
                                         </span>
                                     </p>
+<<<<<<< HEAD
                                     <p class="text-sm text-gray-700"><strong>Orders:</strong> <?php echo $manifest['order_count']; ?></p>
                                     <p class="text-sm text-gray-700"><strong>Assigned Driver:</strong> <?php echo htmlspecialchars($manifest['rider_name'] ?? 'Not Assigned'); ?></p>
+=======
+                                    <p class="text-sm text-gray-700"><strong>Orders:</strong> <?php echo $route['order_count']; ?></p>  <!-- Changed from $manifest to $route -->
+                                    <p class="text-sm text-gray-700"><strong>Assigned Rider:</strong> <?php echo htmlspecialchars($route['rider_name'] ?? 'Not Assigned'); ?></p>  <!-- Changed from $manifest to $route -->
+>>>>>>> 58316d5408f378aa4b3cc44678087670050dcdc2
                                 </div>
                                 <div>
                                     <?php if (isSuperAdmin()): ?>
-                                        <p class="text-sm text-gray-700"><strong>Company:</strong> <?php echo htmlspecialchars($manifest['company_name']); ?></p>
+                                        <p class="text-sm text-gray-700"><strong>Company:</strong> <?php echo htmlspecialchars($route['company_name']); ?></p>  <!-- Changed from $manifest to $route -->
                                     <?php endif; ?>
-                                    <p class="text-sm text-gray-700"><strong>Created:</strong> <?php echo date('M d, Y H:i', strtotime($manifest['created_at'])); ?></p>
-                                    <p class="text-sm text-gray-700"><strong>Last Updated:</strong> <?php echo date('M d, Y H:i', strtotime($manifest['updated_at'])); ?></p>
+                                    <p class="text-sm text-gray-700"><strong>Created:</strong> <?php echo date('M d, Y H:i', strtotime($route['created_at'])); ?></p>  <!-- Changed from $manifest to $route -->
+                                    <p class="text-sm text-gray-700"><strong>Last Updated:</strong> <?php echo date('M d, Y H:i', strtotime($route['updated_at'])); ?></p>  <!-- Changed from $manifest to $route -->
                                 </div>
                             </div>
                         </div>
 
                         <div class="flex justify-end space-x-3">
                             <a href="index.php" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">Cancel</a>
-                            <?php if ($manifest['status'] !== 'delivered'): ?>
+                            <?php if ($route['status'] !== 'delivered'): ?>  <!-- Changed from $manifest to $route -->
                                 <button type="submit" name="confirm_delete" form="deleteForm"
                                     class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
                                     Confirm Delete
@@ -221,7 +233,7 @@ switch ($manifest['status']) {
                         </div>
 
                         <form id="deleteForm" action="" method="POST" class="hidden">
-                            <input type="hidden" name="id" value="<?php echo $manifest['id']; ?>">
+                            <input type="hidden" name="id" value="<?php echo $route['id']; ?>">  <!-- Changed from $manifest to $route -->
                             <input type="hidden" name="confirm_delete" value="1">
                         </form>
                     </div>
@@ -229,10 +241,10 @@ switch ($manifest['status']) {
             </div>
         </div>
 
-        <?php if ($manifest['status'] !== 'delivered'): ?>
+        <?php if ($route['status'] !== 'delivered'): ?>  <!-- Changed from $manifest to $route -->
             <script>
                 document.getElementById('deleteForm').onsubmit = function(e) {
-                    if (!confirm('This action cannot be undone. Are you sure you want to delete this manifest?')) {
+                    if (!confirm('This action cannot be undone. Are you sure you want to delete this route?')) {  // Changed confirmation message
                         e.preventDefault();
                         return false;
                     }

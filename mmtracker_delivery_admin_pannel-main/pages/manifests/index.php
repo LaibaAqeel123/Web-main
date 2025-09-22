@@ -38,7 +38,7 @@ if (!isSuperAdmin()) {
 }
 $riders_result = mysqli_query($conn, $rider_query);
 
-// Fetch manifests with related data
+// Fetch routes with related data
 $query = "SELECT m.*, 
           u.name as rider_name,
           c.name as company_name,
@@ -63,7 +63,7 @@ $result = mysqli_query($conn, $query);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manifests - <?php echo SITE_NAME; ?></title>
+    <title>Routes - <?php echo SITE_NAME; ?></title>  <!-- Changed page title -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -88,8 +88,8 @@ $result = mysqli_query($conn, $query);
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold text-gray-900">Delivery Manifests</h1>
-                    <a href="create.php" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Create Manifest</a>
+                    <h1 class="text-2xl font-bold text-gray-900">Delivery Routes</h1>  <!-- Changed heading -->
+                    <a href="create.php" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Create Route</a>  <!-- Changed button text -->
                 </div>
 
                 <!-- Filters -->
@@ -136,24 +136,24 @@ $result = mysqli_query($conn, $query);
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <?php while ($manifest = mysqli_fetch_assoc($result)): ?>
+                            <?php while ($route = mysqli_fetch_assoc($result)): ?>  <!-- Changed variable name from $manifest to $route -->
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">#<?php echo $manifest['id']; ?></div>
-                                        <div class="text-sm text-gray-500"><?php echo date('M d, Y H:i', strtotime($manifest['created_at'])); ?></div>
+                                        <div class="text-sm font-medium text-gray-900">#<?php echo $route['id']; ?></div>  <!-- Changed from $manifest to $route -->
+                                        <div class="text-sm text-gray-500"><?php echo date('M d, Y H:i', strtotime($route['created_at'])); ?></div>  <!-- Changed from $manifest to $route -->
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900"><?php echo htmlspecialchars($manifest['rider_name'] ?? 'Not Assigned'); ?></div>
+                                        <div class="text-sm text-gray-900"><?php echo htmlspecialchars($route['rider_name'] ?? 'Not Assigned'); ?></div>  <!-- Changed from $manifest to $route -->
                                     </td>
                                     <?php if (isSuperAdmin()): ?>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900"><?php echo htmlspecialchars($manifest['company_name']); ?></div>
+                                            <div class="text-sm text-gray-900"><?php echo htmlspecialchars($route['company_name']); ?></div>  <!-- Changed from $manifest to $route -->
                                         </td>
                                     <?php endif; ?>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                 <?php
-                                switch ($manifest['status']) {
+                                switch ($route['status']) {  // Changed from $manifest to $route
                                     case 'delivered':
                                         echo 'bg-green-100 text-green-800';
                                         break;
@@ -167,16 +167,16 @@ $result = mysqli_query($conn, $query);
                                         echo 'bg-gray-100 text-gray-800';
                                 }
                                 ?>">
-                                            <?php echo ucfirst($manifest['status']); ?>
+                                            <?php echo ucfirst($route['status']); ?>  <!-- Changed from $manifest to $route -->
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <?php echo $manifest['order_count']; ?> Orders
+                                        <?php echo $route['order_count']; ?> Orders  <!-- Changed from $manifest to $route -->
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <?php
-                                        $progress = $manifest['order_count'] > 0
-                                            ? ($manifest['delivered_count'] / $manifest['order_count']) * 100
+                                        $progress = $route['order_count'] > 0  // Changed from $manifest to $route
+                                            ? ($route['delivered_count'] / $route['order_count']) * 100  // Changed from $manifest to $route
                                             : 0;
                                         ?>
                                         <div class="flex items-center">
@@ -187,9 +187,9 @@ $result = mysqli_query($conn, $query);
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="view.php?id=<?php echo $manifest['id']; ?>" class="text-indigo-600 hover:text-indigo-900 mr-3">View</a>
-                                        <a href="edit.php?id=<?php echo $manifest['id']; ?>" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
-                                        <a href="delete.php?id=<?php echo $manifest['id']; ?>" class="text-red-600 hover:text-red-900">Delete</a>
+                                        <a href="view.php?id=<?php echo $route['id']; ?>" class="text-indigo-600 hover:text-indigo-900 mr-3">View</a>  <!-- Changed from $manifest to $route -->
+                                        <a href="edit.php?id=<?php echo $route['id']; ?>" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>  <!-- Changed from $manifest to $route -->
+                                        <a href="delete.php?id=<?php echo $route['id']; ?>" class="text-red-600 hover:text-red-900">Delete</a>  <!-- Changed from $manifest to $route -->
                                     </td>
                                 </tr>
                             <?php endwhile; ?>

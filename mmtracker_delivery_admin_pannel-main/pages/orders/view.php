@@ -4,7 +4,7 @@ requireLogin();
 
 $order = null;
 $status_logs = [];
-$manifest = null;
+$route = null; // Changed from $manifest to $route
 $products = [];
 
 if (isset($_GET['id'])) {
@@ -73,18 +73,18 @@ if (isset($_GET['id'])) {
         $status_logs[] = $log;
     }
 
-    // Fetch manifest details if assigned
-    $manifest_query = "SELECT m.*, u.name as rider_name 
+    // Fetch route details if assigned
+    $route_query = "SELECT m.*, u.name as rider_name 
                       FROM Manifests m
                       LEFT JOIN ManifestOrders mo ON m.id = mo.manifest_id
                       LEFT JOIN Users u ON m.rider_id = u.id
                       WHERE mo.order_id = ?";
 
-    $manifest_stmt = mysqli_prepare($conn, $manifest_query);
-    mysqli_stmt_bind_param($manifest_stmt, "i", $id);
-    mysqli_stmt_execute($manifest_stmt);
-    $manifest_result = mysqli_stmt_get_result($manifest_stmt);
-    $manifest = mysqli_fetch_assoc($manifest_result);
+    $route_stmt = mysqli_prepare($conn, $route_query);
+    mysqli_stmt_bind_param($route_stmt, "i", $id);
+    mysqli_stmt_execute($route_stmt);
+    $route_result = mysqli_stmt_get_result($route_stmt);
+    $route = mysqli_fetch_assoc($route_result); // Changed from $manifest to $route
 }
 ?>
 
@@ -283,26 +283,31 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
 
-                    <!-- Status History and Manifest Info -->
+                    <!-- Status History and Route Info -->
                     <div class="space-y-6">
-                        <!-- Manifest Information -->
-                        <?php if ($manifest): ?>
+                        <!-- Route Information -->
+                        <?php if ($route): ?>
                             <div class="bg-white shadow rounded-lg p-6">
-                                <h2 class="text-xl font-semibold mb-4">Manifest Information</h2>
+                                <h2 class="text-xl font-semibold mb-4">Route Information</h2> <!-- Changed from Manifest Information to Route Information -->
                                 <div class="space-y-4">
                                     <div class="flex justify-between border-b pb-2">
-                                        <span class="font-medium">Manifest Status</span>
+                                        <span class="font-medium">Route Status</span> <!-- Changed from Manifest Status to Route Status -->
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            <?php echo ucfirst($manifest['status']); ?>
+                                            <?php echo ucfirst($route['status']); ?>
                                         </span>
                                     </div>
                                     <div class="flex justify-between border-b pb-2">
+<<<<<<< HEAD
                                         <span class="font-medium">Assigned Driver</span>
                                         <span><?php echo htmlspecialchars($manifest['rider_name']); ?></span>
+=======
+                                        <span class="font-medium">Assigned Rider</span>
+                                        <span><?php echo htmlspecialchars($route['rider_name']); ?></span>
+>>>>>>> 58316d5408f378aa4b3cc44678087670050dcdc2
                                     </div>
                                     <div class="flex justify-between border-b pb-2">
                                         <span class="font-medium">Created At</span>
-                                        <span><?php echo date('M d, Y H:i', strtotime($manifest['created_at'])); ?></span>
+                                        <span><?php echo date('M d, Y H:i', strtotime($route['created_at'])); ?></span>
                                     </div>
                                 </div>
                             </div>
