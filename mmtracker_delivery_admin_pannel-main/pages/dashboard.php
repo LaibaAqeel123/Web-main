@@ -1553,15 +1553,13 @@ localStorage.setItem(
 const defaultGridColumns = '60% 40%';
 
 const defaultSizes = {
-  // Left Column Panels
-  ridersPanel:     { width: '100%', height: '300px' },
-  ordersPanel:     { width: '100%', height: '300px' },
-  unassignedPanel: { width: '100%', height: '250px' },
-  // Right Column Panels
-  mapPanel:{ width: '100%', height: '400px' },
-  routesPanel: { width: '100%', height: '400px' }
+  ridersPanel:     { width: '100%', height: '28vh' },   
+  routeOrdersPanel:{ width: '100%', height: '28vh' },     
+  ordersPanel:     { width: '100%', height: '28vh' },   
+  mapPanel:        { width: '100%', height: '60vh' },   
+  routesPanel:     { width: '100%', height: '25vh' }    
 };
-// Restore saved or default sizes
+//Restore saved or default sizes
 function applySavedSizes() {
   document.querySelectorAll('.resizable-panel').forEach(panel => {
     const saved = JSON.parse(localStorage.getItem('panel-size-' + panel.id));
