@@ -32,10 +32,10 @@ if (isset($_GET["id"])) {
         "SELECT u.*, rc.company_id, rc.is_active as rider_company_active, c.name as company_name,
               (SELECT COUNT(*) FROM Manifests WHERE rider_id = u.id AND status != 'delivered' " .
         (!isSuperAdmin() ? "AND company_id = " . $_SESSION["company_id"] : "") .
-        ") as active_manifests,
+        ") as active_routes,
               (SELECT COUNT(*) FROM Manifests WHERE rider_id = u.id " .
         (!isSuperAdmin() ? "AND company_id = " . $_SESSION["company_id"] : "") .
-        ") as total_manifests,
+        ") as total_routes,
               (SELECT COUNT(*) FROM Orders o 
                JOIN ManifestOrders mo ON o.id = mo.order_id 
                JOIN Manifests m ON mo.manifest_id = m.id 
@@ -65,9 +65,9 @@ if (isset($_GET["id"])) {
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["confirm_delete"])) {
     $id = cleanInput($_POST["id"]);
 
-    if ($rider["active_manifests"] > 0) {
-        $error = "Cannot remove rider: Has active delivery manifests with the company";
-        writeLog("rider_actions.log", "Delete blocked: Rider ID {$id} has active manifests. Attempt by user ID: {$_SESSION['user_id']}");
+    if ($rider["active_routes"] > 0) {
+        $error = "Cannot remove rider: Has active delivery routes with the company";
+        writeLog("rider_actions.log", "Delete blocked: Rider ID {$id} has active routes. Attempt by user ID: {$_SESSION['user_id']}");
     } else {
         mysqli_begin_transaction($conn);
         try {
@@ -154,7 +154,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["confirm_delete"])) {
                                         <li>Remove rider's access to this company</li>
                                         <li>Preserve delivery history and records</li>
                                         <li>Not affect rider's assignments with other companies</li>
-                                        <li>Prevent assignment to future manifests for this company</li>
+                                        <li>Prevent assignment to future routes for this company</li>
                                     </ul>
                                 </div>
                             </div>
@@ -182,8 +182,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["confirm_delete"])) {
                             <div>
                                 <h3 class="text-lg font-medium text-gray-900 mb-4">Company Statistics</h3>
                                 <ul class="text-sm text-gray-600 space-y-2">
-                                    <li><strong>Total Manifests:</strong> <?php echo $rider['total_manifests']; ?></li>
-                                    <li><strong>Active Manifests:</strong> <?php echo $rider['active_manifests']; ?></li>
+                                    <li><strong>Total Routes:</strong> <?php echo $rider['total_routes']; ?></li>
+                                    <li><strong>Active Routes:</strong> <?php echo $rider['active_routes']; ?></li>
                                     <li><strong>Delivered Orders:</strong> <?php echo $rider['delivered_orders']; ?></li>
                                 </ul>
                             </div>
@@ -193,7 +193,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["confirm_delete"])) {
                             <a href="index.php" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">Cancel</a>
                             <button type="submit" name="confirm_delete"
                                 class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                                <?php echo $rider['active_manifests'] > 0 ? 'disabled' : ''; ?>>
+                                <?php echo $rider['active_routes'] > 0 ? 'disabled' : ''; ?>>
                                 Confirm Remove
                             </button>
                         </div>

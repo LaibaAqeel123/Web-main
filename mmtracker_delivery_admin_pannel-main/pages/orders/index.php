@@ -180,7 +180,7 @@ $base_query_string = http_build_query($pagination_params);
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
                                 <?php endif; ?>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manifest</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th> <!-- Changed from Manifest to Route -->
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
@@ -224,7 +224,7 @@ $base_query_string = http_build_query($pagination_params);
                                         <?php if ($order['manifest_id']): ?>
                                             <a href="../manifests/view.php?id=<?php echo $order['manifest_id']; ?>"
                                                 class="text-indigo-600 hover:text-indigo-900">
-                                                View Manifest
+                                                View Route <!-- Changed from View Manifest to View Route -->
                                             </a>
                                         <?php else: ?>
                                             <span class="text-gray-500">Not Assigned</span>

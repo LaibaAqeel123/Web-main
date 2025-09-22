@@ -478,7 +478,7 @@ if (isSuperAdmin()) {
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Total Manifests</dt>
+                                    <dt class="text-sm font-medium text-gray-500">Total Routes</dt>
                                     <dd class="mt-1 text-2xl font-semibold text-gray-900">
                                         <?php echo $delivery_stats['total_manifests']; ?>
                                     </dd>
@@ -511,13 +511,13 @@ if (isSuperAdmin()) {
 
             <!-- Main Content -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- Current Manifest -->
+                <!-- Current Route -->
                 <?php if ($current_manifest && ($current_manifest['status'] === 'assigned' || $current_manifest['status'] === 'delivering')): ?>
                 <a href="../manifests/view.php?id=<?php echo $current_manifest['id']; ?>" class="block">
                     <div class="bg-white shadow hover:shadow-lg transition-shadow duration-200 rounded-lg mb-6">
                         <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center">
                             <h3 class="text-lg font-medium leading-6 text-gray-900">
-                                Current Manifest #<?php echo $current_manifest['id']; ?>
+                                Current Route #<?php echo $current_manifest['id']; ?>
                             </h3>
                             <span class="px-3 py-1 text-sm rounded-full 
                                 <?php echo $current_manifest['status'] === 'delivering' ? 
@@ -574,7 +574,7 @@ if (isSuperAdmin()) {
                 <!-- Product Statistics Section -->
                 <div class="bg-white shadow rounded-lg mb-6">
                     <div class="px-6 py-5 border-b border-gray-200">
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Current Manifest Product Statistics</h3>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Current Route Product Statistics</h3>
                     </div>
                     <div class="px-6 py-5">
                         <!-- Summary Cards -->
@@ -640,7 +640,7 @@ if (isSuperAdmin()) {
                                     <?php if (empty($manifest_products_stats)): ?>
                                     <tr>
                                         <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
-                                            No products found in current manifest
+                                            No products found in current route
                                         </td>
                                     </tr>
                                     <?php endif; ?>
@@ -834,10 +834,10 @@ if (isSuperAdmin()) {
                     </div>
                 </div>
 
-                <!-- Recent Manifests -->
+                <!-- Recent Routes -->
                 <div class="bg-white shadow rounded-lg">
                     <div class="p-6">
-                        <h2 class="text-lg font-medium text-gray-900">Recent Manifests</h2>
+                        <h2 class="text-lg font-medium text-gray-900">Recent Routes</h2>
                         <div class="mt-6 space-y-4">
                             <?php foreach ($recent_manifests as $manifest): ?>
                             <div class="border rounded-lg p-4">
@@ -845,7 +845,7 @@ if (isSuperAdmin()) {
                                     <div>
                                         <a href="../manifests/view.php?id=<?php echo $manifest['id']; ?>" 
                                            class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                                            Manifest #<?php echo $manifest['id']; ?>
+                                            Route #<?php echo $manifest['id']; ?>
                                         </a>
                                         <p class="mt-1 text-sm text-gray-500">
                                             <?php echo date('M d, Y H:i', strtotime($manifest['created_at'])); ?>
@@ -885,7 +885,7 @@ if (isSuperAdmin()) {
                             
                             <?php if (empty($recent_manifests)): ?>
                             <div class="text-center py-4 text-gray-500">
-                                No manifests found
+                                No routes found
                             </div>
                             <?php endif; ?>
                         </div>
