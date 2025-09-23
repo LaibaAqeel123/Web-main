@@ -1,0 +1,35 @@
+[2025-08-03 04:00:49] Duplicate username/email attempt: MN / mohsin@neptasolutions.co.uk
+[2025-08-03 04:01:31] New rider created: ID 54 | Username: MNN
+[2025-08-03 04:01:31] Rider assigned to company successfully: Rider ID 54, Company ID 2
+[2025-08-03 04:09:21] Duplicate username/email attempt: MNN / laiba.aqeel03@gmail.com
+[2025-08-03 04:09:39] Duplicate username/email attempt: MNNN / laiba.aqeel03@gmail.com
+[2025-08-03 04:09:53] Duplicate username/email attempt: LA / laiba.aqeel03@gmail.com
+[2025-08-03 04:10:39] New rider created: ID 55 | Username: RI
+[2025-08-03 04:10:39] Rider assigned to company successfully: Rider ID 55, Company ID 2
+[2025-08-03 04:10:46] Accessing delete confirmation for rider ID: 55 by user ID: 25
+[2025-08-03 04:10:48] Accessing delete confirmation for rider ID: 55 by user ID: 25
+[2025-08-03 04:10:48] Rider ID 55 removed from company ID 2 by user ID: 25
+[2025-08-03 04:23:46] New rider created: ID 56 | Username: HA
+[2025-08-03 04:23:47] Rider assigned to company successfully: Rider ID 56, Company ID 2
+[2025-08-03 04:30:12] Accessing delete confirmation for rider ID: 56 by user ID: 25
+[2025-08-03 04:30:15] Accessing delete confirmation for rider ID: 56 by user ID: 25
+[2025-08-03 04:30:15] Rider ID 56 removed from company ID 2 by user ID: 25
+[2025-08-04 22:36:03] Transaction failed: Test log from manifest create.php
+[2025-08-04 22:36:23] Transaction failed: Test log from manifest create.php
+[2025-08-04 22:36:58] New rider created: ID 59 | Username: UA
+[2025-08-04 22:36:58] Rider assigned to company successfully: Rider ID 59, Company ID 2
+[2025-08-04 22:42:55] Accessing delete confirmation for rider ID: 59 by user ID: 25
+[2025-08-04 22:42:57] Accessing delete confirmation for rider ID: 59 by user ID: 25
+[2025-08-04 22:42:57] Error removing rider ID 59: Error removing rider: Test log from rider delete.php | User ID: 25
+[2025-08-04 22:43:14] Accessing delete confirmation for rider ID: 59 by user ID: 25
+[2025-08-04 22:43:14] Rider ID 59 removed from company ID 2 by user ID: 25
+[2025-09-16 03:03:19] Duplicate username/email attempt: r2 / mohsin@neptasolutionss.co.uk
+[2025-09-16 03:03:45] Duplicate username/email attempt: r2 / laiba91@gmail.com
+[2025-09-16 03:04:09] New rider created: ID 54 | Username: rider2
+[2025-09-16 03:04:09] Rider assigned to company successfully: Rider ID 54, Company ID 2
+[2025-09-16 03:04:44] New rider created: ID 55 | Username: r3
+[2025-09-16 03:04:44] Rider assigned to company successfully: Rider ID 55, Company ID 2
+[2025-09-20 11:47:09] Accessing delete confirmation for rider ID: 30 by user ID: 25
+[2025-09-20 13:09:00] Accessing delete confirmation for rider ID: 30 by user ID: 25
+[2025-09-20 13:11:52] Accessing delete confirmation for rider ID: 30 by user ID: 25
+[2025-09-20 13:12:10] Accessing delete confirmation for rider ID: 30 by user ID: 25
