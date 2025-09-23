@@ -590,6 +590,14 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
     .panel a {
       font-size: 12px; /* Reduced from 14px (text-sm) */
     }
+    /* Default heights for panels (first login) */
+#driversPanel { height: 180px; }
+#routeOrdersPanel { height: 200px; }
+#ordersPanel { height: 190px; }
+#mapPanel { height: 310px; }
+#routesPanel { height: 275px; }
+
+
   </style>
 </head>
 <body>
@@ -1485,6 +1493,11 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
+ 
+setTimeout(() => {
+  map.invalidateSize();
+}, 300);
+
 
     const drivers = <?php echo json_encode($riders_locations); ?> || [];
     const markers = {};
@@ -1641,24 +1654,34 @@ const defaultSizes = {
   routesPanel: { width: '100%', height: '275px' }
 };
     // Restore saved sizes
-    function applySavedSizes() {
-      document.querySelectorAll('.resizable-panel').forEach(panel => {
-        const saved = JSON.parse(localStorage.getItem('panel-size-' + panel.id));
-        const fallback = defaultSizes[panel.id] || {};
-        panel.style.width = saved?.width || fallback.width || '';
-        panel.style.height = saved?.height || fallback.height || '';
-      });
-    }
+  // Restore saved sizes with fallback to defaults
+function applySavedSizes() {
+  document.querySelectorAll('.resizable-panel').forEach(panel => {
+    const saved = JSON.parse(localStorage.getItem('panel-size-' + panel.id));
+    const fallback = defaultSizes[panel.id] || {};
+    panel.style.width = (saved && saved.width) || fallback.width || '100%';
+    panel.style.height = (saved && saved.height) || fallback.height || '220px';
+  });
+}
 
     // Initialize everything
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOM loaded, initializing...');
-      applySavedSizes();
-      initializeDragAndDrop();
-      initializeResizablePanels();
-      fixMap();
-      setTimeout(() => routeOrdersManager.init(), 100);
-    });
+   document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM loaded, initializing...');
+
+  applySavedSizes();
+
+  // Force browser to reflow + fix map after sizes applied
+  requestAnimationFrame(() => {
+    window.dispatchEvent(new Event("resize"));
+    fixMap();
+  });
+
+  initializeDragAndDrop();
+  initializeResizablePanels();
+
+  // Delay init a little longer so layout is stable
+  setTimeout(() => routeOrdersManager.init(),200);
+});
 
     window.addEventListener('load', fixMap);
     window.addEventListener('resize', fixMap);
