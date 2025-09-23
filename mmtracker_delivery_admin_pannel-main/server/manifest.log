@@ -12,4 +12,8 @@
 [2025-08-19 12:53:51] Order #255 removed from Manifest #161 by user #25
 [2025-08-19 12:53:55] Order #256 removed from Manifest #161 by user #25
 [2025-09-16 03:44:33] Manifest #155 created by user #25
+<<<<<<< HEAD
 [2025-09-19 08:17:39] Manifest #156 created by user #25
+=======
+[2025-09-21 19:13:17] Manifest #154 status changed to 'delivering' by user #25
+>>>>>>> 72c718f208a744d2964857118ae3c7b9f6a546a7

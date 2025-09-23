@@ -161,10 +161,17 @@ switch ($route['status']) {
                                     <?php if ($route['status'] !== 'delivering' && $route['status'] !== 'delivered'): ?>
                                         <p class="mt-2">This action will:</p>
                                         <ul class="list-disc list-inside mt-1">
+<<<<<<< HEAD
+                                            <li>Delete the manifest and all associated records</li>
+                                            <li>Reset the status of all orders in this manifest to 'pending'</li>
+                                            <li>Remove driver assignment from this manifest</li>
+                                            <li>Make orders available for new manifest creation</li>
+=======
                                             <li>Delete the route and all associated records</li>  <!-- Changed text -->
                                             <li>Reset the status of all orders in this route to 'pending'</li>  <!-- Changed text -->
                                             <li>Remove rider assignment from this route</li>  <!-- Changed text -->
                                             <li>Make orders available for new route creation</li>  <!-- Changed text -->
+>>>>>>> 58316d5408f378aa4b3cc44678087670050dcdc2
                                         </ul>
                                     <?php endif; ?>
                                 </div>
@@ -197,8 +204,13 @@ switch ($route['status']) {
                                             <?php echo ucfirst($route['status']); ?>  <!-- Changed from $manifest to $route -->
                                         </span>
                                     </p>
+<<<<<<< HEAD
+                                    <p class="text-sm text-gray-700"><strong>Orders:</strong> <?php echo $manifest['order_count']; ?></p>
+                                    <p class="text-sm text-gray-700"><strong>Assigned Driver:</strong> <?php echo htmlspecialchars($manifest['rider_name'] ?? 'Not Assigned'); ?></p>
+=======
                                     <p class="text-sm text-gray-700"><strong>Orders:</strong> <?php echo $route['order_count']; ?></p>  <!-- Changed from $manifest to $route -->
                                     <p class="text-sm text-gray-700"><strong>Assigned Rider:</strong> <?php echo htmlspecialchars($route['rider_name'] ?? 'Not Assigned'); ?></p>  <!-- Changed from $manifest to $route -->
+>>>>>>> 58316d5408f378aa4b3cc44678087670050dcdc2
                                 </div>
                                 <div>
                                     <?php if (isSuperAdmin()): ?>

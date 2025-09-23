@@ -343,34 +343,6 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
     }
 
 
-  
- 
-
-  
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /* Status pill styling */
     .status-pill {
       font-weight: 700;
@@ -603,7 +575,6 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
     }
   </style>
 </head>
-
 <body>
 
   <div class="app-shell">
@@ -698,6 +669,28 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
             <span class="label truncate">Manifests</span>
           </a>
 
+          <a href="<?php echo SITE_URL; ?>pages/routes/index.php"
+            class="<?php echo (strpos($_SERVER['PHP_SELF'], 'routes') !== false) ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'; ?> group flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+              </path>
+            </svg>
+            <span class="label truncate">Routes</span>
+          </a>
+
+          <?php if (isSuperAdmin() || isAdmin()): ?>
+            <a href="<?php echo SITE_URL; ?>pages/riders/index.php"
+              class="<?php echo (strpos($_SERVER['PHP_SELF'], 'drivers') !== false) ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'; ?> group flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                </path>
+              </svg>
+              <span class="label truncate">Drivers</span>
+            </a>
+          <?php endif; ?>
+
           <a href="<?php echo SITE_URL; ?>pages/apikeys/index.php"
             class="<?php echo (strpos($_SERVER['PHP_SELF'], 'apikeys') !== false) ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'; ?> group flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -707,25 +700,6 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
             </svg>
             <span class="label truncate">API Keys</span>
           </a>
-
-<<<<<<< HEAD
-        <a href="<?php echo SITE_URL; ?>pages/manifests/index.php"
-           class="<?php echo (strpos($_SERVER['PHP_SELF'], 'manifests') !== false) ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'; ?> group flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all">
-           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-           <span class="label truncate">Routes</span>
-        </a>
-=======
-          <?php if (isSuperAdmin() || isAdmin()): ?>
-            <a href="<?php echo SITE_URL; ?>pages/riders/index.php"
-              class="<?php echo (strpos($_SERVER['PHP_SELF'], 'riders') !== false) ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'; ?> group flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-              </svg>
-              <span class="label truncate">Riders</span>
-            </a>
-          <?php endif; ?>
->>>>>>> b8ae9295a8d0f129e06b523cfb0fc46faa9bafce
 
           <?php if (isSuperAdmin() || isAdmin()): ?>
             <a href="<?php echo SITE_URL; ?>pages/users/index.php"
@@ -756,36 +730,35 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
         <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
 
         <div class="grid-wrap" id="dashboardGrid">
-          <!-- LEFT COLUMN: Riders THEN Route Orders THEN Orders -->
+          <!-- LEFT COLUMN: Drivers THEN Route Orders THEN Orders -->
           <div class="left-column" id="leftColumn">
             <div class="column-resizer" id="columnResizer"></div>
-
-            <!-- Riders Section -->
-            <div class="panel resizable-panel mb-3" id="ridersPanel">
+            
+            <!-- Drivers Section -->
+            <div class="panel resizable-panel mb-3" id="driversPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
-
+              
               <div class="section-header">
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg font-semibold">Riders</h2>
+                  <h2 class="text-lg font-semibold">Drivers</h2>
                   <span class="workflow-step">Step 2: Assign Routes</span>
                 </div>
-                <a href="riders/index.php" class="text-indigo-600 text-sm">Manage</a>
+               <a href="../pages/riders/index.php" class="text-indigo-600 text-sm">Manage</a>
               </div>
-              <div class="workflow-indicator">Drag routes here to assign to riders</div>
-              <div id="ridersList" class="riders-list">
+              <div class="workflow-indicator">Drag routes here to assign to drivers</div>
+              <div id="driversList" class="drivers-list">
                 <table class="w-full text-sm text-left text-gray-500">
                   <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
-                      <th scope="col" class="py-2 px-4">Rider</th>
+                      <th scope="col" class="py-2 px-4">Drivers</th>
                       <th scope="col" class="py-2 px-4">Orders</th>
                     </tr>
                   </thead>
-                  <tbody id="ridersTableBody">
+                  <tbody id="driversTableBody">
                     <?php if ($riders_result && mysqli_num_rows($riders_result) > 0): ?>
                       <?php while ($r = mysqli_fetch_assoc($riders_result)): ?>
-                        <tr class="bg-white border-b hover:bg-gray-50 drop-zone"
-                          data-rider-id="<?php echo intval($r['id']); ?>">
+                        <tr class="bg-white border-b hover:bg-gray-50 drop-zone" data-driver-id="<?php echo intval($r['id']); ?>">
                           <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">
                             <?php echo htmlspecialchars($r['name'] ?? ''); ?>
                             <div class="loading-spinner"></div>
@@ -797,7 +770,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
                       <?php endwhile; ?>
                     <?php else: ?>
                       <tr>
-                        <td colspan="2" class="text-center py-4">No riders found</td>
+                        <td colspan="2" class="text-center py-4">No drivers found</td>
                       </tr>
                     <?php endif; ?>
                   </tbody>
@@ -805,7 +778,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
               </div>
             </div>
 
-            <!-- Route Orders Section - NEW 5th CARD -->
+            <!-- Route Orders Section -->
             <div class="panel resizable-panel mb-3" id="routeOrdersPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
@@ -857,8 +830,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
                               <span class="text-green-600 font-semibold">
                                 Route <?php echo $order['manifest_id']; ?>
                                 <?php if ($order['assigned_rider_name']): ?>
-                                  <br><span
-                                    class="text-gray-500"><?php echo htmlspecialchars($order['assigned_rider_name']); ?></span>
+                                  <br><span class="text-gray-500"><?php echo htmlspecialchars($order['assigned_rider_name']); ?></span>
                                 <?php endif; ?>
                               </span>
                             <?php else: ?>
@@ -877,11 +849,11 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
               </div>
             </div>
 
-            <!-- Orders Section with Buttons -->
+            <!-- Orders Section -->
             <div class="panel resizable-panel" id="ordersPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
-
+              
               <div class="section-header">
                 <div class="flex items-center gap-2">
                   <h2 class="text-lg font-semibold">Unassigned Orders</h2>
@@ -893,8 +865,8 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
                   <a href="orders/index.php" class="text-indigo-600 text-sm">View all →</a>
                 </div>
               </div>
-
-              <div class="workflow-indicator">Drag orders to routes first, then assign routes to riders</div>
+              
+              <div class="workflow-indicator">Drag orders to routes first, then assign routes to drivers</div>
               <div class="orders-list" id="ordersList">
                 <table class="w-full text-sm text-left text-gray-500">
                   <thead class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -907,8 +879,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
                   <tbody id="ordersTableBody">
                     <?php if ($recent_orders_result && mysqli_num_rows($recent_orders_result) > 0): ?>
                       <?php while ($order = mysqli_fetch_assoc($recent_orders_result)): ?>
-                        <tr class="bg-white border-b hover:bg-gray-50 draggable-row" draggable="true"
-                          data-order-id="<?php echo intval($order['id']); ?>">
+                        <tr class="bg-white border-b hover:bg-gray-50 draggable-row" draggable="true" data-order-id="<?php echo intval($order['id']); ?>">
                           <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">
                             <?php echo htmlspecialchars($order['order_number']); ?>
                           </td>
@@ -921,9 +892,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
                         </tr>
                       <?php endwhile; ?>
                     <?php else: ?>
-                      <tr>
-                        <td colspan="3" class="text-center py-4">No unassigned orders found</td>
-                      </tr>
+                      <tr><td colspan="3" class="text-center py-4">No unassigned orders found</td></tr>
                     <?php endif; ?>
                   </tbody>
                 </table>
@@ -936,10 +905,10 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
             <div class="panel resizable-panel mb-3" id="mapPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
-
+              
               <div class="flex justify-between items-center mb-3">
-                <h2 class="text-lg font-semibold">Riders Location Map</h2>
-                <div class="text-sm text-gray-500" id="lastUpdate">Last update: 0 riders</div>
+                <h2 class="text-lg font-semibold">Drivers Location Map</h2>
+                <div class="text-sm text-gray-500" id="lastUpdate">Last update: 0 drivers</div>
               </div>
               <div id="map"></div>
             </div>
@@ -947,21 +916,25 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
             <div class="panel resizable-panel" id="routesPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
-
+              
               <div class="section-header">
                 <div class="flex items-center gap-2">
                   <h2 class="text-lg font-semibold">Routes</h2>
-                  <span class="workflow-step">Collect Orders → Assign to Riders</span>
+                  <span class="workflow-step">Collect Orders → Assign to Drivers</span>
                 </div>
-                <a href="manifests/index.php" class="text-indigo-600 text-sm">New</a>
+                <div class="flex items-center gap-4">
+               <a href="../pages/manifests/create.php" class="text-indigo-600 text-sm">Create Route</a>
+              <a href="../pages/manifests/index.php" class="text-indigo-600 text-sm">View all →</a>
+                </div>
               </div>
-              <div class="workflow-indicator">Drop orders here, then drag routes to riders</div>
-              <div id="routesList">
+              
+              <div class="workflow-indicator">Routes ready for assignment to drivers</div>
+              <div class="routes-list" id="routesList">
                 <table class="w-full text-sm text-left text-gray-500">
                   <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
                       <th scope="col" class="py-2 px-4">Route #</th>
-                      <th scope="col" class="py-2 px-4">Rider</th>
+                      <th scope="col" class="py-2 px-4">Driver</th>
                       <th scope="col" class="py-2 px-4">Orders</th>
                       <th scope="col" class="py-2 px-4">Status</th>
                     </tr>
@@ -969,9 +942,9 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
                   <tbody id="routesTableBody">
                     <?php if ($routes_result && mysqli_num_rows($routes_result) > 0): ?>
                       <?php while ($r = mysqli_fetch_assoc($routes_result)): ?>
-                        <tr class="bg-white border-b hover:bg-gray-50 drop-zone draggable-row route-row"
-                          data-route-id="<?php echo intval($r['id']); ?>"
-                          draggable="<?php echo ($r['total_orders'] > 0) ? 'true' : 'false'; ?>" style="cursor: pointer;">
+                        <tr class="bg-white border-b hover:bg-gray-50 drop-zone <?php echo ($r['total_orders'] > 0) ? 'draggable-row' : ''; ?>" 
+                            data-route-id="<?php echo intval($r['id']); ?>" 
+                            <?php echo ($r['total_orders'] > 0) ? 'draggable="true"' : ''; ?>>
                           <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">
                             R-<?php echo intval($r['id']); ?>
                             <div class="loading-spinner"></div>
@@ -1000,11 +973,10 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
               </div>
             </div>
           </div>
-
-        </div> <!-- grid-wrap -->
-      </div> <!-- content -->
-    </div> <!-- main -->
-  </div> <!-- app-shell -->
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Message container for notifications -->
   <div id="messageContainer"></div>
@@ -1038,12 +1010,11 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
     let draggedElement = null;
     let dragType = null; // 'order' or 'route'
 
-    // Route Orders Management - NEW FUNCTIONALITY
+    // Route Orders Management
     let selectedRouteId = null;
-    let allOrdersData = []; // Cache for all orders data
+    let allOrdersData = [];
 
     const routeOrdersManager = {
-
       // Initialize route orders functionality
       init() {
         this.loadAllOrders();
@@ -1055,7 +1026,6 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       // Load all orders data via AJAX
       async loadAllOrders() {
         try {
-          // For now, use the data already loaded in PHP
           this.displayCurrentOrders();
           this.updateOrdersCount();
           console.log('Route orders initialized with current data');
@@ -1073,9 +1043,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       // Setup click handlers for route rows
       setupRouteClickHandlers() {
         document.addEventListener('click', (e) => {
-          // Don't interfere with drag operations
           if (e.target.closest('.draggable-row.dragging')) return;
-
           const routeRow = e.target.closest('#routesTableBody tr[data-route-id]');
           if (routeRow && !e.target.closest('.loading-spinner')) {
             const routeId = routeRow.dataset.routeId;
@@ -1095,25 +1063,16 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       // Select a route and show its orders
       async selectRoute(routeId) {
         if (selectedRouteId === routeId) {
-          // If clicking the same route, clear selection
           this.clearRouteSelection();
           return;
         }
-
         selectedRouteId = routeId;
-
-        // Update UI to show selected state
         this.updateRouteSelectionUI(routeId);
-
-        // Load and display route-specific orders
         await this.loadRouteOrders(routeId);
-
-        // Highlight selected route
         this.highlightSelectedRoute(routeId);
       },
 
-      // Load orders for specific route (simulated with current data)
-      // Load and display orders for a specific route by fetching data from the server
+      // Load orders for specific route
       async loadRouteOrders(routeId) {
         const tableBody = document.getElementById('routeOrdersTableBody');
         tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
@@ -1122,53 +1081,39 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
           const response = await fetch(`../api/get_route_orders.php?manifest_id=${routeId}`);
           const orders = await response.json();
 
-          // Check if the request was successful
           if (response.ok) {
-            tableBody.innerHTML = ''; // Clear the "Loading..." message
+            tableBody.innerHTML = '';
             if (orders.length > 0) {
-              // Loop through the fetched orders and create new table rows
               orders.forEach(order => {
                 const row = document.createElement('tr');
                 row.className = 'bg-white border-b hover:bg-gray-50 route-order-row';
                 row.dataset.orderId = order.id;
                 row.innerHTML = `
-                        <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">
-                            ${order.order_number}
-                        </td>
-                        <td class="py-2 px-4">
-                            ${order.customer_name || 'N/A'}
-                        </td>
-                        <td class="py-2 px-4">
-                            <span class="status-pill status-${order.status}">
-                                ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                            </span>
-                        </td>
-                        <td class="py-2 px-4 text-xs">
-                            <span class="text-green-600 font-semibold">
-                                Route ${routeId}
-                            </span>
-                        </td>
-                    `;
+                  <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">${order.order_number}</td>
+                  <td class="py-2 px-4">${order.customer_name || 'N/A'}</td>
+                  <td class="py-2 px-4">
+                    <span class="status-pill status-${order.status}">
+                      ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    </span>
+                  </td>
+                  <td class="py-2 px-4 text-xs">
+                    <span class="text-green-600 font-semibold">Route ${routeId}</span>
+                  </td>
+                `;
                 tableBody.appendChild(row);
               });
-
-              // Hide the "no orders" message if it exists
               const noOrdersRow = document.getElementById('noRouteOrdersRow');
               if (noOrdersRow) noOrdersRow.style.display = 'none';
-
             } else {
-              // Display a message if no orders were found
               tableBody.innerHTML = '<tr id="noRouteOrdersRow"><td colspan="4" class="text-center py-4">No orders found for this route</td></tr>';
             }
             this.updateOrdersCount(orders.length);
           } else {
-            // Handle API errors
             console.error('Failed to load route orders:', orders.error);
             tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">${orders.error || 'Failed to load data.'}</td></tr>`;
             this.updateOrdersCount(0);
           }
         } catch (error) {
-          // Handle network errors
           console.error('Fetch error:', error);
           tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">Failed to connect to server.</td></tr>`;
           this.updateOrdersCount(0);
@@ -1179,17 +1124,10 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       clearRouteSelection() {
         selectedRouteId = null;
         this.updateRouteSelectionUI(null);
-
-        // Show all rows
         const allRows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row');
         allRows.forEach(row => row.style.display = '');
-
-        // Hide "no orders" message
         const noOrdersRow = document.getElementById('noRouteOrdersRow');
-        if (noOrdersRow) {
-          noOrdersRow.style.display = 'none';
-        }
-
+        if (noOrdersRow) noOrdersRow.style.display = 'none';
         this.updateOrdersCount(allRows.length);
         this.highlightSelectedRoute(null);
       },
@@ -1216,17 +1154,12 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
 
       // Highlight selected route in routes table
       highlightSelectedRoute(routeId) {
-        // Remove previous highlights
         document.querySelectorAll('#routesTableBody tr').forEach(row => {
           row.classList.remove('route-selected');
         });
-
-        // Add highlight to selected route
         if (routeId) {
           const routeRow = document.querySelector(`#routesTableBody tr[data-route-id="${routeId}"]`);
-          if (routeRow) {
-            routeRow.classList.add('route-selected');
-          }
+          if (routeRow) routeRow.classList.add('route-selected');
         }
       },
 
@@ -1240,7 +1173,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
         countElement.textContent = `${count} order${count !== 1 ? 's' : ''}`;
       },
 
-      // Refresh route orders data (call this when orders are moved)
+      // Refresh route orders data
       refresh() {
         setTimeout(() => {
           if (selectedRouteId) {
@@ -1252,12 +1185,11 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       }
     };
 
-    // DRAG AND DROP IMPLEMENTATION FOR TABLE ROWS
+    // DRAG AND DROP IMPLEMENTATION
 
-    // Setup draggable order rows (Step 1: Orders → Routes)
+    // Setup draggable order rows
     function setupDraggableOrders() {
       const orderRows = document.querySelectorAll('#ordersTableBody tr.draggable-row[data-order-id]');
-
       orderRows.forEach(row => {
         row.addEventListener('dragstart', (e) => {
           document.body.classList.add('dragging-active');
@@ -1265,14 +1197,9 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
           draggedElement = row;
           dragType = 'order';
           row.classList.add('dragging');
-
-          // Set drag data
           e.dataTransfer.setData('text/plain', draggedOrderId);
           e.dataTransfer.effectAllowed = 'move';
-
-          // Create ghost image
           createDragGhost(row, e);
-
           console.log(`Started dragging order: ${draggedOrderId}`);
         });
 
@@ -1285,14 +1212,12 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
           console.log('Order drag ended');
         });
       });
-
       console.log(`Setup ${orderRows.length} draggable order rows`);
     }
 
-    // Setup draggable route rows (Step 2: Routes → Riders)
+    // Setup draggable route rows
     function setupDraggableRoutes() {
       const routeRows = document.querySelectorAll('#routesTableBody tr.draggable-row[data-route-id][draggable="true"]');
-
       routeRows.forEach(row => {
         row.addEventListener('dragstart', (e) => {
           document.body.classList.add('dragging-active');
@@ -1300,14 +1225,9 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
           draggedElement = row;
           dragType = 'route';
           row.classList.add('dragging');
-
-          // Set drag data
           e.dataTransfer.setData('text/plain', draggedRouteId);
           e.dataTransfer.effectAllowed = 'move';
-
-          // Create ghost image
           createDragGhost(row, e);
-
           console.log(`Started dragging route: ${draggedRouteId}`);
         });
 
@@ -1320,7 +1240,6 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
           console.log('Route drag ended');
         });
       });
-
       console.log(`Setup ${routeRows.length} draggable route rows`);
     }
 
@@ -1334,32 +1253,24 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       ghost.style.backgroundColor = '#e0f2fe';
       ghost.style.zIndex = '9999';
       document.body.appendChild(ghost);
-
       e.dataTransfer.setDragImage(ghost, e.offsetX, e.offsetY);
-
       setTimeout(() => {
-        if (document.body.contains(ghost)) {
-          document.body.removeChild(ghost);
-        }
+        if (document.body.contains(ghost)) document.body.removeChild(ghost);
       }, 100);
     }
 
-    // Setup drop targets for route rows (accept orders only)
+    // Setup drop targets for route rows
     function setupRouteDropTargets() {
       const routeRows = document.querySelectorAll('#routesTableBody tr.drop-zone[data-route-id]');
-
       routeRows.forEach(row => {
         row.addEventListener('dragover', (e) => {
-          // Only accept orders, not routes
           if (dragType !== 'order') return;
-
           e.preventDefault();
           e.dataTransfer.dropEffect = 'move';
           row.classList.add('drag-over-order');
         });
 
         row.addEventListener('dragleave', (e) => {
-          // Check if we're leaving the row entirely
           if (!row.contains(e.relatedTarget)) {
             row.classList.remove('drag-over-order');
           }
@@ -1368,38 +1279,28 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
         row.addEventListener('drop', async (e) => {
           e.preventDefault();
           row.classList.remove('drag-over-order');
-
-          // Only accept orders
           if (dragType !== 'order') return;
-
           const orderId = e.dataTransfer.getData('text/plain');
           const routeId = row.dataset.routeId;
-
           if (!orderId || !routeId) return;
-
           await assignOrderToRoute(orderId, routeId, row);
         });
       });
-
       console.log(`Setup ${routeRows.length} route drop targets`);
     }
 
-    // Setup drop targets for rider rows (accept routes only)
-    function setupRiderDropTargets() {
-      const riderRows = document.querySelectorAll('#ridersTableBody tr.drop-zone[data-rider-id]');
-
-      riderRows.forEach(row => {
+    // Setup drop targets for driver rows (but use rider_id in data attributes)
+    function setupDriverDropTargets() {
+      const driverRows = document.querySelectorAll('#driversTableBody tr.drop-zone[data-driver-id]');
+      driverRows.forEach(row => {
         row.addEventListener('dragover', (e) => {
-          // Only accept routes, not orders
           if (dragType !== 'route') return;
-
           e.preventDefault();
           e.dataTransfer.dropEffect = 'move';
           row.classList.add('drag-over-route');
         });
 
         row.addEventListener('dragleave', (e) => {
-          // Check if we're leaving the row entirely
           if (!row.contains(e.relatedTarget)) {
             row.classList.remove('drag-over-route');
           }
@@ -1408,37 +1309,28 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
         row.addEventListener('drop', async (e) => {
           e.preventDefault();
           row.classList.remove('drag-over-route');
-
-          // Only accept routes
           if (dragType !== 'route') return;
-
           const routeId = e.dataTransfer.getData('text/plain');
-          const riderId = row.dataset.riderId;
-
+          const riderId = row.dataset.driverId; // This contains the rider_id from database
           if (!routeId || !riderId) return;
-
-          await assignRouteToRider(routeId, riderId, row);
+          await assignRouteToDriver(routeId, riderId, row);
         });
       });
-
-      console.log(`Setup ${riderRows.length} rider drop targets`);
+      console.log(`Setup ${driverRows.length} driver drop targets`);
     }
 
-    // API CALLS FOR DRAG AND DROP OPERATIONS
+    // API CALLS FOR DRAG AND DROP
 
-    // Assign order to route (Step 1)
+    // Assign order to route
     async function assignOrderToRoute(orderId, routeId, targetRow) {
       const spinner = targetRow.querySelector('.loading-spinner');
       if (spinner) spinner.style.display = 'inline-block';
 
       try {
         console.log(`Assigning order ${orderId} to route ${routeId}`);
-
         const response = await fetch('../api/assign_order_to_route.php', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             order_id: parseInt(orderId),
             route_id: parseInt(routeId)
@@ -1449,26 +1341,18 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
         console.log('Assignment result:', result);
 
         if (result.success) {
-          // Remove the order row from the orders table
           if (draggedElement && draggedElement.dataset.orderId == orderId) {
             draggedElement.remove();
           }
-
-          // Update the route row to show it now has orders
           updateRouteRow(routeId, targetRow);
-
           showMessage(`Order #${getOrderNumber(orderId)} added to Route R-${routeId}`, 'success');
-
-          // Re-setup draggable routes since this route might now be draggable
           setTimeout(() => {
             setupDraggableRoutes();
             routeOrdersManager.refresh();
           }, 100);
-
         } else {
           showMessage(result.message || 'Failed to add order to route', 'error');
         }
-
       } catch (error) {
         console.error('Assignment error:', error);
         showMessage('Network error occurred', 'error');
@@ -1477,22 +1361,19 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       }
     }
 
-    // Assign route to rider (Step 2)
-    async function assignRouteToRider(routeId, riderId, targetRow) {
+    // Assign route to driver (but send rider_id to API)
+    async function assignRouteToDriver(routeId, riderId, targetRow) {
       const spinner = targetRow.querySelector('.loading-spinner');
       if (spinner) spinner.style.display = 'inline-block';
 
       try {
         console.log(`Assigning route ${routeId} to rider ${riderId}`);
-
         const response = await fetch('../api/assign_route_to_rider.php', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             route_id: parseInt(routeId),
-            rider_id: parseInt(riderId)
+            rider_id: parseInt(riderId) // Use rider_id for API call
           })
         });
 
@@ -1500,26 +1381,16 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
         console.log('Route assignment result:', result);
 
         if (result.success) {
-          // Update the route row to show the new rider assignment
           if (draggedElement && draggedElement.dataset.routeId == routeId) {
-            const riderCell = draggedElement.querySelector('td:nth-child(2)');
-            if (riderCell) {
-              riderCell.textContent = getRiderName(riderId);
-            }
+            const driverCell = draggedElement.querySelector('td:nth-child(2)');
+            if (driverCell) driverCell.textContent = getDriverName(riderId);
           }
-
-          // Update rider's order count
-          updateRiderOrderCount(riderId, targetRow);
-
-          showMessage(`Route R-${routeId} assigned to ${getRiderName(riderId)}`, 'success');
-
-          // Refresh route orders
+          updateDriverOrderCount(riderId, targetRow);
+          showMessage(`Route R-${routeId} assigned to ${getDriverName(riderId)}`, 'success');
           routeOrdersManager.refresh();
-
         } else {
-          showMessage(result.message || 'Failed to assign route to rider', 'error');
+          showMessage(result.message || 'Failed to assign route to driver', 'error');
         }
-
       } catch (error) {
         console.error('Route assignment error:', error);
         showMessage('Network error occurred', 'error');
@@ -1536,24 +1407,20 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       if (ordersCountSpan) {
         const currentCount = parseInt(ordersCountSpan.textContent) || 0;
         ordersCountSpan.textContent = currentCount + 1;
-
-        // Add "Ready" indicator if not present
         if (!routeRow.querySelector('.assigned-indicator')) {
           const readyIndicator = document.createElement('span');
           readyIndicator.className = 'assigned-indicator';
           readyIndicator.textContent = 'Ready';
           ordersCountSpan.parentNode.appendChild(readyIndicator);
         }
-
-        // Make the route draggable now that it has orders
         routeRow.draggable = true;
         routeRow.classList.add('draggable-row');
       }
     }
 
-    // Update rider order count
-    function updateRiderOrderCount(riderId, riderRow) {
-      const orderCountCell = riderRow.querySelector('td:nth-child(2)');
+    // Update driver order count (but still reference rider data)
+    function updateDriverOrderCount(riderId, driverRow) {
+      const orderCountCell = driverRow.querySelector('td:nth-child(2)');
       if (orderCountCell) {
         const currentCount = parseInt(orderCountCell.textContent) || 0;
         orderCountCell.textContent = currentCount + 1;
@@ -1569,33 +1436,28 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       return orderId;
     }
 
-    // Get rider name from rider ID
-    function getRiderName(riderId) {
-      const riderRow = document.querySelector(`#ridersTableBody tr[data-rider-id="${riderId}"]`);
-      if (riderRow) {
-        const nameCell = riderRow.querySelector('td:first-child');
-        return nameCell ? nameCell.textContent.trim() : 'Rider';
+    // Get driver name from rider ID (since data-driver-id contains rider_id)
+    function getDriverName(riderId) {
+      const driverRow = document.querySelector(`#driversTableBody tr[data-driver-id="${riderId}"]`);
+      if (driverRow) {
+        const nameCell = driverRow.querySelector('td:first-child');
+        return nameCell ? nameCell.textContent.trim() : 'Driver';
       }
-      return 'Rider';
+      return 'Driver';
     }
 
     // Initialize all drag and drop functionality
     function initializeDragAndDrop() {
       console.log('Initializing drag and drop functionality...');
-
-      setupDraggableOrders();    // Step 1: Orders can be dragged
-      setupDraggableRoutes();    // Step 2: Routes can be dragged (if they have orders)
-      setupRouteDropTargets();   // Routes accept orders
-      setupRiderDropTargets();   // Riders accept routes
-
+      setupDraggableOrders();
+      setupDraggableRoutes();
+      setupRouteDropTargets();
+      setupDriverDropTargets();
       console.log('Drag and drop initialization complete');
-      console.log('Workflow:');
-      console.log('1. Drag orders from Orders table to Routes table');
-      console.log('2. Drag routes from Routes table to Riders table');
-      console.log('3. Click routes to view their orders in Route Orders panel');
+      console.log('Workflow: 1. Drag orders to routes 2. Drag routes to drivers 3. Click routes to view orders');
     }
 
-    // Map initialization (enhanced)
+    // Map initialization
     const map = L.map('map', {
       center: [51.5074, -0.1278],
       zoom: 10,
@@ -1607,34 +1469,32 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    const riders = <?php echo json_encode($riders_locations); ?> || [];
+    const drivers = <?php echo json_encode($riders_locations); ?> || [];
     const markers = {};
 
-    riders.forEach(loc => {
+    drivers.forEach(loc => {
       const lat = parseFloat(loc.lat || loc.latitude || 0);
       const lng = parseFloat(loc.lng || loc.longitude || 0);
       if (!isFinite(lat) || !isFinite(lng)) return;
 
-      const id = loc.rider_id || loc.id;
+      const id = loc.driver_id || loc.id;
       const icon = L.divIcon({
         className: '',
         html: `<div style="text-align:center">
-        <div style="width:12px;height:12px;background:#10B981;border:2px solid white;border-radius:50%;box-shadow:0 0 0 3px rgba(16,185,129,0.3)"></div>
-        <div style="background:#fff;padding:2px 6px;border-radius:6px;margin-top:4px;font-size:11px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.1);color:#374151">${loc.rider_name || 'Rider'}</div>
-      </div>`
+          <div style="width:12px;height:12px;background:#10B981;border:2px solid white;border-radius:50%;box-shadow:0 0 0 3px rgba(16,185,129,0.3)"></div>
+          <div style="background:#fff;padding:2px 6px;border-radius:6px;margin-top:4px;font-size:11px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.1);color:#374151">${loc.driver_name || 'Driver'}</div>
+        </div>`
       });
 
       const marker = L.marker([lat, lng], { icon }).addTo(map);
-
       if (loc.created_at) {
         marker.bindPopup(`
-        <div style="text-align:center;">
-          <strong>${loc.rider_name || 'Rider'}</strong><br/>
-          <small>Last update: ${new Date(loc.created_at).toLocaleString()}</small>
-        </div>
-      `);
+          <div style="text-align:center;">
+            <strong>${loc.driver_name || 'Driver'}</strong><br/>
+            <small>Last update: ${new Date(loc.created_at).toLocaleString()}</small>
+          </div>
+        `);
       }
-
       markers[id] = marker;
     });
 
@@ -1643,10 +1503,10 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
     if (allCoords.length) {
       const londonBounds = L.latLngBounds([[51.28, -0.51], [51.69, 0.33]]);
       map.fitBounds(londonBounds);
-      document.getElementById('lastUpdate').innerText = `Last update: ${allCoords.length} riders`;
+      document.getElementById('lastUpdate').innerText = `Last update: ${allCoords.length} drivers`;
     } else {
       map.setView([51.5074, -0.1278], 10);
-      document.getElementById('lastUpdate').innerText = 'Last update: 0 riders';
+      document.getElementById('lastUpdate').innerText = 'Last update: 0 drivers';
     }
 
     // Map resize handler
@@ -1656,12 +1516,8 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
 
     // Resizable panels functionality
     function initializeResizablePanels() {
-      // Individual panel resizing
       initializePanelResizing();
-
-      // Column resizing
       initializeColumnResizing();
-
       console.log('Resizable panels initialized');
     }
 
@@ -1670,18 +1526,12 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       document.querySelectorAll('.resizable-panel').forEach(panel => {
         const resizeHandleV = panel.querySelector('.resize-handle-v');
         const resizeHandleCorner = panel.querySelector('.resize-handle-corner');
-
-        if (resizeHandleV) {
-          initializeResizeHandle(resizeHandleV, panel, 'vertical');
-        }
-
-        if (resizeHandleCorner) {
-          initializeResizeHandle(resizeHandleCorner, panel, 'both');
-        }
+        if (resizeHandleV) initializeResizeHandle(resizeHandleV, panel, 'vertical');
+        if (resizeHandleCorner) initializeResizeHandle(resizeHandleCorner, panel, 'both');
       });
     }
 
-    // Initialize column resizing (left/right column split)
+    // Initialize column resizing
     function initializeColumnResizing() {
       const columnResizer = document.getElementById('columnResizer');
       const leftColumn = document.getElementById('leftColumn');
@@ -1698,20 +1548,16 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
         startX = e.clientX;
         startWidth = leftColumn.offsetWidth;
         columnResizer.classList.add('dragging');
-
         document.addEventListener('mousemove', handleColumnResize);
         document.addEventListener('mouseup', stopColumnResize);
-
         e.preventDefault();
       });
 
       function handleColumnResize(e) {
         if (!isResizing) return;
-
         const deltaX = e.clientX - startX;
         const newWidth = Math.max(250, Math.min(startWidth + deltaX, window.innerWidth - 300));
         const percentage = (newWidth / dashboardGrid.offsetWidth) * 100;
-
         dashboardGrid.style.gridTemplateColumns = `${percentage}% 1fr`;
       }
 
@@ -1723,13 +1569,10 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       }
     }
 
-    // Initialize resize handle for individual panels
+    // Initialize resize handle for panels
     function initializeResizeHandle(handle, panel, direction) {
       let isResizing = false;
-      let startX = 0;
-      let startY = 0;
-      let startWidth = 0;
-      let startHeight = 0;
+      let startX = 0, startY = 0, startWidth = 0, startHeight = 0;
 
       handle.addEventListener('mousedown', (e) => {
         isResizing = true;
@@ -1738,10 +1581,8 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
         startY = e.clientY;
         startWidth = parseInt(document.defaultView.getComputedStyle(panel).width, 10);
         startHeight = parseInt(document.defaultView.getComputedStyle(panel).height, 10);
-
         document.addEventListener('mousemove', handleResize);
         document.addEventListener('mouseup', stopResize);
-
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
@@ -1749,18 +1590,14 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
 
       function handleResize(e) {
         if (!isResizing) return;
-
         if (direction === 'vertical' || direction === 'both') {
           const newHeight = Math.max(200, startHeight + e.clientY - startY);
           panel.style.height = newHeight + 'px';
         }
-
         if (direction === 'horizontal' || direction === 'both') {
           const newWidth = Math.max(250, startWidth + e.clientX - startX);
           panel.style.width = newWidth + 'px';
         }
-
-        // Trigger map resize if this is the map panel
         if (panel.id === 'mapPanel') {
           setTimeout(() => map.invalidateSize(), 100);
         }
@@ -1769,29 +1606,21 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       function stopResize() {
         isResizing = false;
         panel.classList.remove('resizing');
-        // Save the final size
-        localStorage.setItem(
-          'panel-size-' + panel.id,
-          JSON.stringify({ width: panel.style.width, height: panel.style.height })
-        );
-
+        localStorage.setItem('panel-size-' + panel.id, JSON.stringify({ width: panel.style.width, height: panel.style.height }));
         document.removeEventListener('mousemove', handleResize);
         document.removeEventListener('mouseup', stopResize);
       }
     }
-    // Default panel sizes (first-time)
-    const defaultGridColumns = '60% 40%';
 
+    // Default sizes
     const defaultSizes = {
-      // Left Column Panels
-      ridersPanel: { width: '100%', height: '300px' },
+      driversPanel: { width: '100%', height: '300px' },
       ordersPanel: { width: '100%', height: '300px' },
-      unassignedPanel: { width: '100%', height: '250px' },
-      // Right Column Panels
       mapPanel: { width: '100%', height: '400px' },
       routesPanel: { width: '100%', height: '400px' }
     };
-    // Restore saved or default sizes
+
+    // Restore saved sizes
     function applySavedSizes() {
       document.querySelectorAll('.resizable-panel').forEach(panel => {
         const saved = JSON.parse(localStorage.getItem('panel-size-' + panel.id));
@@ -1801,25 +1630,21 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       });
     }
 
-    // Initialize everything when page loads
+    // Initialize everything
     document.addEventListener('DOMContentLoaded', () => {
       console.log('DOM loaded, initializing...');
       applySavedSizes();
       initializeDragAndDrop();
-
       initializeResizablePanels();
       fixMap();
-
-      // Initialize route orders manager
-      setTimeout(() => {
-        routeOrdersManager.init();
-      }, 100);
+      setTimeout(() => routeOrdersManager.init(), 100);
     });
 
-    // Map event handlers
     window.addEventListener('load', fixMap);
     window.addEventListener('resize', fixMap);
   </script>
+
+  <style>
 </body>
 
 </html>

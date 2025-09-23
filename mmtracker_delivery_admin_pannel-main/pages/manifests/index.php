@@ -106,7 +106,7 @@ $result = mysqli_query($conn, $query);
                         </div>
                         <div>
                             <select name="rider_id" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">All Riders</option>
+                                <option value="">All Drivers</option>
                                 <?php while ($rider = mysqli_fetch_assoc($riders_result)): ?>
                                     <option value="<?php echo $rider['id']; ?>"
                                         <?php echo $rider_filter == $rider['id'] ? 'selected' : ''; ?>>
@@ -125,7 +125,7 @@ $result = mysqli_query($conn, $query);
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID/Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rider</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
                                 <?php if (isSuperAdmin()): ?>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
                                 <?php endif; ?>

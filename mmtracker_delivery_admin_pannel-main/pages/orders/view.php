@@ -297,8 +297,13 @@ if (isset($_GET['id'])) {
                                         </span>
                                     </div>
                                     <div class="flex justify-between border-b pb-2">
+<<<<<<< HEAD
+                                        <span class="font-medium">Assigned Driver</span>
+                                        <span><?php echo htmlspecialchars($manifest['rider_name']); ?></span>
+=======
                                         <span class="font-medium">Assigned Rider</span>
                                         <span><?php echo htmlspecialchars($route['rider_name']); ?></span>
+>>>>>>> 58316d5408f378aa4b3cc44678087670050dcdc2
                                     </div>
                                     <div class="flex justify-between border-b pb-2">
                                         <span class="font-medium">Created At</span>

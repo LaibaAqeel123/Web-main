@@ -107,8 +107,8 @@ $result = mysqli_query($conn, $query);
         <div class="p-4">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold text-gray-900">Riders</h1>
-                    <a href="create.php" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Add Rider</a>
+                    <h1 class="text-2xl font-bold text-gray-900">Drivers</h1>
+                    <a href="create.php" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Add Drivers</a>
                 </div>
 
                 <!-- Filters -->
@@ -116,7 +116,7 @@ $result = mysqli_query($conn, $query);
                     <form method="GET" class="flex gap-4">
                         <div class="flex-1">
                             <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>"
-                                placeholder="Search riders..."
+                                placeholder="Search drivers..."
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                         <div>
@@ -135,7 +135,7 @@ $result = mysqli_query($conn, $query);
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rider</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                                 <?php if (isSuperAdmin()): ?>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
@@ -188,7 +188,7 @@ $result = mysqli_query($conn, $query);
 
                     <?php if (mysqli_num_rows($result) == 0): ?>
                         <div class="text-center py-4 text-gray-500">
-                            No riders found.
+                            No drivers found.
                         </div>
                     <?php endif; ?>
                 </div>

@@ -700,7 +700,7 @@ if (isset($_GET['success'])) {
 
                             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                                 <div>
-                                    <label for="rider_id" class="block text-sm font-medium text-gray-700">Assigned Rider</label>
+                                    <label for="rider_id" class="block text-sm font-medium text-gray-700">Assigned Driver</label>
                                     <select name="rider_id" id="rider_id" <?php echo $is_delivered ? 'disabled' : ''; ?>
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 <?php echo $is_delivered ? 'bg-gray-100' : ''; ?>">
                                         <option value="">Select Rider</option>
