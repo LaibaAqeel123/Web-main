@@ -119,7 +119,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
+ <style>
     .app-shell {
       display: flex;
       min-height: 100vh;
@@ -184,25 +184,30 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
     .topbar {
       background: #0b1724;
       color: #fff;
-      padding: 12px 20px;
+      padding: 8px 16px; /* Reduced from 12px 20px */
       display: flex;
       justify-content: space-between;
       align-items: center;
+      height: 48px; /* Fixed height, reduced from ~60px */
     }
 
     .content {
-      padding: 18px;
+      padding: 6px; /* Reduced from 12px */
       flex: 1;
       overflow: auto;
+      height: calc(100vh - 48px); /* Adjusted for new topbar height */
     }
 
     .grid-wrap {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: 1fr 1fr;
-      align-items: start;
-      position: relative;
-    }
+  display: grid;
+  gap: 0px; /* CHANGE FROM 4px TO 2px */
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  position: relative;
+  height: 100%;
+  max-height: calc(100vh - 54px);
+}
+
 
     @media (max-width:1100px) {
       .grid-wrap {
@@ -210,21 +215,24 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       }
     }
 
-    .panel {
-      background: white;
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-      position: relative;
-      min-height: 200px;
-    }
+  .panel {
+  background: white;
+  border-radius: 6px;
+  padding: 4px; /* CHANGE FROM 6px TO 4px */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  position: relative;
+  min-height: 120px; /* CHANGE FROM 140px TO 120px */
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
 
     /* Resizable panels */
-
     .resizable-panel {
       overflow: auto;
       min-width: 250px;
-      min-height: 200px;
+      min-height: 140px; /* Reduced from 200px */
       max-width: 100%;
       border: 1px solid #e5e7eb;
     }
@@ -300,54 +308,82 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
     }
 
     .left-column {
-      position: relative;
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0px; /* CHANGE FROM 4px TO 2px */
+
     }
 
+  .right-column {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0px; /* CHANGE FROM 4px TO 2px */
+}
 
-    #ordersPanel .orders-list {
-      height: 80%;
-      
 
-    }
-
-    #ordersPanel table {
+    /* Compact table styling */
+    .panel table {
       width: 100%;
-      height: 100%;
-
+      font-size: 13px; /* Reduced from default */
     }
 
-    #ridersPanel .riders-list {
+   .panel table thead th {
+  padding: 3px 6px; /* CHANGE FROM 4px 8px TO 3px 6px */
+  font-size: 11px;
+  font-weight: 600;
+}
 
-      height: 100%;
-     
+    .panel table tbody td {
+  padding: 2px 6px; /* CHANGE FROM 3px 8px TO 2px 6px */
+  line-height: 1.2;
+}
 
+
+    .panel table tbody tr {
+      height: auto; /* Let content determine height */
     }
 
-    #ridersPanel table {
-      width: 100%;
-      height: 100%;
-      
+    /* Compact section headers */
+    .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px; /* CHANGE FROM 6px TO 4px */
+}
 
+    .section-header h2 {
+      font-size: 16px; /* Reduced from 18px (text-lg) */
+      font-weight: 600;
+      margin: 0;
     }
 
-    #mapPanel,
-    #routesPanel {
-      display: flex;
-      flex-direction: column;
+  .workflow-indicator {
+  font-size: 10px;
+  color: #6B7280;
+  margin-top: 1px; /* CHANGE FROM 2px TO 1px */
+  margin-bottom: 2px; /* CHANGE FROM 4px TO 2px */
+  font-style: italic;
+  line-height: 1.2;
+}
+
+    .workflow-step {
+      font-size: 9px; /* Reduced from 10px */
+      color: #6B7280;
+      background: #F3F4F6;
+      padding: 2px 4px; /* Reduced from 2px 6px */
+      border-radius: 3px; /* Reduced from 4px */
+      font-weight: 500;
     }
 
-
-    #mapPanel #map {
-      flex: 1;
-      min-height: 200px;
-    }
-
-
-    /* Status pill styling */
+    /* Compact status pills */
     .status-pill {
       font-weight: 700;
-      font-size: 12px;
-      padding: 4px 8px;
+      font-size: 10px; /* Reduced from 12px */
+      padding: 2px 6px; /* Reduced from 4px 8px */
       border-radius: 999px;
     }
 
@@ -449,38 +485,13 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
     /* Assigned status indicators */
     .assigned-indicator {
       display: inline-block;
-      font-size: 10px;
+      font-size: 9px; /* Reduced from 10px */
       color: #10b981;
       font-weight: 600;
       background: rgba(16, 185, 129, 0.1);
-      padding: 2px 4px;
+      padding: 1px 3px; /* Reduced from 2px 4px */
       border-radius: 3px;
       margin-left: 4px;
-    }
-
-    /* Workflow indicators */
-    .workflow-indicator {
-      font-size: 11px;
-      color: #6B7280;
-      margin-top: 4px;
-      font-style: italic;
-    }
-
-    /* Section headers with workflow info */
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .workflow-step {
-      font-size: 10px;
-      color: #6B7280;
-      background: #F3F4F6;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 500;
     }
 
     /* Prevent text selection during drag */
@@ -501,20 +512,21 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
     }
 
     #map {
-      height: 360px;
-      border-radius: 8px;
+      height: 100%; /* Use full available height */
+      min-height: 200px;
+      border-radius: 6px; /* Match panel border radius */
     }
 
     /* Loading spinner */
     .loading-spinner {
       display: none;
-      width: 16px;
-      height: 16px;
+      width: 14px; /* Reduced from 16px */
+      height: 14px;
       border: 2px solid #f3f3f3;
       border-top: 2px solid #10B981;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin-left: 8px;
+      margin-left: 6px; /* Reduced from 8px */
     }
 
     @keyframes spin {
@@ -572,6 +584,11 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
 
     .route-order-row[data-assignment-status="unassigned"] {
       background-color: #fffbeb;
+    }
+
+    /* Compact link styling */
+    .panel a {
+      font-size: 12px; /* Reduced from 14px (text-sm) */
     }
   </style>
 </head>
@@ -727,7 +744,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       </div>
 
       <div class="content">
-        <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+       
 
         <div class="grid-wrap" id="dashboardGrid">
           <!-- LEFT COLUMN: Drivers THEN Route Orders THEN Orders -->
@@ -735,7 +752,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
             <div class="column-resizer" id="columnResizer"></div>
             
             <!-- Drivers Section -->
-            <div class="panel resizable-panel mb-3" id="driversPanel">
+            <div class="panel resizable-panel " id="driversPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
               
@@ -779,7 +796,7 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
             </div>
 
             <!-- Route Orders Section -->
-            <div class="panel resizable-panel mb-3" id="routeOrdersPanel">
+            <div class="panel resizable-panel " id="routeOrdersPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
 
@@ -902,11 +919,11 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
 
           <!-- RIGHT COLUMN: Map on top, Routes below -->
           <div class="right-column" id="rightColumn">
-            <div class="panel resizable-panel mb-3" id="mapPanel">
+            <div class="panel resizable-panel " id="mapPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
               
-              <div class="flex justify-between items-center mb-3">
+              <div class="flex justify-between items-center ">
                 <h2 class="text-lg font-semibold">Drivers Location Map</h2>
                 <div class="text-sm text-gray-500" id="lastUpdate">Last update: 0 drivers</div>
               </div>
@@ -1612,14 +1629,17 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       }
     }
 
-    // Default sizes
-    const defaultSizes = {
-      driversPanel: { width: '100%', height: '300px' },
-      ordersPanel: { width: '100%', height: '300px' },
-      mapPanel: { width: '100%', height: '400px' },
-      routesPanel: { width: '100%', height: '400px' }
-    };
+   const defaultGridColumns = '60% 40%';
 
+const defaultSizes = {
+  // Left Column Panels
+  driversPanel: { width: '100%', height: '180px' },
+  routeOrdersPanel: { width: '100%', height: '200px' },
+  ordersPanel: { width: '100%', height: '190px' },
+  // Right Column Panels
+  mapPanel: { width: '100%', height: '310px' },
+  routesPanel: { width: '100%', height: '275px' }
+};
     // Restore saved sizes
     function applySavedSizes() {
       document.querySelectorAll('.resizable-panel').forEach(panel => {
