@@ -73,7 +73,7 @@ if (isset($_GET['id'])) {
         $status_logs[] = $log;
     }
 
-    // Fetch route details if assigned
+    // Fetch route details if assigned - Backend uses 'rider' terminology
     $route_query = "SELECT m.*, u.name as rider_name 
                       FROM Manifests m
                       LEFT JOIN ManifestOrders mo ON m.id = mo.manifest_id
@@ -84,7 +84,7 @@ if (isset($_GET['id'])) {
     mysqli_stmt_bind_param($route_stmt, "i", $id);
     mysqli_stmt_execute($route_stmt);
     $route_result = mysqli_stmt_get_result($route_stmt);
-    $route = mysqli_fetch_assoc($route_result); // Changed from $manifest to $route
+    $route = mysqli_fetch_assoc($route_result);
 }
 ?>
 
@@ -288,22 +288,17 @@ if (isset($_GET['id'])) {
                         <!-- Route Information -->
                         <?php if ($route): ?>
                             <div class="bg-white shadow rounded-lg p-6">
-                                <h2 class="text-xl font-semibold mb-4">Route Information</h2> <!-- Changed from Manifest Information to Route Information -->
+                                <h2 class="text-xl font-semibold mb-4">Route Information</h2>
                                 <div class="space-y-4">
                                     <div class="flex justify-between border-b pb-2">
-                                        <span class="font-medium">Route Status</span> <!-- Changed from Manifest Status to Route Status -->
+                                        <span class="font-medium">Route Status</span>
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                             <?php echo ucfirst($route['status']); ?>
                                         </span>
                                     </div>
                                     <div class="flex justify-between border-b pb-2">
-<<<<<<< HEAD
                                         <span class="font-medium">Assigned Driver</span>
-                                        <span><?php echo htmlspecialchars($manifest['rider_name']); ?></span>
-=======
-                                        <span class="font-medium">Assigned Rider</span>
-                                        <span><?php echo htmlspecialchars($route['rider_name']); ?></span>
->>>>>>> 58316d5408f378aa4b3cc44678087670050dcdc2
+                                        <span><?php echo htmlspecialchars($route['driver_name'] ?? 'Not assigned'); ?></span>
                                     </div>
                                     <div class="flex justify-between border-b pb-2">
                                         <span class="font-medium">Created At</span>
