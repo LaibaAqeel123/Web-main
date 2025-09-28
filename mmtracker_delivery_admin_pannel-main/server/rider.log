@@ -35,3 +35,6 @@
 [2025-09-20 13:12:10] Accessing delete confirmation for rider ID: 30 by user ID: 25
 [2025-09-23 08:53:54] New rider created: ID 56 | Username: AHQ
 [2025-09-23 08:53:54] Rider assigned to company successfully: Rider ID 56, Company ID 2
+[2025-09-28 03:51:08] Invalid UK phone number provided: +44791100123
+[2025-09-28 03:51:41] New rider created: ID 57 | Username: SZ
+[2025-09-28 03:51:41] Rider assigned to company successfully: Rider ID 57, Company ID 2
