@@ -1217,7 +1217,7 @@ $db_fields = [
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
                     <span class="block sm:inline"><?php echo htmlspecialchars($success); ?></span>
                     
-                    <?php if ($import_results && $import_results['skipped'] > 0 && !empty($import_results['skipped_orders'])): ?>
+                 <?php if ($import_results && isset($import_results['skipped']) && $import_results['skipped'] > 0 && !empty($import_results['skipped_orders'])): ?>
                         <div class="skip-details">
                             <strong>Skipped Orders (Already Exist):</strong>
                             <ul style="margin-top: 5px;">
@@ -1533,6 +1533,93 @@ $db_fields = [
                 this.value = thirtyDaysAgo.toISOString().split('T')[0];
             }
         });
+        // Auto-map CSV columns based on header names
+document.addEventListener('DOMContentLoaded', function() {
+    // Mapping rules: CSV header patterns -> database field values
+    const autoMappingRules = {
+        // Order identifiers
+        'order_group_id': 'order_group_id',
+        'order_id': 'order_group_id',
+        'group_id': 'order_group_id',
+        
+        // Customer info
+        'customer_name': 'customer_name',
+        'customer_email': 'customer_email', 
+        'customer_phone': 'customer_phone',
+        'name': 'customer_name',
+        'email': 'customer_email',
+        'phone': 'customer_phone',
+        
+        // Address fields
+        'delivery_address_line1': 'delivery_address_line1',
+        'address_line1': 'delivery_address_line1',
+        'address': 'delivery_address_line1',
+        'delivery_address_line2': 'delivery_address_line2', 
+        'address_line2': 'delivery_address_line2',
+        'delivery_city': 'delivery_city',
+        'city': 'delivery_city',
+        'delivery_state': 'delivery_state',
+        'state': 'delivery_state',
+        'delivery_postal_code': 'delivery_postal_code',
+        'postal_code': 'delivery_postal_code',
+        'postcode': 'delivery_postal_code',
+        
+        // Product fields
+        'product_qrcode': 'product_qrcode',
+        'product_sku': 'product_qrcode',
+        'sku': 'product_qrcode',
+        'qrcode': 'product_qrcode',
+        'product_name': 'product_name',
+        'product_quantity': 'product_quantity',
+        'quantity': 'product_quantity',
+        'qty': 'product_quantity',
+        'product_price': 'product_price',
+        'price': 'product_price',
+        'order_notes': 'order_notes',
+        'notes': 'order_notes'
+    };
+    
+    // Auto-map function
+    function autoMapColumns() {
+        const selects = document.querySelectorAll('select[name^="map["]');
+        
+        selects.forEach(function(select) {
+            const row = select.closest('tr');
+            const headerCell = row.querySelector('td:first-child');
+            const headerText = headerCell.textContent.toLowerCase().trim();
+            
+            // Try exact match first
+            if (autoMappingRules[headerText]) {
+                select.value = autoMappingRules[headerText];
+                return;
+            }
+            
+            // Try partial matches
+            for (const [pattern, fieldValue] of Object.entries(autoMappingRules)) {
+                if (headerText.includes(pattern) || pattern.includes(headerText)) {
+                    select.value = fieldValue;
+                    break;
+                }
+            }
+        });
+    }
+    
+    // Add auto-map button
+    const form = document.querySelector('form[action="import.php"]');
+    if (form) {
+        const buttonContainer = form.querySelector('.flex.justify-between');
+        const autoMapButton = document.createElement('button');
+        autoMapButton.type = 'button';
+        autoMapButton.className = 'bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 mr-2';
+        autoMapButton.textContent = 'Auto-Map Columns';
+        autoMapButton.onclick = autoMapColumns;
+        
+        buttonContainer.insertBefore(autoMapButton, buttonContainer.lastElementChild);
+    }
+    
+    // Auto-map on page load
+    autoMapColumns();
+});
     </script>
 </body>
 </html>
