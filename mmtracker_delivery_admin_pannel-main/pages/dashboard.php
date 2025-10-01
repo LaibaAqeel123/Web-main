@@ -108,6 +108,25 @@ $riders_locations = [];
 while ($row = mysqli_fetch_assoc($riders_location_result)) {
   $riders_locations[] = $row;
 }
+$user_id = intval($_SESSION['user_id']);
+$preferences_sql = "SELECT panel_id, width, height, grid_columns 
+                    FROM user_dashboard_preferences 
+                    WHERE user_id = $user_id";
+$preferences_result = mysqli_query($conn, $preferences_sql);
+
+$user_preferences = [];
+if ($preferences_result) {
+    while ($pref = mysqli_fetch_assoc($preferences_result)) {
+        $user_preferences[$pref['panel_id']] = [
+            'width' => $pref['width'],
+            'height' => $pref['height'],
+            'grid_columns' => $pref['grid_columns']
+        ];
+    }
+}
+
+// Convert to JSON for JavaScript
+$user_preferences_json = json_encode($user_preferences);
 ?>
 <!doctype html>
 <html lang="en">
@@ -1537,102 +1556,97 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
     }
 
     // Resizable panels functionality
-    function initializeResizablePanels() {
-      initializePanelResizing();
-      initializeColumnResizing();
-      console.log('Resizable panels initialized');
-    }
-
+   function initializeResizablePanels() {
+  initializePanelResizing();
+  initializeColumnResizing();
+  console.log('Resizable panels initialized with database storage');
+}
     // Initialize individual panel resizing
-    function initializePanelResizing() {
-      document.querySelectorAll('.resizable-panel').forEach(panel => {
-        const resizeHandleV = panel.querySelector('.resize-handle-v');
-        const resizeHandleCorner = panel.querySelector('.resize-handle-corner');
-        if (resizeHandleV) initializeResizeHandle(resizeHandleV, panel, 'vertical');
-        if (resizeHandleCorner) initializeResizeHandle(resizeHandleCorner, panel, 'both');
-      });
-    }
-
+  function initializePanelResizing() {
+  document.querySelectorAll('.resizable-panel').forEach(panel => {
+    const resizeHandleV = panel.querySelector('.resize-handle-v');
+    const resizeHandleCorner = panel.querySelector('.resize-handle-corner');
+    if (resizeHandleV) initializeResizeHandle(resizeHandleV, panel, 'vertical');
+    if (resizeHandleCorner) initializeResizeHandle(resizeHandleCorner, panel, 'both');
+  });
+}
     // Initialize column resizing
-    function initializeColumnResizing() {
-      const columnResizer = document.getElementById('columnResizer');
-      const leftColumn = document.getElementById('leftColumn');
-      const dashboardGrid = document.getElementById('dashboardGrid');
+   function initializeColumnResizing() {
+  const columnResizer = document.getElementById('columnResizer');
+  const leftColumn = document.getElementById('leftColumn');
+  const dashboardGrid = document.getElementById('dashboardGrid');
 
-      if (!columnResizer || !leftColumn || !dashboardGrid) return;
+  if (!columnResizer || !leftColumn || !dashboardGrid) return;
 
-      let isResizing = false;
-      let startX = 0;
-      let startWidth = 0;
+  let isResizing = false;
+  let startX = 0;
+  let startWidth = 0;
 
-      columnResizer.addEventListener('mousedown', (e) => {
-        isResizing = true;
-        startX = e.clientX;
-        startWidth = leftColumn.offsetWidth;
-        columnResizer.classList.add('dragging');
-        document.addEventListener('mousemove', handleColumnResize);
-        document.addEventListener('mouseup', stopColumnResize);
-        e.preventDefault();
-      });
+  columnResizer.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    startX = e.clientX;
+    startWidth = leftColumn.offsetWidth;
+    columnResizer.classList.add('dragging');
+    document.addEventListener('mousemove', handleColumnResize);
+    document.addEventListener('mouseup', stopColumnResize);
+    e.preventDefault();
+  });
 
-      function handleColumnResize(e) {
-        if (!isResizing) return;
-        const deltaX = e.clientX - startX;
-        const newWidth = Math.max(250, Math.min(startWidth + deltaX, window.innerWidth - 300));
-        const percentage = (newWidth / dashboardGrid.offsetWidth) * 100;
-        dashboardGrid.style.gridTemplateColumns = `${percentage}% 1fr`;
-      }
+  function handleColumnResize(e) {
+    if (!isResizing) return;
+    const deltaX = e.clientX - startX;
+    const newWidth = Math.max(250, Math.min(startWidth + deltaX, window.innerWidth - 300));
+    const percentage = (newWidth / dashboardGrid.offsetWidth) * 100;
+    dashboardGrid.style.gridTemplateColumns = `${percentage}% 1fr`;
+  }
 
-      function stopColumnResize() {
-        isResizing = false;
-        columnResizer.classList.remove('dragging');
-        document.removeEventListener('mousemove', handleColumnResize);
-        document.removeEventListener('mouseup', stopColumnResize);
-      }
+  function stopColumnResize() {
+    isResizing = false;
+    columnResizer.classList.remove('dragging');
+    
+    // Save grid columns to database
+    const gridColumns = dashboardGrid.style.gridTemplateColumns;
+    saveLayoutToDatabase('dashboardGrid', null, null, gridColumns);
+    
+    document.removeEventListener('mousemove', handleColumnResize);
+    document.removeEventListener('mouseup', stopColumnResize);
+  }
+}
+
+// Initialize resize handle for panels with DB save
+function initializeResizeHandle(handle, panel, direction) {
+  let isResizing = false;
+  let startX = 0, startY = 0, startWidth = 0, startHeight = 0;
+
+  handle.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    panel.classList.add('resizing');
+    startX = e.clientX;
+    startY = e.clientY;
+    startWidth = parseInt(document.defaultView.getComputedStyle(panel).width, 10);
+    startHeight = parseInt(document.defaultView.getComputedStyle(panel).height, 10);
+    document.addEventListener('mousemove', handleResize);
+    document.addEventListener('mouseup', stopResize);
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+  });
+
+  function handleResize(e) {
+    if (!isResizing) return;
+    if (direction === 'vertical' || direction === 'both') {
+      const newHeight = Math.max(200, startHeight + e.clientY - startY);
+      panel.style.height = newHeight + 'px';
     }
-
-    // Initialize resize handle for panels
-    function initializeResizeHandle(handle, panel, direction) {
-      let isResizing = false;
-      let startX = 0, startY = 0, startWidth = 0, startHeight = 0;
-
-      handle.addEventListener('mousedown', (e) => {
-        isResizing = true;
-        panel.classList.add('resizing');
-        startX = e.clientX;
-        startY = e.clientY;
-        startWidth = parseInt(document.defaultView.getComputedStyle(panel).width, 10);
-        startHeight = parseInt(document.defaultView.getComputedStyle(panel).height, 10);
-        document.addEventListener('mousemove', handleResize);
-        document.addEventListener('mouseup', stopResize);
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-      });
-
-      function handleResize(e) {
-        if (!isResizing) return;
-        if (direction === 'vertical' || direction === 'both') {
-          const newHeight = Math.max(200, startHeight + e.clientY - startY);
-          panel.style.height = newHeight + 'px';
-        }
-        if (direction === 'horizontal' || direction === 'both') {
-          const newWidth = Math.max(250, startWidth + e.clientX - startX);
-          panel.style.width = newWidth + 'px';
-        }
-        if (panel.id === 'mapPanel') {
-          setTimeout(() => map.invalidateSize(), 100);
-        }
-      }
-
-      function stopResize() {
-        isResizing = false;
-        panel.classList.remove('resizing');
-        localStorage.setItem('panel-size-' + panel.id, JSON.stringify({ width: panel.style.width, height: panel.style.height }));
-        document.removeEventListener('mousemove', handleResize);
-        document.removeEventListener('mouseup', stopResize);
-      }
+    if (direction === 'horizontal' || direction === 'both') {
+      const newWidth = Math.max(250, startWidth + e.clientX - startX);
+      panel.style.width = newWidth + 'px';
     }
+    if (panel.id === 'mapPanel') {
+      setTimeout(() => map.invalidateSize(), 100);
+    }
+  }
+
 
     // Make resize handles sticky when scrolling
     function makeResizeHandlesSticky() {
@@ -1686,6 +1700,70 @@ while ($row = mysqli_fetch_assoc($riders_location_result)) {
       });
     }
 
+  function stopResize() {
+    isResizing = false;
+    panel.classList.remove('resizing');
+    
+    // Save to database instead of localStorage
+    saveLayoutToDatabase(panel.id, panel.style.width, panel.style.height);
+    
+    document.removeEventListener('mousemove', handleResize);
+    document.removeEventListener('mouseup', stopResize);
+  }
+}
+
+    const userPreferences = <?php echo $user_preferences_json; ?> || {};
+   const defaultGridColumns = '60% 40%';
+
+const defaultSizes = {
+  // Left Column Panels
+  driversPanel: { width: '100%', height: '180px' },
+  routeOrdersPanel: { width: '100%', height: '200px' },
+  ordersPanel: { width: '100%', height: '190px' },
+  // Right Column Panels
+  mapPanel: { width: '100%', height: '310px' },
+  routesPanel: { width: '100%', height: '275px' }
+};
+    async function saveLayoutToDatabase(panelId, width, height, gridColumns = null) {
+  try {
+    const response = await fetch('../api/save_dashboard_layout.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        panel_id: panelId,
+        width: width,
+        height: height,
+        grid_columns: gridColumns
+      })
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      console.error('Failed to save layout:', result.message);
+    } else {
+      console.log(`Layout saved for ${panelId}`);
+    }
+  } catch (error) {
+    console.error('Error saving layout:', error);
+  }
+}
+
+
+function applySavedSizes() {
+  document.querySelectorAll('.resizable-panel').forEach(panel => {
+    const panelId = panel.id;
+    const savedFromDB = userPreferences[panelId];
+    const fallback = defaultSizes[panelId] || {};
+    
+    panel.style.width = (savedFromDB && savedFromDB.width) || fallback.width || '100%';
+    panel.style.height = (savedFromDB && savedFromDB.height) || fallback.height || '220px';
+  });
+
+  const dashboardGrid = document.getElementById('dashboardGrid');
+  if (userPreferences['dashboardGrid'] && userPreferences['dashboardGrid'].grid_columns) {
+    dashboardGrid.style.gridTemplateColumns = userPreferences['dashboardGrid'].grid_columns;
+  }
+}
     // Initialize everything
     document.addEventListener('DOMContentLoaded', () => {
       console.log('DOM loaded, initializing...');

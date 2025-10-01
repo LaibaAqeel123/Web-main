@@ -63,15 +63,24 @@ try {
         $route = mysqli_fetch_assoc($route_check);
         
         // 2. Check if route already assigned to this rider
-        if ($route['rider_id'] == $rider_id) {
-            echo json_encode([
-                'success' => true,
-                'message' => "Route already assigned to {$rider['name']}",
-                'rider_name' => $rider['name']
-            ]);
-            exit;
-        }
-        
+    // Check if route is already assigned to ANY rider
+if ($route['rider_id'] && $route['rider_id'] != $rider_id) {
+    // Route is already assigned to a DIFFERENT rider
+    $current_rider = mysqli_query($conn, "SELECT name FROM Users WHERE id = {$route['rider_id']}");
+    $current_rider_name = mysqli_fetch_assoc($current_rider)['name'] ?? 'Unknown';
+    
+    throw new Exception("Route already assigned to {$current_rider_name}. Please unassign first or choose a different route.");
+}
+
+// If route is already assigned to THIS rider, do nothing
+if ($route['rider_id'] == $rider_id) {
+    echo json_encode([
+        'success' => true,
+        'message' => "Route already assigned to {$rider['name']}",
+        'rider_name' => $rider['name']
+    ]);
+    exit;
+}
         // 3. Assign the entire route to the new rider
         $assign_route = mysqli_query($conn, "UPDATE Manifests SET rider_id = $rider_id, status = 'assigned' WHERE id = $route_id");
         
