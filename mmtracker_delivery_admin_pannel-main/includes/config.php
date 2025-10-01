@@ -13,7 +13,7 @@ $db_host = '127.0.0.1';   // better than 'localhost' for TCP
 $db_user = 'root';
 $db_pass = '';            // no password
 $db_name = 'u337053559_delivery';
-$db_port = 3306;          // force correct port
+$db_port = 3307;          // force correct port
 
 // Create connection
 $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name, $db_port);

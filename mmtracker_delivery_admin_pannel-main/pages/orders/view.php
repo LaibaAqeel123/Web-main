@@ -123,13 +123,12 @@ if (isset($_GET['id'])) {
                         Order #<?php echo htmlspecialchars($order['order_number']); ?>
                     </h1>
                     <div class="space-x-2">
-                        <?php if ($order['status'] === 'delivered'): ?>
-                            <a href="generate_view_pdf.php?id=<?php echo $order['id']; ?>" target="_blank"
-                                class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 inline-flex items-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                View POD PDF
-                            </a>
-                        <?php endif; ?>
+                        <!-- CHANGED: Show POD PDF button for ALL order statuses in GREEN color -->
+                        <a href="generate_view_pdf.php?id=<?php echo $order['id']; ?>" target="_blank"
+                            class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 inline-flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            View POD PDF
+                        </a>
                         <a href="edit.php?id=<?php echo $order['id']; ?>"
                             class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
                             Edit Order
