@@ -294,6 +294,7 @@ $user_preferences_json = json_encode($user_preferences);
       bottom: 0;
       height: 4px;
       cursor: ns-resize;
+      
     }
 
     /* Corner resize handle */
@@ -1505,10 +1506,9 @@ $user_preferences_json = json_encode($user_preferences);
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
  
-setTimeout(() => {
-  map.invalidateSize();
-}, 300);
-
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 300);
 
     const drivers = <?php echo json_encode($riders_locations); ?> || [];
     const markers = {};
@@ -1647,6 +1647,59 @@ function initializeResizeHandle(handle, panel, direction) {
     }
   }
 
+
+    // Make resize handles sticky when scrolling
+    function makeResizeHandlesSticky() {
+      document.querySelectorAll('.resizable-panel').forEach(panel => {
+        const handleV = panel.querySelector('.resize-handle-v');
+        const handleCorner = panel.querySelector('.resize-handle-corner');
+        
+        if (!handleV && !handleCorner) return;
+        
+        // Update handle positions on scroll
+        panel.addEventListener('scroll', () => {
+          const scrollTop = panel.scrollTop;
+          const scrollHeight = panel.scrollHeight;
+          const clientHeight = panel.clientHeight;
+          
+          // Calculate how much to offset the handles
+          const maxScroll = scrollHeight - clientHeight;
+          const offset = Math.min(scrollTop, maxScroll);
+          
+          if (handleV) {
+            handleV.style.transform = `translateY(${offset}px)`;
+          }
+          if (handleCorner) {
+            handleCorner.style.transform = `translateY(${offset}px)`;
+          }
+        });
+      });
+      
+      console.log('Sticky resize handles initialized');
+    }
+
+    const defaultGridColumns = '60% 40%';
+
+    const defaultSizes = {
+      // Left Column Panels
+      driversPanel: { width: '100%', height: '180px' },
+      routeOrdersPanel: { width: '100%', height: '200px' },
+      ordersPanel: { width: '100%', height: '190px' },
+      // Right Column Panels
+      mapPanel: { width: '100%', height: '310px' },
+      routesPanel: { width: '100%', height: '275px' }
+    };
+
+    // Restore saved sizes with fallback to defaults
+    function applySavedSizes() {
+      document.querySelectorAll('.resizable-panel').forEach(panel => {
+        const saved = JSON.parse(localStorage.getItem('panel-size-' + panel.id));
+        const fallback = defaultSizes[panel.id] || {};
+        panel.style.width = (saved && saved.width) || fallback.width || '100%';
+        panel.style.height = (saved && saved.height) || fallback.height || '220px';
+      });
+    }
+
   function stopResize() {
     isResizing = false;
     panel.classList.remove('resizing');
@@ -1695,6 +1748,7 @@ const defaultSizes = {
   }
 }
 
+
 function applySavedSizes() {
   document.querySelectorAll('.resizable-panel').forEach(panel => {
     const panelId = panel.id;
@@ -1711,27 +1765,28 @@ function applySavedSizes() {
   }
 }
     // Initialize everything
-   document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM loaded, initializing...');
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded, initializing...');
 
-  applySavedSizes();
+      applySavedSizes();
 
-  // Force browser to reflow + fix map after sizes applied
-  requestAnimationFrame(() => {
-    window.dispatchEvent(new Event("resize"));
-    fixMap();
-  });
+      // Force browser to reflow + fix map after sizes applied
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event("resize"));
+        fixMap();
+      });
 
-  initializeDragAndDrop();
-  initializeResizablePanels();
+      initializeDragAndDrop();
+      initializeResizablePanels();
+      makeResizeHandlesSticky(); // NEW: Initialize sticky resize handles
 
-  // Delay init a little longer so layout is stable
-  setTimeout(() => routeOrdersManager.init(),200);
-});
+      // Delay init a little longer so layout is stable
+      setTimeout(() => routeOrdersManager.init(), 200);
+    });
 
     window.addEventListener('load', fixMap);
     window.addEventListener('resize', fixMap);
-  </script>
+</script>
 
   <style>
 </body>
