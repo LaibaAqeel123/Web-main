@@ -1020,207 +1020,263 @@ $user_preferences_json = json_encode($user_preferences);
 
   <script>
     // Sidebar behavior 
-    const sidebar = document.getElementById('sidebar');
-    let pinned = false;
-    function sidebarHover(incoming) { if (pinned) return; incoming ? sidebar.classList.add('expanded') : sidebar.classList.remove('expanded'); }
-    function toggleSidebar() { pinned = !pinned; sidebar.classList.toggle('expanded', pinned); }
+   // ========== SIDEBAR DEBUGGING VERSION ==========
+console.log('[SIDEBAR DEBUG] Script started loading at:', new Date().toISOString());
+
+// Sidebar behavior with extensive logging
+console.log('[SIDEBAR DEBUG] Attempting to get sidebar element...');
+const sidebar = document.getElementById('sidebar');
+console.log('[SIDEBAR DEBUG] Sidebar element:', sidebar ? 'FOUND' : 'NOT FOUND');
+console.log('[SIDEBAR DEBUG] Sidebar classes:', sidebar ? sidebar.className : 'N/A');
+
+let pinned = false;
+console.log('[SIDEBAR DEBUG] Initial pinned state:', pinned);
+
+function sidebarHover(incoming) {
+  console.log('[SIDEBAR DEBUG] sidebarHover called with incoming:', incoming);
+  console.log('[SIDEBAR DEBUG] Current pinned state:', pinned);
+  
+  if (pinned) {
+    console.log('[SIDEBAR DEBUG] Sidebar is pinned, ignoring hover');
+    return;
+  }
+  
+  const sidebar = document.getElementById('sidebar');
+  console.log('[SIDEBAR DEBUG] Sidebar element in hover:', sidebar ? 'EXISTS' : 'NULL');
+  
+  if (incoming) {
+    console.log('[SIDEBAR DEBUG] Adding expanded class');
+    sidebar.classList.add('expanded');
+    console.log('[SIDEBAR DEBUG] Classes after add:', sidebar.className);
+  } else {
+    console.log('[SIDEBAR DEBUG] Removing expanded class');
     sidebar.classList.remove('expanded');
+    console.log('[SIDEBAR DEBUG] Classes after remove:', sidebar.className);
+  }
+}
 
-    // Message system
-    function showMessage(text, type = 'success') {
-      const container = document.getElementById('messageContainer');
-      const message = document.createElement('div');
-      message.className = `message ${type}`;
-      message.textContent = text;
-      container.appendChild(message);
+function toggleSidebar() {
+  console.log('[SIDEBAR DEBUG] toggleSidebar called');
+  pinned = !pinned;
+  console.log('[SIDEBAR DEBUG] New pinned state:', pinned);
+  
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('expanded', pinned);
+  console.log('[SIDEBAR DEBUG] Classes after toggle:', sidebar.className);
+}
 
-      setTimeout(() => message.classList.add('show'), 100);
-      setTimeout(() => {
-        message.classList.remove('show');
-        setTimeout(() => container.removeChild(message), 300);
-      }, 3000);
+// Check if inline handlers are working
+console.log('[SIDEBAR DEBUG] Checking if sidebarHover is accessible globally...');
+console.log('[SIDEBAR DEBUG] typeof sidebarHover:', typeof sidebarHover);
+console.log('[SIDEBAR DEBUG] typeof toggleSidebar:', typeof toggleSidebar);
+
+// Force remove expanded class
+if (sidebar) {
+  console.log('[SIDEBAR DEBUG] Force removing expanded class');
+  sidebar.classList.remove('expanded');
+  console.log('[SIDEBAR DEBUG] Final sidebar classes:', sidebar.className);
+} else {
+  console.log('[SIDEBAR DEBUG] ERROR: Cannot remove expanded class - sidebar is null');
+}
+
+// Test hover functionality after a delay
+setTimeout(() => {
+  console.log('[SIDEBAR DEBUG] Testing hover after 2 seconds...');
+  const testSidebar = document.getElementById('sidebar');
+  console.log('[SIDEBAR DEBUG] Sidebar exists?', !!testSidebar);
+  
+  if (testSidebar) {
+    console.log('[SIDEBAR DEBUG] Sidebar onmouseenter:', testSidebar.onmouseenter);
+    console.log('[SIDEBAR DEBUG] Sidebar onmouseleave:', testSidebar.onmouseleave);
+    
+    // Check if event listeners are attached
+    console.log('[SIDEBAR DEBUG] Attempting manual hover test...');
+    sidebarHover(true);
+    
+    setTimeout(() => {
+      console.log('[SIDEBAR DEBUG] Attempting manual hover leave...');
+      sidebarHover(false);
+    }, 1000);
+  }
+}, 2000);
+
+// Message system
+function showMessage(text, type = 'success') {
+  const container = document.getElementById('messageContainer');
+  const message = document.createElement('div');
+  message.className = `message ${type}`;
+  message.textContent = text;
+  container.appendChild(message);
+
+  setTimeout(() => message.classList.add('show'), 100);
+  setTimeout(() => {
+    message.classList.remove('show');
+    setTimeout(() => container.removeChild(message), 300);
+  }, 3000);
+}
+
+// Global drag state
+let draggedOrderId = null;
+let draggedRouteId = null;
+let draggedElement = null;
+let dragType = null;
+
+// Route Orders Management
+let selectedRouteId = null;
+let allOrdersData = [];
+
+const routeOrdersManager = {
+  init() {
+    this.loadAllOrders();
+    this.setupRouteClickHandlers();
+    this.setupClearSelection();
+    console.log('Route Orders Manager initialized');
+  },
+  async loadAllOrders() {
+    try {
+      this.displayCurrentOrders();
+      this.updateOrdersCount();
+      console.log('Route orders initialized with current data');
+    } catch (error) {
+      console.error('Error loading orders:', error);
     }
-
-    // Global drag state
-    let draggedOrderId = null;
-    let draggedRouteId = null;
-    let draggedElement = null;
-    let dragType = null; // 'order' or 'route'
-
-    // Route Orders Management
-    let selectedRouteId = null;
-    let allOrdersData = [];
-
-    const routeOrdersManager = {
-      // Initialize route orders functionality
-      init() {
-        this.loadAllOrders();
-        this.setupRouteClickHandlers();
-        this.setupClearSelection();
-        console.log('Route Orders Manager initialized');
-      },
-
-      // Load all orders data via AJAX
-      async loadAllOrders() {
-        try {
-          this.displayCurrentOrders();
-          this.updateOrdersCount();
-          console.log('Route orders initialized with current data');
-        } catch (error) {
-          console.error('Error loading orders:', error);
-        }
-      },
-
-      // Display current orders from PHP data
-      displayCurrentOrders() {
-        const rows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row');
-        this.updateOrdersCount(rows.length);
-      },
-
-      // Setup click handlers for route rows
-      setupRouteClickHandlers() {
-        document.addEventListener('click', (e) => {
-          if (e.target.closest('.draggable-row.dragging')) return;
-          const routeRow = e.target.closest('#routesTableBody tr[data-route-id]');
-          if (routeRow && !e.target.closest('.loading-spinner')) {
-            const routeId = routeRow.dataset.routeId;
-            this.selectRoute(routeId);
-          }
-        });
-      },
-
-      // Setup clear selection button
-      setupClearSelection() {
-        const clearBtn = document.getElementById('clearRouteSelection');
-        clearBtn.addEventListener('click', () => {
-          this.clearRouteSelection();
-        });
-      },
-
-      // Select a route and show its orders
-      async selectRoute(routeId) {
-        if (selectedRouteId === routeId) {
-          this.clearRouteSelection();
-          return;
-        }
-        selectedRouteId = routeId;
-        this.updateRouteSelectionUI(routeId);
-        await this.loadRouteOrders(routeId);
-        this.highlightSelectedRoute(routeId);
-      },
-
-      // Load orders for specific route
-      async loadRouteOrders(routeId) {
-        const tableBody = document.getElementById('routeOrdersTableBody');
-        tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
-
-        try {
-          const response = await fetch(`../api/get_route_orders.php?manifest_id=${routeId}`);
-          const orders = await response.json();
-
-          if (response.ok) {
-            tableBody.innerHTML = '';
-            if (orders.length > 0) {
-              orders.forEach(order => {
-                const row = document.createElement('tr');
-                row.className = 'bg-white border-b hover:bg-gray-50 route-order-row';
-                row.dataset.orderId = order.id;
-                row.innerHTML = `
-                  <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">${order.order_number}</td>
-                  <td class="py-2 px-4">${order.customer_name || 'N/A'}</td>
-                  <td class="py-2 px-4">
-                    <span class="status-pill status-${order.status}">
-                      ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                    </span>
-                  </td>
-                  <td class="py-2 px-4 text-xs">
-                    <span class="text-green-600 font-semibold">Route ${routeId}</span>
-                  </td>
-                `;
-                tableBody.appendChild(row);
-              });
-              const noOrdersRow = document.getElementById('noRouteOrdersRow');
-              if (noOrdersRow) noOrdersRow.style.display = 'none';
-            } else {
-              tableBody.innerHTML = '<tr id="noRouteOrdersRow"><td colspan="4" class="text-center py-4">No orders found for this route</td></tr>';
-            }
-            this.updateOrdersCount(orders.length);
-          } else {
-            console.error('Failed to load route orders:', orders.error);
-            tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">${orders.error || 'Failed to load data.'}</td></tr>`;
-            this.updateOrdersCount(0);
-          }
-        } catch (error) {
-          console.error('Fetch error:', error);
-          tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">Failed to connect to server.</td></tr>`;
-          this.updateOrdersCount(0);
-        }
-      },
-
-      // Clear route selection and show all orders
-      clearRouteSelection() {
-        selectedRouteId = null;
-        this.updateRouteSelectionUI(null);
-        const allRows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row');
-        allRows.forEach(row => row.style.display = '');
-        const noOrdersRow = document.getElementById('noRouteOrdersRow');
-        if (noOrdersRow) noOrdersRow.style.display = 'none';
-        this.updateOrdersCount(allRows.length);
-        this.highlightSelectedRoute(null);
-      },
-
-      // Update UI elements based on route selection
-      updateRouteSelectionUI(routeId) {
-        const title = document.getElementById('routeOrdersTitle');
-        const workflowStep = document.getElementById('routeOrdersWorkflowStep');
-        const indicator = document.getElementById('routeOrdersIndicator');
-        const clearBtn = document.getElementById('clearRouteSelection');
-
-        if (routeId) {
-          title.textContent = `Route R-${routeId} Orders`;
-          workflowStep.textContent = 'Route Selected';
-          indicator.textContent = `Showing orders assigned to Route R-${routeId}`;
-          clearBtn.classList.remove('hidden');
-        } else {
-          title.textContent = 'All Orders';
-          workflowStep.textContent = 'Select route to view its orders';
-          indicator.textContent = 'Click on any route to see its orders, or view all orders below';
-          clearBtn.classList.add('hidden');
-        }
-      },
-
-      // Highlight selected route in routes table
-      highlightSelectedRoute(routeId) {
-        document.querySelectorAll('#routesTableBody tr').forEach(row => {
-          row.classList.remove('route-selected');
-        });
-        if (routeId) {
-          const routeRow = document.querySelector(`#routesTableBody tr[data-route-id="${routeId}"]`);
-          if (routeRow) routeRow.classList.add('route-selected');
-        }
-      },
-
-      // Update orders count display
-      updateOrdersCount(count) {
-        if (count === undefined) {
-          const visibleRows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row[style=""], #routeOrdersTableBody tr.route-order-row:not([style])');
-          count = visibleRows.length;
-        }
-        const countElement = document.getElementById('routeOrdersCount');
-        countElement.textContent = `${count} order${count !== 1 ? 's' : ''}`;
-      },
-
-      // Refresh route orders data
-      refresh() {
-        setTimeout(() => {
-          if (selectedRouteId) {
-            this.loadRouteOrders(selectedRouteId);
-          } else {
-            this.clearRouteSelection();
-          }
-        }, 500);
+  },
+  displayCurrentOrders() {
+    const rows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row');
+    this.updateOrdersCount(rows.length);
+  },
+  setupRouteClickHandlers() {
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.draggable-row.dragging')) return;
+      const routeRow = e.target.closest('#routesTableBody tr[data-route-id]');
+      if (routeRow && !e.target.closest('.loading-spinner')) {
+        const routeId = routeRow.dataset.routeId;
+        this.selectRoute(routeId);
       }
-    };
+    });
+  },
+  setupClearSelection() {
+    const clearBtn = document.getElementById('clearRouteSelection');
+    clearBtn.addEventListener('click', () => {
+      this.clearRouteSelection();
+    });
+  },
+  async selectRoute(routeId) {
+    if (selectedRouteId === routeId) {
+      this.clearRouteSelection();
+      return;
+    }
+    selectedRouteId = routeId;
+    this.updateRouteSelectionUI(routeId);
+    await this.loadRouteOrders(routeId);
+    this.highlightSelectedRoute(routeId);
+  },
+  async loadRouteOrders(routeId) {
+    const tableBody = document.getElementById('routeOrdersTableBody');
+    tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
+
+    try {
+      const response = await fetch(`../api/get_route_orders.php?manifest_id=${routeId}`);
+      const orders = await response.json();
+
+      if (response.ok) {
+        tableBody.innerHTML = '';
+        if (orders.length > 0) {
+          orders.forEach(order => {
+            const row = document.createElement('tr');
+            row.className = 'bg-white border-b hover:bg-gray-50 route-order-row';
+            row.dataset.orderId = order.id;
+            row.innerHTML = `
+              <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">${order.order_number}</td>
+              <td class="py-2 px-4">${order.customer_name || 'N/A'}</td>
+              <td class="py-2 px-4">
+                <span class="status-pill status-${order.status}">
+                  ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                </span>
+              </td>
+              <td class="py-2 px-4 text-xs">
+                <span class="text-green-600 font-semibold">Route ${routeId}</span>
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+          const noOrdersRow = document.getElementById('noRouteOrdersRow');
+          if (noOrdersRow) noOrdersRow.style.display = 'none';
+        } else {
+          tableBody.innerHTML = '<tr id="noRouteOrdersRow"><td colspan="4" class="text-center py-4">No orders found for this route</td></tr>';
+        }
+        this.updateOrdersCount(orders.length);
+      } else {
+        console.error('Failed to load route orders:', orders.error);
+        tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">${orders.error || 'Failed to load data.'}</td></tr>`;
+        this.updateOrdersCount(0);
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">Failed to connect to server.</td></tr>`;
+      this.updateOrdersCount(0);
+    }
+  },
+  clearRouteSelection() {
+    selectedRouteId = null;
+    this.updateRouteSelectionUI(null);
+    const allRows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row');
+    allRows.forEach(row => row.style.display = '');
+    const noOrdersRow = document.getElementById('noRouteOrdersRow');
+    if (noOrdersRow) noOrdersRow.style.display = 'none';
+    this.updateOrdersCount(allRows.length);
+    this.highlightSelectedRoute(null);
+  },
+  updateRouteSelectionUI(routeId) {
+    const title = document.getElementById('routeOrdersTitle');
+    const workflowStep = document.getElementById('routeOrdersWorkflowStep');
+    const indicator = document.getElementById('routeOrdersIndicator');
+    const clearBtn = document.getElementById('clearRouteSelection');
+
+    if (routeId) {
+      title.textContent = `Route R-${routeId} Orders`;
+      workflowStep.textContent = 'Route Selected';
+      indicator.textContent = `Showing orders assigned to Route R-${routeId}`;
+      clearBtn.classList.remove('hidden');
+    } else {
+      title.textContent = 'All Orders';
+      workflowStep.textContent = 'Select route to view its orders';
+      indicator.textContent = 'Click on any route to see its orders, or view all orders below';
+      clearBtn.classList.add('hidden');
+    }
+  },
+  highlightSelectedRoute(routeId) {
+    document.querySelectorAll('#routesTableBody tr').forEach(row => {
+      row.classList.remove('route-selected');
+    });
+    if (routeId) {
+      const routeRow = document.querySelector(`#routesTableBody tr[data-route-id="${routeId}"]`);
+      if (routeRow) routeRow.classList.add('route-selected');
+    }
+  },
+  updateOrdersCount(count) {
+    if (count === undefined) {
+      const visibleRows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row[style=""], #routeOrdersTableBody tr.route-order-row:not([style])');
+      count = visibleRows.length;
+    }
+    const countElement = document.getElementById('routeOrdersCount');
+    countElement.textContent = `${count} order${count !== 1 ? 's' : ''}`;
+  },
+  refresh() {
+    setTimeout(() => {
+      if (selectedRouteId) {
+        this.loadRouteOrders(selectedRouteId);
+      } else {
+        this.clearRouteSelection();
+      }
+    }, 500);
+  }
+};
+
+// REST OF YOUR CODE CONTINUES HERE...
+// (Include all your drag and drop, map initialization, and resizing code)
+
+console.log('[SIDEBAR DEBUG] End of script definitions');
 
     // DRAG AND DROP IMPLEMENTATION
 
@@ -1778,7 +1834,7 @@ function applySavedSizes() {
 
       initializeDragAndDrop();
       initializeResizablePanels();
-      makeResizeHandlesSticky(); // NEW: Initialize sticky resize handles
+    
 
       // Delay init a little longer so layout is stable
       setTimeout(() => routeOrdersManager.init(), 200);
