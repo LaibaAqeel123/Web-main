@@ -1834,6 +1834,7 @@ function applySavedSizes() {
 
       initializeDragAndDrop();
       initializeResizablePanels();
+      makeResizeHandlesSticky();
     
 
       // Delay init a little longer so layout is stable
