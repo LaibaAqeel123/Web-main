@@ -2,8 +2,43 @@
 require_once '../../includes/config.php';
 requireLogin();
 
-// Get API keys for the company
-$company_condition = !isSuperAdmin() ? "AND ak.company_id = " . $_SESSION['company_id'] : "";
+// Ensure WooCommerce API Keys always exist
+$wooKeys = [
+    ["https://intern.neptasolutions.co.uk", "WooCommerce Store URL"],
+    ["ck_45c0bbb7f77388f48c3dde2a4f9c4aeaab6a0e3d", "WooCommerce Consumer Key"],
+    ["cs_e55eda86d1eb997248d3243aff3937450bf4ecae", "WooCommerce Consumer Secret"]
+];
+
+foreach ($wooKeys as $k) {
+    $apiKey = mysqli_real_escape_string($conn, $k[0]);
+    $desc   = mysqli_real_escape_string($conn, $k[1]);
+
+    $check = mysqli_query($conn, "SELECT id FROM ApiKeys WHERE description = '$desc' LIMIT 1");
+    if (mysqli_num_rows($check) == 0) {
+        $created_by = $_SESSION['user_id'];
+        mysqli_query(
+            $conn,
+            "INSERT INTO ApiKeys (company_id, api_key, description, created_by, created_at, is_active) 
+             VALUES (0, '$apiKey', '$desc', $created_by, NOW(), 1)"
+        );
+    } else {
+        // Ensure they remain active
+        mysqli_query($conn, "UPDATE ApiKeys SET is_active = 1 WHERE description = '$desc'");
+    }
+}
+
+// Get API keys for the company (always include WooCommerce keys)
+if (!isSuperAdmin()) {
+    $company_condition = "AND (ak.company_id = " . intval($_SESSION['company_id']) . " 
+        OR ak.company_id = 0
+        OR ak.description IN (
+            'WooCommerce Store URL', 
+            'WooCommerce Consumer Key', 
+            'WooCommerce Consumer Secret'
+        ))";
+} else {
+    $company_condition = "";
+}
 
 $query = "SELECT ak.*, c.name as company_name, u.name as created_by_name 
           FROM ApiKeys ak
@@ -43,6 +78,13 @@ if (isSuperAdmin()) {
                 Create New API Key
             </a>
         </div>
+
+        <!-- Error alert if deletion of WooCommerce keys was attempted -->
+        <?php if (isset($_GET['error'])): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <?php echo htmlspecialchars($_GET['error']); ?>
+            </div>
+        <?php endif; ?>
 
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200">
@@ -112,4 +154,4 @@ if (isSuperAdmin()) {
         }
     </script>
 </body>
-</html> 
+</html>
