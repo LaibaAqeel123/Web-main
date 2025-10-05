@@ -532,10 +532,12 @@ $user_preferences_json = json_encode($user_preferences);
     }
 
     #map {
-      height: 100%; /* Use full available height */
-      min-height: 200px;
-      border-radius: 6px; /* Match panel border radius */
-    }
+  height: 100% !important; /* Force height */
+  min-height: 250px !important; /* Ensure minimum */
+  width: 100%;
+  border-radius: 6px;
+  position: relative; /* Add this */
+}
 
     /* Loading spinner */
     .loading-spinner {
@@ -781,7 +783,7 @@ $user_preferences_json = json_encode($user_preferences);
                   <h2 class="text-lg font-semibold">Drivers</h2>
                   <span class="workflow-step">Step 2: Assign Routes</span>
                 </div>
-               <a href="../pages/riders/index.php" class="text-indigo-600 text-sm">Manage</a>
+              <a href="<?php echo SITE_URL; ?>pages/riders/index.php" class="text-indigo-600 text-sm">Manage</a>
               </div>
               <div class="workflow-indicator">Drag routes here to assign to drivers</div>
               <div id="driversList" class="drivers-list">
@@ -897,9 +899,9 @@ $user_preferences_json = json_encode($user_preferences);
                   <span class="workflow-step">Step 1: Add to Routes</span>
                 </div>
                 <div class="flex items-center gap-4">
-                  <a href="orders/create.php" class="text-indigo-600 text-sm">Create Order</a>
-                  <a href="orders/import.php" class="text-indigo-600 text-sm">Import Order</a>
-                  <a href="orders/index.php" class="text-indigo-600 text-sm">View all →</a>
+                <a href="<?php echo SITE_URL; ?>pages/orders/create.php" class="text-indigo-600 text-sm">Create Order</a>
+<a href="<?php echo SITE_URL; ?>pages/orders/import.php" class="text-indigo-600 text-sm">Import Order</a>
+<a href="<?php echo SITE_URL; ?>pages/orders/index.php" class="text-indigo-600 text-sm">View all →</a>
                 </div>
               </div>
               
@@ -960,8 +962,8 @@ $user_preferences_json = json_encode($user_preferences);
                   <span class="workflow-step">Collect Orders → Assign to Drivers</span>
                 </div>
                 <div class="flex items-center gap-4">
-               <a href="../pages/manifests/create.php" class="text-indigo-600 text-sm">Create Route</a>
-              <a href="../pages/manifests/index.php" class="text-indigo-600 text-sm">View all →</a>
+              <a href="<?php echo SITE_URL; ?>pages/manifests/create.php" class="text-indigo-600 text-sm">Create Route</a>
+<a href="<?php echo SITE_URL; ?>pages/manifests/index.php" class="text-indigo-600 text-sm">View all →</a>
                 </div>
               </div>
               
@@ -1018,89 +1020,39 @@ $user_preferences_json = json_encode($user_preferences);
   <!-- Message container for notifications -->
   <div id="messageContainer"></div>
 
-  <script>
-    // Sidebar behavior 
-   // ========== SIDEBAR DEBUGGING VERSION ==========
-console.log('[SIDEBAR DEBUG] Script started loading at:', new Date().toISOString());
 
-// Sidebar behavior with extensive logging
-console.log('[SIDEBAR DEBUG] Attempting to get sidebar element...');
+   
+<script>
+// ========== SIDEBAR ==========
 const sidebar = document.getElementById('sidebar');
-console.log('[SIDEBAR DEBUG] Sidebar element:', sidebar ? 'FOUND' : 'NOT FOUND');
-console.log('[SIDEBAR DEBUG] Sidebar classes:', sidebar ? sidebar.className : 'N/A');
-
 let pinned = false;
-console.log('[SIDEBAR DEBUG] Initial pinned state:', pinned);
+
+// Ensure sidebar starts collapsed
+if (sidebar && sidebar.classList.contains('expanded')) {
+  sidebar.classList.remove('expanded');
+}
 
 function sidebarHover(incoming) {
-  console.log('[SIDEBAR DEBUG] sidebarHover called with incoming:', incoming);
-  console.log('[SIDEBAR DEBUG] Current pinned state:', pinned);
-  
-  if (pinned) {
-    console.log('[SIDEBAR DEBUG] Sidebar is pinned, ignoring hover');
-    return;
-  }
-  
+  if (pinned) return;
   const sidebar = document.getElementById('sidebar');
-  console.log('[SIDEBAR DEBUG] Sidebar element in hover:', sidebar ? 'EXISTS' : 'NULL');
+  if (!sidebar) return;
   
   if (incoming) {
-    console.log('[SIDEBAR DEBUG] Adding expanded class');
     sidebar.classList.add('expanded');
-    console.log('[SIDEBAR DEBUG] Classes after add:', sidebar.className);
   } else {
-    console.log('[SIDEBAR DEBUG] Removing expanded class');
     sidebar.classList.remove('expanded');
-    console.log('[SIDEBAR DEBUG] Classes after remove:', sidebar.className);
   }
 }
 
 function toggleSidebar() {
-  console.log('[SIDEBAR DEBUG] toggleSidebar called');
   pinned = !pinned;
-  console.log('[SIDEBAR DEBUG] New pinned state:', pinned);
-  
   const sidebar = document.getElementById('sidebar');
-  sidebar.classList.toggle('expanded', pinned);
-  console.log('[SIDEBAR DEBUG] Classes after toggle:', sidebar.className);
-}
-
-// Check if inline handlers are working
-console.log('[SIDEBAR DEBUG] Checking if sidebarHover is accessible globally...');
-console.log('[SIDEBAR DEBUG] typeof sidebarHover:', typeof sidebarHover);
-console.log('[SIDEBAR DEBUG] typeof toggleSidebar:', typeof toggleSidebar);
-
-// Force remove expanded class
-if (sidebar) {
-  console.log('[SIDEBAR DEBUG] Force removing expanded class');
-  sidebar.classList.remove('expanded');
-  console.log('[SIDEBAR DEBUG] Final sidebar classes:', sidebar.className);
-} else {
-  console.log('[SIDEBAR DEBUG] ERROR: Cannot remove expanded class - sidebar is null');
-}
-
-// Test hover functionality after a delay
-setTimeout(() => {
-  console.log('[SIDEBAR DEBUG] Testing hover after 2 seconds...');
-  const testSidebar = document.getElementById('sidebar');
-  console.log('[SIDEBAR DEBUG] Sidebar exists?', !!testSidebar);
-  
-  if (testSidebar) {
-    console.log('[SIDEBAR DEBUG] Sidebar onmouseenter:', testSidebar.onmouseenter);
-    console.log('[SIDEBAR DEBUG] Sidebar onmouseleave:', testSidebar.onmouseleave);
-    
-    // Check if event listeners are attached
-    console.log('[SIDEBAR DEBUG] Attempting manual hover test...');
-    sidebarHover(true);
-    
-    setTimeout(() => {
-      console.log('[SIDEBAR DEBUG] Attempting manual hover leave...');
-      sidebarHover(false);
-    }, 1000);
+  if (sidebar) {
+    sidebar.classList.toggle('expanded', pinned);
   }
-}, 2000);
+}
 
-// Message system
+// ========== MESSAGE SYSTEM ==========
 function showMessage(text, type = 'success') {
   const container = document.getElementById('messageContainer');
   const message = document.createElement('div');
@@ -1115,13 +1067,13 @@ function showMessage(text, type = 'success') {
   }, 3000);
 }
 
-// Global drag state
+// ========== GLOBAL DRAG STATE ==========
 let draggedOrderId = null;
 let draggedRouteId = null;
 let draggedElement = null;
 let dragType = null;
 
-// Route Orders Management
+// ========== ROUTE ORDERS MANAGEMENT ==========
 let selectedRouteId = null;
 let allOrdersData = [];
 
@@ -1132,6 +1084,7 @@ const routeOrdersManager = {
     this.setupClearSelection();
     console.log('Route Orders Manager initialized');
   },
+  
   async loadAllOrders() {
     try {
       this.displayCurrentOrders();
@@ -1141,10 +1094,12 @@ const routeOrdersManager = {
       console.error('Error loading orders:', error);
     }
   },
+  
   displayCurrentOrders() {
     const rows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row');
     this.updateOrdersCount(rows.length);
   },
+  
   setupRouteClickHandlers() {
     document.addEventListener('click', (e) => {
       if (e.target.closest('.draggable-row.dragging')) return;
@@ -1155,12 +1110,16 @@ const routeOrdersManager = {
       }
     });
   },
+  
   setupClearSelection() {
     const clearBtn = document.getElementById('clearRouteSelection');
-    clearBtn.addEventListener('click', () => {
-      this.clearRouteSelection();
-    });
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        this.clearRouteSelection();
+      });
+    }
   },
+  
   async selectRoute(routeId) {
     if (selectedRouteId === routeId) {
       this.clearRouteSelection();
@@ -1171,8 +1130,11 @@ const routeOrdersManager = {
     await this.loadRouteOrders(routeId);
     this.highlightSelectedRoute(routeId);
   },
+  
   async loadRouteOrders(routeId) {
     const tableBody = document.getElementById('routeOrdersTableBody');
+    if (!tableBody) return;
+    
     tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
 
     try {
@@ -1217,6 +1179,7 @@ const routeOrdersManager = {
       this.updateOrdersCount(0);
     }
   },
+  
   clearRouteSelection() {
     selectedRouteId = null;
     this.updateRouteSelectionUI(null);
@@ -1227,6 +1190,7 @@ const routeOrdersManager = {
     this.updateOrdersCount(allRows.length);
     this.highlightSelectedRoute(null);
   },
+  
   updateRouteSelectionUI(routeId) {
     const title = document.getElementById('routeOrdersTitle');
     const workflowStep = document.getElementById('routeOrdersWorkflowStep');
@@ -1234,17 +1198,18 @@ const routeOrdersManager = {
     const clearBtn = document.getElementById('clearRouteSelection');
 
     if (routeId) {
-      title.textContent = `Route R-${routeId} Orders`;
-      workflowStep.textContent = 'Route Selected';
-      indicator.textContent = `Showing orders assigned to Route R-${routeId}`;
-      clearBtn.classList.remove('hidden');
+      if (title) title.textContent = `Route R-${routeId} Orders`;
+      if (workflowStep) workflowStep.textContent = 'Route Selected';
+      if (indicator) indicator.textContent = `Showing orders assigned to Route R-${routeId}`;
+      if (clearBtn) clearBtn.classList.remove('hidden');
     } else {
-      title.textContent = 'All Orders';
-      workflowStep.textContent = 'Select route to view its orders';
-      indicator.textContent = 'Click on any route to see its orders, or view all orders below';
-      clearBtn.classList.add('hidden');
+      if (title) title.textContent = 'All Orders';
+      if (workflowStep) workflowStep.textContent = 'Select route to view its orders';
+      if (indicator) indicator.textContent = 'Click on any route to see its orders, or view all orders below';
+      if (clearBtn) clearBtn.classList.add('hidden');
     }
   },
+  
   highlightSelectedRoute(routeId) {
     document.querySelectorAll('#routesTableBody tr').forEach(row => {
       row.classList.remove('route-selected');
@@ -1254,14 +1219,18 @@ const routeOrdersManager = {
       if (routeRow) routeRow.classList.add('route-selected');
     }
   },
+  
   updateOrdersCount(count) {
     if (count === undefined) {
       const visibleRows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row[style=""], #routeOrdersTableBody tr.route-order-row:not([style])');
       count = visibleRows.length;
     }
     const countElement = document.getElementById('routeOrdersCount');
-    countElement.textContent = `${count} order${count !== 1 ? 's' : ''}`;
+    if (countElement) {
+      countElement.textContent = `${count} order${count !== 1 ? 's' : ''}`;
+    }
   },
+  
   refresh() {
     setTimeout(() => {
       if (selectedRouteId) {
@@ -1273,285 +1242,309 @@ const routeOrdersManager = {
   }
 };
 
-// REST OF YOUR CODE CONTINUES HERE...
-// (Include all your drag and drop, map initialization, and resizing code)
+// ========== DRAG AND DROP ==========
 
-console.log('[SIDEBAR DEBUG] End of script definitions');
+function setupDraggableOrders() {
+  const orderRows = document.querySelectorAll('#ordersTableBody tr.draggable-row[data-order-id]');
+  orderRows.forEach(row => {
+    // Remove existing listeners by cloning
+    const newRow = row.cloneNode(true);
+    row.parentNode.replaceChild(newRow, row);
+    
+    newRow.addEventListener('dragstart', (e) => {
+      document.body.classList.add('dragging-active');
+      draggedOrderId = newRow.dataset.orderId;
+      draggedElement = newRow;
+      dragType = 'order';
+      newRow.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', draggedOrderId);
+      e.dataTransfer.effectAllowed = 'move';
+      createDragGhost(newRow, e);
+      console.log(`Started dragging order: ${draggedOrderId}`);
+    });
 
-    // DRAG AND DROP IMPLEMENTATION
+    newRow.addEventListener('dragend', () => {
+      document.body.classList.remove('dragging-active');
+      newRow.classList.remove('dragging');
+      draggedOrderId = null;
+      draggedElement = null;
+      dragType = null;
+      console.log('Order drag ended');
+    });
+  });
+  console.log(`Setup ${orderRows.length} draggable order rows`);
+}
 
-    // Setup draggable order rows
-    function setupDraggableOrders() {
-      const orderRows = document.querySelectorAll('#ordersTableBody tr.draggable-row[data-order-id]');
-      orderRows.forEach(row => {
-        row.addEventListener('dragstart', (e) => {
-          document.body.classList.add('dragging-active');
-          draggedOrderId = row.dataset.orderId;
-          draggedElement = row;
-          dragType = 'order';
-          row.classList.add('dragging');
-          e.dataTransfer.setData('text/plain', draggedOrderId);
-          e.dataTransfer.effectAllowed = 'move';
-          createDragGhost(row, e);
-          console.log(`Started dragging order: ${draggedOrderId}`);
-        });
+function setupDraggableRoutes() {
+  const routeRows = document.querySelectorAll('#routesTableBody tr.draggable-row[data-route-id][draggable="true"]');
+  routeRows.forEach(row => {
+    // Remove existing listeners by cloning
+    const newRow = row.cloneNode(true);
+    row.parentNode.replaceChild(newRow, row);
+    
+    newRow.addEventListener('dragstart', (e) => {
+      document.body.classList.add('dragging-active');
+      draggedRouteId = newRow.dataset.routeId;
+      draggedElement = newRow;
+      dragType = 'route';
+      newRow.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', draggedRouteId);
+      e.dataTransfer.effectAllowed = 'move';
+      createDragGhost(newRow, e);
+      console.log(`Started dragging route: ${draggedRouteId}`);
+    });
 
-        row.addEventListener('dragend', () => {
-          document.body.classList.remove('dragging-active');
-          row.classList.remove('dragging');
-          draggedOrderId = null;
-          draggedElement = null;
-          dragType = null;
-          console.log('Order drag ended');
-        });
-      });
-      console.log(`Setup ${orderRows.length} draggable order rows`);
-    }
+    newRow.addEventListener('dragend', () => {
+      document.body.classList.remove('dragging-active');
+      newRow.classList.remove('dragging');
+      draggedRouteId = null;
+      draggedElement = null;
+      dragType = null;
+      console.log('Route drag ended');
+    });
+  });
+  console.log(`Setup ${routeRows.length} draggable route rows`);
+}
 
-    // Setup draggable route rows
-    function setupDraggableRoutes() {
-      const routeRows = document.querySelectorAll('#routesTableBody tr.draggable-row[data-route-id][draggable="true"]');
-      routeRows.forEach(row => {
-        row.addEventListener('dragstart', (e) => {
-          document.body.classList.add('dragging-active');
-          draggedRouteId = row.dataset.routeId;
-          draggedElement = row;
-          dragType = 'route';
-          row.classList.add('dragging');
-          e.dataTransfer.setData('text/plain', draggedRouteId);
-          e.dataTransfer.effectAllowed = 'move';
-          createDragGhost(row, e);
-          console.log(`Started dragging route: ${draggedRouteId}`);
-        });
+function createDragGhost(row, e) {
+  const ghost = row.cloneNode(true);
+  ghost.style.position = 'absolute';
+  ghost.style.top = '-1000px';
+  ghost.style.opacity = '0.8';
+  ghost.style.transform = 'rotate(2deg) scale(0.95)';
+  ghost.style.backgroundColor = '#e0f2fe';
+  ghost.style.zIndex = '9999';
+  document.body.appendChild(ghost);
+  e.dataTransfer.setDragImage(ghost, e.offsetX, e.offsetY);
+  setTimeout(() => {
+    if (document.body.contains(ghost)) document.body.removeChild(ghost);
+  }, 100);
+}
 
-        row.addEventListener('dragend', () => {
-          document.body.classList.remove('dragging-active');
-          row.classList.remove('dragging');
-          draggedRouteId = null;
-          draggedElement = null;
-          dragType = null;
-          console.log('Route drag ended');
-        });
-      });
-      console.log(`Setup ${routeRows.length} draggable route rows`);
-    }
+function setupRouteDropTargets() {
+  const routeRows = document.querySelectorAll('#routesTableBody tr.drop-zone[data-route-id]');
+  routeRows.forEach(row => {
+    const newRow = row.cloneNode(true);
+    row.parentNode.replaceChild(newRow, row);
+    
+    newRow.addEventListener('dragover', (e) => {
+      if (dragType !== 'order') return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      newRow.classList.add('drag-over-order');
+    });
 
-    // Create drag ghost image
-    function createDragGhost(row, e) {
-      const ghost = row.cloneNode(true);
-      ghost.style.position = 'absolute';
-      ghost.style.top = '-1000px';
-      ghost.style.opacity = '0.8';
-      ghost.style.transform = 'rotate(2deg) scale(0.95)';
-      ghost.style.backgroundColor = '#e0f2fe';
-      ghost.style.zIndex = '9999';
-      document.body.appendChild(ghost);
-      e.dataTransfer.setDragImage(ghost, e.offsetX, e.offsetY);
+    newRow.addEventListener('dragleave', (e) => {
+      if (!newRow.contains(e.relatedTarget)) {
+        newRow.classList.remove('drag-over-order');
+      }
+    });
+
+    newRow.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      newRow.classList.remove('drag-over-order');
+      if (dragType !== 'order') return;
+      const orderId = e.dataTransfer.getData('text/plain');
+      const routeId = newRow.dataset.routeId;
+      if (!orderId || !routeId) return;
+      await assignOrderToRoute(orderId, routeId, newRow);
+    });
+  });
+  console.log(`Setup ${routeRows.length} route drop targets`);
+}
+
+function setupDriverDropTargets() {
+  const driverRows = document.querySelectorAll('#driversTableBody tr.drop-zone[data-driver-id]');
+  driverRows.forEach(row => {
+    const newRow = row.cloneNode(true);
+    row.parentNode.replaceChild(newRow, row);
+    
+    newRow.addEventListener('dragover', (e) => {
+      if (dragType !== 'route') return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      newRow.classList.add('drag-over-route');
+    });
+
+    newRow.addEventListener('dragleave', (e) => {
+      if (!newRow.contains(e.relatedTarget)) {
+        newRow.classList.remove('drag-over-route');
+      }
+    });
+
+    newRow.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      newRow.classList.remove('drag-over-route');
+      if (dragType !== 'route') return;
+      const routeId = e.dataTransfer.getData('text/plain');
+      const riderId = newRow.dataset.driverId;
+      if (!routeId || !riderId) return;
+      await assignRouteToDriver(routeId, riderId, newRow);
+    });
+  });
+  console.log(`Setup ${driverRows.length} driver drop targets`);
+}
+
+async function assignOrderToRoute(orderId, routeId, targetRow) {
+  const spinner = targetRow.querySelector('.loading-spinner');
+  if (spinner) spinner.style.display = 'inline-block';
+
+  try {
+    console.log(`Assigning order ${orderId} to route ${routeId}`);
+    const response = await fetch('../api/assign_order_to_route.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        order_id: parseInt(orderId),
+        route_id: parseInt(routeId)
+      })
+    });
+
+    const result = await response.json();
+    console.log('Assignment result:', result);
+
+    if (result.success) {
+      if (draggedElement && draggedElement.dataset.orderId == orderId) {
+        draggedElement.remove();
+      }
+      updateRouteRow(routeId, targetRow);
+      showMessage(`Order #${getOrderNumber(orderId)} added to Route R-${routeId}`, 'success');
       setTimeout(() => {
-        if (document.body.contains(ghost)) document.body.removeChild(ghost);
+        setupDraggableRoutes();
+        routeOrdersManager.refresh();
       }, 100);
+    } else {
+      showMessage(result.message || 'Failed to add order to route', 'error');
     }
+  } catch (error) {
+    console.error('Assignment error:', error);
+    showMessage('Network error occurred', 'error');
+  } finally {
+    if (spinner) spinner.style.display = 'none';
+  }
+}
 
-    // Setup drop targets for route rows
-    function setupRouteDropTargets() {
-      const routeRows = document.querySelectorAll('#routesTableBody tr.drop-zone[data-route-id]');
-      routeRows.forEach(row => {
-        row.addEventListener('dragover', (e) => {
-          if (dragType !== 'order') return;
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'move';
-          row.classList.add('drag-over-order');
-        });
+async function assignRouteToDriver(routeId, riderId, targetRow) {
+  const spinner = targetRow.querySelector('.loading-spinner');
+  if (spinner) spinner.style.display = 'inline-block';
 
-        row.addEventListener('dragleave', (e) => {
-          if (!row.contains(e.relatedTarget)) {
-            row.classList.remove('drag-over-order');
-          }
-        });
+  try {
+    console.log(`Assigning route ${routeId} to rider ${riderId}`);
+    const response = await fetch('../api/assign_route_to_rider.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        route_id: parseInt(routeId),
+        rider_id: parseInt(riderId)
+      })
+    });
 
-        row.addEventListener('drop', async (e) => {
-          e.preventDefault();
-          row.classList.remove('drag-over-order');
-          if (dragType !== 'order') return;
-          const orderId = e.dataTransfer.getData('text/plain');
-          const routeId = row.dataset.routeId;
-          if (!orderId || !routeId) return;
-          await assignOrderToRoute(orderId, routeId, row);
-        });
-      });
-      console.log(`Setup ${routeRows.length} route drop targets`);
+    const result = await response.json();
+    console.log('Route assignment result:', result);
+
+    if (result.success) {
+      if (draggedElement && draggedElement.dataset.routeId == routeId) {
+        const driverCell = draggedElement.querySelector('td:nth-child(2)');
+        if (driverCell) driverCell.textContent = getDriverName(riderId);
+      }
+      updateDriverOrderCount(riderId, targetRow);
+      showMessage(`Route R-${routeId} assigned to ${getDriverName(riderId)}`, 'success');
+      routeOrdersManager.refresh();
+    } else {
+      showMessage(result.message || 'Failed to assign route to driver', 'error');
     }
+  } catch (error) {
+    console.error('Route assignment error:', error);
+    showMessage('Network error occurred', 'error');
+  } finally {
+    if (spinner) spinner.style.display = 'none';
+  }
+}
 
-    // Setup drop targets for driver rows (but use rider_id in data attributes)
-    function setupDriverDropTargets() {
-      const driverRows = document.querySelectorAll('#driversTableBody tr.drop-zone[data-driver-id]');
-      driverRows.forEach(row => {
-        row.addEventListener('dragover', (e) => {
-          if (dragType !== 'route') return;
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'move';
-          row.classList.add('drag-over-route');
-        });
-
-        row.addEventListener('dragleave', (e) => {
-          if (!row.contains(e.relatedTarget)) {
-            row.classList.remove('drag-over-route');
-          }
-        });
-
-        row.addEventListener('drop', async (e) => {
-          e.preventDefault();
-          row.classList.remove('drag-over-route');
-          if (dragType !== 'route') return;
-          const routeId = e.dataTransfer.getData('text/plain');
-          const riderId = row.dataset.driverId; // This contains the rider_id from database
-          if (!routeId || !riderId) return;
-          await assignRouteToDriver(routeId, riderId, row);
-        });
-      });
-      console.log(`Setup ${driverRows.length} driver drop targets`);
+function updateRouteRow(routeId, routeRow) {
+  const ordersCountSpan = routeRow.querySelector('.orders-count');
+  if (ordersCountSpan) {
+    const currentCount = parseInt(ordersCountSpan.textContent) || 0;
+    ordersCountSpan.textContent = currentCount + 1;
+    if (!routeRow.querySelector('.assigned-indicator')) {
+      const readyIndicator = document.createElement('span');
+      readyIndicator.className = 'assigned-indicator';
+      readyIndicator.textContent = 'Ready';
+      ordersCountSpan.parentNode.appendChild(readyIndicator);
     }
+    routeRow.draggable = true;
+    routeRow.classList.add('draggable-row');
+  }
+}
 
-    // API CALLS FOR DRAG AND DROP
+function updateDriverOrderCount(riderId, driverRow) {
+  const orderCountCell = driverRow.querySelector('td:nth-child(2)');
+  if (orderCountCell) {
+    const currentCount = parseInt(orderCountCell.textContent) || 0;
+    orderCountCell.textContent = currentCount + 1;
+  }
+}
 
-    // Assign order to route
-    async function assignOrderToRoute(orderId, routeId, targetRow) {
-      const spinner = targetRow.querySelector('.loading-spinner');
-      if (spinner) spinner.style.display = 'inline-block';
+function getOrderNumber(orderId) {
+  if (draggedElement) {
+    const orderNumberCell = draggedElement.querySelector('td:first-child');
+    return orderNumberCell ? orderNumberCell.textContent.trim() : orderId;
+  }
+  return orderId;
+}
 
+function getDriverName(riderId) {
+  const driverRow = document.querySelector(`#driversTableBody tr[data-driver-id="${riderId}"]`);
+  if (driverRow) {
+    const nameCell = driverRow.querySelector('td:first-child');
+    return nameCell ? nameCell.textContent.trim() : 'Driver';
+  }
+  return 'Driver';
+}
+
+function initializeDragAndDrop() {
+  console.log('Initializing drag and drop functionality...');
+  setupDraggableOrders();
+  setupDraggableRoutes();
+  setupRouteDropTargets();
+  setupDriverDropTargets();
+  console.log('Drag and drop initialization complete');
+}
+
+// ========== MAP INITIALIZATION ==========
+const drivers = <?php echo json_encode($riders_locations); ?> || [];
+const markers = {};
+let map = null;
+
+function initializeMap() {
+  try {
+    const mapContainer = document.getElementById('map');
+    if (!mapContainer) {
+      console.error('Map container not found');
+      setTimeout(initializeMap, 200); // Retry
+      return;
+    }
+    
+    // Force container to have dimensions
+    const mapPanel = document.getElementById('mapPanel');
+    if (mapPanel && mapPanel.style.height) {
+      const height = parseInt(mapPanel.style.height) || 310;
+      mapContainer.style.height = (height - 60) + 'px'; // Account for header
+    } else {
+      mapContainer.style.height = '250px'; // Fallback
+    }
+    
+    if (map) {
       try {
-        console.log(`Assigning order ${orderId} to route ${routeId}`);
-        const response = await fetch('../api/assign_order_to_route.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            order_id: parseInt(orderId),
-            route_id: parseInt(routeId)
-          })
-        });
-
-        const result = await response.json();
-        console.log('Assignment result:', result);
-
-        if (result.success) {
-          if (draggedElement && draggedElement.dataset.orderId == orderId) {
-            draggedElement.remove();
-          }
-          updateRouteRow(routeId, targetRow);
-          showMessage(`Order #${getOrderNumber(orderId)} added to Route R-${routeId}`, 'success');
-          setTimeout(() => {
-            setupDraggableRoutes();
-            routeOrdersManager.refresh();
-          }, 100);
-        } else {
-          showMessage(result.message || 'Failed to add order to route', 'error');
-        }
-      } catch (error) {
-        console.error('Assignment error:', error);
-        showMessage('Network error occurred', 'error');
-      } finally {
-        if (spinner) spinner.style.display = 'none';
+        map.remove();
+      } catch(e) {
+        console.log('Error removing old map:', e);
       }
+      map = null;
     }
-
-    // Assign route to driver (but send rider_id to API)
-    async function assignRouteToDriver(routeId, riderId, targetRow) {
-      const spinner = targetRow.querySelector('.loading-spinner');
-      if (spinner) spinner.style.display = 'inline-block';
-
-      try {
-        console.log(`Assigning route ${routeId} to rider ${riderId}`);
-        const response = await fetch('../api/assign_route_to_rider.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            route_id: parseInt(routeId),
-            rider_id: parseInt(riderId) // Use rider_id for API call
-          })
-        });
-
-        const result = await response.json();
-        console.log('Route assignment result:', result);
-
-        if (result.success) {
-          if (draggedElement && draggedElement.dataset.routeId == routeId) {
-            const driverCell = draggedElement.querySelector('td:nth-child(2)');
-            if (driverCell) driverCell.textContent = getDriverName(riderId);
-          }
-          updateDriverOrderCount(riderId, targetRow);
-          showMessage(`Route R-${routeId} assigned to ${getDriverName(riderId)}`, 'success');
-          routeOrdersManager.refresh();
-        } else {
-          showMessage(result.message || 'Failed to assign route to driver', 'error');
-        }
-      } catch (error) {
-        console.error('Route assignment error:', error);
-        showMessage('Network error occurred', 'error');
-      } finally {
-        if (spinner) spinner.style.display = 'none';
-      }
-    }
-
-    // HELPER FUNCTIONS
-
-    // Update route row after adding orders
-    function updateRouteRow(routeId, routeRow) {
-      const ordersCountSpan = routeRow.querySelector('.orders-count');
-      if (ordersCountSpan) {
-        const currentCount = parseInt(ordersCountSpan.textContent) || 0;
-        ordersCountSpan.textContent = currentCount + 1;
-        if (!routeRow.querySelector('.assigned-indicator')) {
-          const readyIndicator = document.createElement('span');
-          readyIndicator.className = 'assigned-indicator';
-          readyIndicator.textContent = 'Ready';
-          ordersCountSpan.parentNode.appendChild(readyIndicator);
-        }
-        routeRow.draggable = true;
-        routeRow.classList.add('draggable-row');
-      }
-    }
-
-    // Update driver order count (but still reference rider data)
-    function updateDriverOrderCount(riderId, driverRow) {
-      const orderCountCell = driverRow.querySelector('td:nth-child(2)');
-      if (orderCountCell) {
-        const currentCount = parseInt(orderCountCell.textContent) || 0;
-        orderCountCell.textContent = currentCount + 1;
-      }
-    }
-
-    // Get order number from dragged element
-    function getOrderNumber(orderId) {
-      if (draggedElement) {
-        const orderNumberCell = draggedElement.querySelector('td:first-child');
-        return orderNumberCell ? orderNumberCell.textContent.trim() : orderId;
-      }
-      return orderId;
-    }
-
-    // Get driver name from rider ID (since data-driver-id contains rider_id)
-    function getDriverName(riderId) {
-      const driverRow = document.querySelector(`#driversTableBody tr[data-driver-id="${riderId}"]`);
-      if (driverRow) {
-        const nameCell = driverRow.querySelector('td:first-child');
-        return nameCell ? nameCell.textContent.trim() : 'Driver';
-      }
-      return 'Driver';
-    }
-
-    // Initialize all drag and drop functionality
-    function initializeDragAndDrop() {
-      console.log('Initializing drag and drop functionality...');
-      setupDraggableOrders();
-      setupDraggableRoutes();
-      setupRouteDropTargets();
-      setupDriverDropTargets();
-      console.log('Drag and drop initialization complete');
-      console.log('Workflow: 1. Drag orders to routes 2. Drag routes to drivers 3. Click routes to view orders');
-    }
-
-    // Map initialization
-    const map = L.map('map', {
+    
+    // Initialize immediately
+    map = L.map('map', {
       center: [51.5074, -0.1278],
       zoom: 10,
       minZoom: 8,
@@ -1561,64 +1554,107 @@ console.log('[SIDEBAR DEBUG] End of script definitions');
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
- 
-    setTimeout(() => {
+    
+    // Multiple invalidation attempts
+    requestAnimationFrame(() => {
       map.invalidateSize();
-    }, 300);
+      setTimeout(() => map.invalidateSize(), 50);
+      setTimeout(() => map.invalidateSize(), 150);
+      setTimeout(() => map.invalidateSize(), 300);
+      setTimeout(() => map.invalidateSize(), 600);
+    });
+    
+    addMapMarkers();
+    console.log('Map initialized successfully');
+    
+  } catch (error) {
+    console.error('Error initializing map:', error);
+    setTimeout(initializeMap, 500); // Retry on error
+  }
+}
 
-    const drivers = <?php echo json_encode($riders_locations); ?> || [];
-    const markers = {};
+function addMapMarkers() {
+  if (!map) {
+    console.error('Map not initialized yet');
+    return;
+  }
+  
+  Object.values(markers).forEach(marker => marker.remove());
+  Object.keys(markers).forEach(key => delete markers[key]);
 
-    drivers.forEach(loc => {
-      const lat = parseFloat(loc.lat || loc.latitude || 0);
-      const lng = parseFloat(loc.lng || loc.longitude || 0);
-      if (!isFinite(lat) || !isFinite(lng)) return;
+  drivers.forEach(loc => {
+    const lat = parseFloat(loc.lat || loc.latitude || 0);
+    const lng = parseFloat(loc.lng || loc.longitude || 0);
+    if (!isFinite(lat) || !isFinite(lng)) return;
 
-      const id = loc.driver_id || loc.id;
-      const icon = L.divIcon({
-        className: '',
-        html: `<div style="text-align:center">
-          <div style="width:12px;height:12px;background:#10B981;border:2px solid white;border-radius:50%;box-shadow:0 0 0 3px rgba(16,185,129,0.3)"></div>
-          <div style="background:#fff;padding:2px 6px;border-radius:6px;margin-top:4px;font-size:11px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.1);color:#374151">${loc.driver_name || 'Driver'}</div>
-        </div>`
-      });
-
-      const marker = L.marker([lat, lng], { icon }).addTo(map);
-      if (loc.created_at) {
-        marker.bindPopup(`
-          <div style="text-align:center;">
-            <strong>${loc.driver_name || 'Driver'}</strong><br/>
-            <small>Last update: ${new Date(loc.created_at).toLocaleString()}</small>
-          </div>
-        `);
-      }
-      markers[id] = marker;
+    const id = loc.driver_id || loc.id;
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="text-align:center">
+        <div style="width:12px;height:12px;background:#10B981;border:2px solid white;border-radius:50%;box-shadow:0 0 0 3px rgba(16,185,129,0.3)"></div>
+        <div style="background:#fff;padding:2px 6px;border-radius:6px;margin-top:4px;font-size:11px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.1);color:#374151">${loc.driver_name || 'Driver'}</div>
+      </div>`
     });
 
-    // Fit map bounds
-    const allCoords = Object.values(markers).map(m => m.getLatLng());
-    if (allCoords.length) {
-      const londonBounds = L.latLngBounds([[51.28, -0.51], [51.69, 0.33]]);
-      map.fitBounds(londonBounds);
-      document.getElementById('lastUpdate').innerText = `Last update: ${allCoords.length} drivers`;
-    } else {
-      map.setView([51.5074, -0.1278], 10);
-      document.getElementById('lastUpdate').innerText = 'Last update: 0 drivers';
+    const marker = L.marker([lat, lng], { icon }).addTo(map);
+    if (loc.created_at) {
+      marker.bindPopup(`
+        <div style="text-align:center;">
+          <strong>${loc.driver_name || 'Driver'}</strong><br/>
+          <small>Last update: ${new Date(loc.created_at).toLocaleString()}</small>
+        </div>
+      `);
     }
+    markers[id] = marker;
+  });
 
-    // Map resize handler
-    function fixMap() {
-      setTimeout(() => map.invalidateSize(), 250);
+  const allCoords = Object.values(markers).map(m => m.getLatLng());
+  const lastUpdateEl = document.getElementById('lastUpdate');
+  if (allCoords.length) {
+    const londonBounds = L.latLngBounds([[51.28, -0.51], [51.69, 0.33]]);
+    map.fitBounds(londonBounds);
+    if (lastUpdateEl) lastUpdateEl.innerText = `Last update: ${allCoords.length} drivers`;
+  } else {
+    map.setView([51.5074, -0.1278], 10);
+    if (lastUpdateEl) lastUpdateEl.innerText = 'Last update: 0 drivers';
+  }
+}
+function fixMap() {
+  if (!map) {
+    console.log('Map not initialized, forcing initialization...');
+    initializeMap();
+    return;
+  }
+  
+  // Check if map container still has the leaflet content
+  const mapContainer = document.getElementById('map');
+  if (mapContainer && !mapContainer.querySelector('.leaflet-container')) {
+    console.log('Map container empty, reinitializing...');
+    map = null;
+    initializeMap();
+    return;
+  }
+  
+  setTimeout(() => {
+    try {
+      map.invalidateSize();
+      console.log('Map size invalidated');
+    } catch (error) {
+      console.error('Error fixing map:', error);
+      map = null;
+      initializeMap();
     }
+  }, 250);
+}
+// ========== RESIZABLE PANELS ==========
 
-    // Resizable panels functionality
-   function initializeResizablePanels() {
+function initializeResizablePanels() {
   initializePanelResizing();
   initializeColumnResizing();
-  console.log('Resizable panels initialized with database storage');
+  console.log('Resizable panels initialized');
 }
-    // Initialize individual panel resizing
-  function initializePanelResizing() {
+
+function initializePanelResizing() {
   document.querySelectorAll('.resizable-panel').forEach(panel => {
     const resizeHandleV = panel.querySelector('.resize-handle-v');
     const resizeHandleCorner = panel.querySelector('.resize-handle-corner');
@@ -1626,8 +1662,8 @@ console.log('[SIDEBAR DEBUG] End of script definitions');
     if (resizeHandleCorner) initializeResizeHandle(resizeHandleCorner, panel, 'both');
   });
 }
-    // Initialize column resizing
-   function initializeColumnResizing() {
+
+function initializeColumnResizing() {
   const columnResizer = document.getElementById('columnResizer');
   const leftColumn = document.getElementById('leftColumn');
   const dashboardGrid = document.getElementById('dashboardGrid');
@@ -1659,17 +1695,13 @@ console.log('[SIDEBAR DEBUG] End of script definitions');
   function stopColumnResize() {
     isResizing = false;
     columnResizer.classList.remove('dragging');
-    
-    // Save grid columns to database
     const gridColumns = dashboardGrid.style.gridTemplateColumns;
     saveLayoutToDatabase('dashboardGrid', null, null, gridColumns);
-    
     document.removeEventListener('mousemove', handleColumnResize);
     document.removeEventListener('mouseup', stopColumnResize);
   }
 }
 
-// Initialize resize handle for panels with DB save
 function initializeResizeHandle(handle, panel, direction) {
   let isResizing = false;
   let startX = 0, startY = 0, startWidth = 0, startHeight = 0;
@@ -1685,7 +1717,6 @@ function initializeResizeHandle(handle, panel, direction) {
     document.addEventListener('mouseup', stopResize);
     e.preventDefault();
     e.stopPropagation();
-    e.stopImmediatePropagation();
   });
 
   function handleResize(e) {
@@ -1699,88 +1730,20 @@ function initializeResizeHandle(handle, panel, direction) {
       panel.style.width = newWidth + 'px';
     }
     if (panel.id === 'mapPanel') {
-      setTimeout(() => map.invalidateSize(), 100);
+      setTimeout(() => map && map.invalidateSize(), 100);
     }
   }
-
-
-    // Make resize handles sticky when scrolling
-    function makeResizeHandlesSticky() {
-      document.querySelectorAll('.resizable-panel').forEach(panel => {
-        const handleV = panel.querySelector('.resize-handle-v');
-        const handleCorner = panel.querySelector('.resize-handle-corner');
-        
-        if (!handleV && !handleCorner) return;
-        
-        // Update handle positions on scroll
-        panel.addEventListener('scroll', () => {
-          const scrollTop = panel.scrollTop;
-          const scrollHeight = panel.scrollHeight;
-          const clientHeight = panel.clientHeight;
-          
-          // Calculate how much to offset the handles
-          const maxScroll = scrollHeight - clientHeight;
-          const offset = Math.min(scrollTop, maxScroll);
-          
-          if (handleV) {
-            handleV.style.transform = `translateY(${offset}px)`;
-          }
-          if (handleCorner) {
-            handleCorner.style.transform = `translateY(${offset}px)`;
-          }
-        });
-      });
-      
-      console.log('Sticky resize handles initialized');
-    }
-
-    const defaultGridColumns = '60% 40%';
-
-    const defaultSizes = {
-      // Left Column Panels
-      driversPanel: { width: '100%', height: '180px' },
-      routeOrdersPanel: { width: '100%', height: '200px' },
-      ordersPanel: { width: '100%', height: '190px' },
-      // Right Column Panels
-      mapPanel: { width: '100%', height: '310px' },
-      routesPanel: { width: '100%', height: '275px' }
-    };
-
-    // Restore saved sizes with fallback to defaults
-    function applySavedSizes() {
-      document.querySelectorAll('.resizable-panel').forEach(panel => {
-        const saved = JSON.parse(localStorage.getItem('panel-size-' + panel.id));
-        const fallback = defaultSizes[panel.id] || {};
-        panel.style.width = (saved && saved.width) || fallback.width || '100%';
-        panel.style.height = (saved && saved.height) || fallback.height || '220px';
-      });
-    }
 
   function stopResize() {
     isResizing = false;
     panel.classList.remove('resizing');
-    
-    // Save to database instead of localStorage
     saveLayoutToDatabase(panel.id, panel.style.width, panel.style.height);
-    
     document.removeEventListener('mousemove', handleResize);
     document.removeEventListener('mouseup', stopResize);
   }
 }
 
-    const userPreferences = <?php echo $user_preferences_json; ?> || {};
-   const defaultGridColumns = '60% 40%';
-
-const defaultSizes = {
-  // Left Column Panels
-  driversPanel: { width: '100%', height: '180px' },
-  routeOrdersPanel: { width: '100%', height: '200px' },
-  ordersPanel: { width: '100%', height: '190px' },
-  // Right Column Panels
-  mapPanel: { width: '100%', height: '310px' },
-  routesPanel: { width: '100%', height: '275px' }
-};
-    async function saveLayoutToDatabase(panelId, width, height, gridColumns = null) {
+async function saveLayoutToDatabase(panelId, width, height, gridColumns = null) {
   try {
     const response = await fetch('../api/save_dashboard_layout.php', {
       method: 'POST',
@@ -1804,6 +1767,14 @@ const defaultSizes = {
   }
 }
 
+const userPreferences = <?php echo $user_preferences_json; ?> || {};
+const defaultSizes = {
+  driversPanel: { width: '100%', height: '180px' },
+  routeOrdersPanel: { width: '100%', height: '200px' },
+  ordersPanel: { width: '100%', height: '190px' },
+  mapPanel: { width: '100%', height: '310px' },
+  routesPanel: { width: '100%', height: '275px' }
+};
 
 function applySavedSizes() {
   document.querySelectorAll('.resizable-panel').forEach(panel => {
@@ -1816,32 +1787,125 @@ function applySavedSizes() {
   });
 
   const dashboardGrid = document.getElementById('dashboardGrid');
-  if (userPreferences['dashboardGrid'] && userPreferences['dashboardGrid'].grid_columns) {
+  if (dashboardGrid && userPreferences['dashboardGrid'] && userPreferences['dashboardGrid'].grid_columns) {
     dashboardGrid.style.gridTemplateColumns = userPreferences['dashboardGrid'].grid_columns;
   }
 }
-    // Initialize everything
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOM loaded, initializing...');
 
-      applySavedSizes();
-
-      // Force browser to reflow + fix map after sizes applied
-      requestAnimationFrame(() => {
-        window.dispatchEvent(new Event("resize"));
-        fixMap();
-      });
-
-      initializeDragAndDrop();
-      initializeResizablePanels();
+// ========== APP INITIALIZATION ==========
+function initializeApp() {
+  console.log('Initializing app...');
+  
+  try {
+    applySavedSizes();
+    initializeMap();
+    initializeResizablePanels();
+    initializeDragAndDrop();
     
+    setTimeout(() => {
+      routeOrdersManager.init();
+      console.log('App initialization complete');
+    }, 300);
+    
+  } catch (error) {
+    console.error('Error during initialization:', error);
+  }
+}
+// Run initialization
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  initializeApp();
+}
 
-      // Delay init a little longer so layout is stable
-      setTimeout(() => routeOrdersManager.init(), 200);
-    });
+window.addEventListener('load', () => {
+  fixMap();
+  if (!draggedOrderId && !draggedRouteId) {
+    console.log('Reinitializing on window load...');
+    initializeDragAndDrop();
+  }
+});
 
-    window.addEventListener('load', fixMap);
-    window.addEventListener('resize', fixMap);
+window.addEventListener('resize', fixMap);
+
+// Page visibility change handler - reinitialize map when returning to page
+// Page visibility change handler - reinitialize map when returning to page
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    console.log('Page became visible, checking map...');
+    
+    const mapContainer = document.getElementById('map');
+    const hasLeafletContent = mapContainer && mapContainer.querySelector('.leaflet-container');
+    
+    if (!map || !hasLeafletContent) {
+      console.log('Map missing or empty, forcing reinitialization...');
+      map = null;
+      setTimeout(() => {
+        initializeMap();
+      }, 150);
+    } else {
+      setTimeout(fixMap, 100);
+    }
+  }
+});
+
+// Window focus event
+window.addEventListener('focus', () => {
+  console.log('Window focused, checking map...');
+  setTimeout(() => {
+    const mapContainer = document.getElementById('map');
+    const hasLeafletContent = mapContainer && mapContainer.querySelector('.leaflet-container');
+    
+    if (!map || !hasLeafletContent) {
+      console.log('Map not found on focus, reinitializing...');
+      map = null;
+      initializeMap();
+    } else {
+      fixMap();
+    }
+  }, 200);
+});
+
+// Page show event (fires when navigating back via browser history)
+window.addEventListener('pageshow', (event) => {
+  console.log('Page show event, forcing map check...');
+  
+  setTimeout(() => {
+    const mapContainer = document.getElementById('map');
+    const hasLeafletContent = mapContainer && mapContainer.querySelector('.leaflet-container');
+    
+    if (!map || !hasLeafletContent || event.persisted) {
+      console.log('Forcing full map reinitialization...');
+      map = null;
+      initializeMap();
+    }
+  }, 150);
+});
+// Additional check: Reinitialize when page gains focus
+window.addEventListener('focus', () => {
+  console.log('Window focused, checking map...');
+  setTimeout(() => {
+    if (!map) {
+      console.log('Map not found on focus, reinitializing...');
+      initializeMap();
+    } else {
+      fixMap();
+    }
+  }, 200);
+});
+
+// Page show event (fires when navigating back via browser history)
+window.addEventListener('pageshow', (event) => {
+  console.log('Page show event, checking map...');
+  
+  // Force reinitialization if coming from cache
+  if (event.persisted || !map) {
+    console.log('Reinitializing from page cache...');
+    setTimeout(() => {
+      initializeMap();
+    }, 100);
+  }
+});
 </script>
 
   <style>
