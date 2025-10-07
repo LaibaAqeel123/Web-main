@@ -1,48 +1,46 @@
 <?php
+// ULTIMATE OUTPUT CLEANING - NO WHITESPACE BEFORE THIS LINE
+while (ob_get_level()) ob_end_clean();
+ob_start();
+error_reporting(0);
+ini_set('display_errors', 0);
+
 require_once '../../includes/config.php';
 require_once '../../includes/generate_pdf.php';
 requireLogin();
 
-$order_id = null;
-if (isset($_GET['id'])) {
-    $order_id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
-}
+$order_id = isset($_GET['id']) ? filter_var($_GET['id'], FILTER_VALIDATE_INT) : null;
 
 if (!$order_id) {
+    while (ob_get_level()) ob_end_clean();
+    header('Content-Type: text/plain');
     http_response_code(400);
     die('Invalid Order ID provided.');
 }
 
-// Check access rights first by fetching the order's company ID
-$company_id_query = "SELECT company_id FROM Orders WHERE id = ?";
-$stmt_check = mysqli_prepare($conn, $company_id_query);
-if (!$stmt_check) {
-     http_response_code(500);
-     die('Database error preparing check.');
-}
-mysqli_stmt_bind_param($stmt_check, "i", $order_id);
-mysqli_stmt_execute($stmt_check);
-$result_check = mysqli_stmt_get_result($stmt_check);
-$order_company_info = mysqli_fetch_assoc($result_check);
-mysqli_stmt_close($stmt_check);
+// Quick permission check
+$stmt = mysqli_prepare($conn, "SELECT company_id FROM Orders WHERE id = ?");
+mysqli_stmt_bind_param($stmt, "i", $order_id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$order = mysqli_fetch_assoc($result);
 
-if (!$order_company_info) {
+if (!$order) {
+    while (ob_get_level()) ob_end_clean();
+    header('Content-Type: text/plain');
     http_response_code(404);
     die('Order not found.');
 }
 
-// Verify permissions
-if (!isSuperAdmin() && $_SESSION['company_id'] != $order_company_info['company_id']) {
+if (!isSuperAdmin() && $_SESSION['company_id'] != $order['company_id']) {
+    while (ob_get_level()) ob_end_clean();
+    header('Content-Type: text/plain');
     http_response_code(403);
     die('Access Denied. You do not have permission to view this order PDF.');
 }
 
-
 try {
     $pdf_filepath = generateOrderPDF($order_id, $conn);
-    
-    // Debug: Log the returned filepath
-    error_log("PDF filepath returned: " . ($pdf_filepath ? $pdf_filepath : 'NULL'));
     
     if (!$pdf_filepath) {
         throw new Exception("PDF generation returned null/false");
@@ -63,21 +61,17 @@ try {
         throw new Exception("Generated file is not a valid PDF");
     }
     
-    // Clear any previous output/errors
-    if (ob_get_level()) {
-        ob_clean();
-    }
+    // CLEAN ALL BUFFERS BEFORE HEADERS
+    while (ob_get_level()) ob_end_clean();
     
-    // Set headers for inline PDF display
+    // Set headers for PDF response
     header('Content-Type: application/pdf');
-    header('Content-Disposition: inline; filename="' . basename($pdf_filepath) . '"');
-    header('Content-Transfer-Encoding: binary');
-    header('Accept-Ranges: bytes');
+    header('Content-Disposition: inline; filename="proof_of_delivery.pdf"');
     header('Content-Length: ' . $file_size);
-    header('Cache-Control: private, must-revalidate, post-check=0, pre-check=0, max-age=1');
-    header('Pragma: public');
-    header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
-    header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+    header('Content-Transfer-Encoding: binary');
     
     // Output the file content
     readfile($pdf_filepath);
@@ -85,10 +79,13 @@ try {
     // Delete the temporary file
     unlink($pdf_filepath);
     
-    exit; // Stop script execution after sending file
+    exit;
     
 } catch (Exception $e) {
-    // Log the specific error
+    // Clean any remaining output
+    while (ob_get_level()) ob_end_clean();
+    
+    header('Content-Type: text/plain');
     error_log("PDF Generation Error for Order ID $order_id: " . $e->getMessage());
     
     // Clean up any partial file
