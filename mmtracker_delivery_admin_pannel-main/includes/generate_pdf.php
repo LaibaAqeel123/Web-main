@@ -1,6 +1,12 @@
 <?php
-require_once __DIR__ . '/tcpdf/tcpdf.php'; // Adjust path if TCPDF is placed elsewhere
-require_once __DIR__ . '/config.php'; // Assuming config.php is one level up
+// PREVENT ANY OUTPUT DURING PDF GENERATION
+if (ob_get_level() > 0) {
+    ob_clean();
+}
+ob_start();
+
+require_once __DIR__ . '/tcpdf/tcpdf.php';
+require_once __DIR__ . '/config.php';
 
 // --- Extend TCPDF to create custom Header --- 
 class POD_PDF extends TCPDF {
@@ -42,6 +48,11 @@ class POD_PDF extends TCPDF {
 // Function to generate PDF for a given order
 // Returns the path to the generated PDF file or false on failure
 function generateOrderPDF($order_id, $conn) {
+    
+    // Ensure no output during generation
+    if (ob_get_level() > 0) {
+        ob_clean();
+    }
     
     // 1. Fetch Order Details (including Customer, Address, Company, Org, Lat/Lng)
     $query = "SELECT 
@@ -131,6 +142,7 @@ function generateOrderPDF($order_id, $conn) {
         } else {
             error_log("No delivered/failed status log found for order ID: $order_id");
         }
+        mysqli_stmt_close($log_stmt);
     } else {
         error_log("Failed to prepare statement for status log: " . mysqli_error($conn));
     }
@@ -138,10 +150,6 @@ function generateOrderPDF($order_id, $conn) {
     // Use latitude and longitude directly from the Orders table
     $lat = $order['latitude'];
     $lng = $order['longitude'];
-
-    // --- ADD LOGGING FOR LAT/LNG --- 
-    error_log("PDF Gen Lat/Lng Check - Order ID: $order_id, Fetched Lat from Orders: " . var_export($lat, true) . ", Fetched Lng from Orders: " . var_export($lng, true));
-    // --- END LOGGING --- 
 
     // 4. Initialize Custom TCPDF Class
     try {
@@ -300,35 +308,25 @@ function generateOrderPDF($order_id, $conn) {
         $proof_sig_path_on_server = null;
 
         if (!empty($order['proof_photo_url'])) {
-            // Corrected base path: Go up one level from includes, then into api/
             $base_path = realpath(__DIR__ . '/../api'); 
             $image_relative_path = $order['proof_photo_url'];
             if ($base_path && $image_relative_path) {
                  $proof_photo_path_on_server = $base_path . '/' . $image_relative_path;
-            } else {
-                 $proof_photo_path_on_server = null; // Base path resolution failed
             }
            
-             error_log("PDF Gen: Attempting to access photo path: " . $proof_photo_path_on_server);
              if (!$proof_photo_path_on_server || !file_exists($proof_photo_path_on_server)) {
-                 error_log("PDF Gen Error: Photo proof file not found or path incorrect: " . ($proof_photo_path_on_server ?: $order['proof_photo_url']));
-                 $proof_photo_path_on_server = null; // Prevent trying to embed non-existent file
+                 $proof_photo_path_on_server = null;
              }
         }
          if (!empty($order['proof_signature_path'])) {
-             // Corrected base path: Go up one level from includes, then into api/
             $base_path = realpath(__DIR__ . '/../api'); 
             $sig_relative_path = $order['proof_signature_path'];
              if ($base_path && $sig_relative_path) {
                  $proof_sig_path_on_server = $base_path . '/' . $sig_relative_path;
-            } else {
-                 $proof_sig_path_on_server = null; // Base path resolution failed
             }
 
-            error_log("PDF Gen: Attempting to access signature path: " . $proof_sig_path_on_server);
              if (!$proof_sig_path_on_server || !file_exists($proof_sig_path_on_server)) {
-                 error_log("PDF Gen Error: Signature proof file not found or path incorrect: " . ($proof_sig_path_on_server ?: $order['proof_signature_path']));
-                 $proof_sig_path_on_server = null; // Prevent trying to embed non-existent file
+                 $proof_sig_path_on_server = null;
              }
         }
         
@@ -377,7 +375,7 @@ function generateOrderPDF($order_id, $conn) {
         // --- End PDF Content ---
 
         // 5. Save PDF to a temporary file
-        $pdf_dir = '/tmp/delivery_pdfs'; // Or choose a writable directory accessible by web server
+        $pdf_dir = '/tmp/delivery_pdfs';
         if (!file_exists($pdf_dir)) {
             if (!mkdir($pdf_dir, 0777, true)) {
                  error_log("PDF Gen Error: Failed to create PDF directory: $pdf_dir");
@@ -389,7 +387,6 @@ function generateOrderPDF($order_id, $conn) {
         
         $pdf->Output($filepath, 'F'); // 'F' saves to file
 
-        error_log("PDF Generated: $filepath");
         return $filepath;
 
     } catch (Exception $e) {
@@ -398,4 +395,8 @@ function generateOrderPDF($order_id, $conn) {
     }
 }
 
-?> 
+// Clean any output buffer before ending
+if (ob_get_level() > 0) {
+    ob_clean();
+}
+?>
