@@ -116,13 +116,13 @@ $preferences_result = mysqli_query($conn, $preferences_sql);
 
 $user_preferences = [];
 if ($preferences_result) {
-    while ($pref = mysqli_fetch_assoc($preferences_result)) {
-        $user_preferences[$pref['panel_id']] = [
-            'width' => $pref['width'],
-            'height' => $pref['height'],
-            'grid_columns' => $pref['grid_columns']
-        ];
-    }
+  while ($pref = mysqli_fetch_assoc($preferences_result)) {
+    $user_preferences[$pref['panel_id']] = [
+      'width' => $pref['width'],
+      'height' => $pref['height'],
+      'grid_columns' => $pref['grid_columns']
+    ];
+  }
 }
 
 // Convert to JSON for JavaScript
@@ -138,7 +138,7 @@ $user_preferences_json = json_encode($user_preferences);
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
- <style>
+  <style>
     .app-shell {
       display: flex;
       min-height: 100vh;
@@ -203,29 +203,34 @@ $user_preferences_json = json_encode($user_preferences);
     .topbar {
       background: #0b1724;
       color: #fff;
-      padding: 8px 16px; /* Reduced from 12px 20px */
+      padding: 8px 16px;
+      /* Reduced from 12px 20px */
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 48px; /* Fixed height, reduced from ~60px */
+      height: 48px;
+      /* Fixed height, reduced from ~60px */
     }
 
     .content {
-      padding: 6px; /* Reduced from 12px */
+      padding: 6px;
+      /* Reduced from 12px */
       flex: 1;
       overflow: auto;
-      height: calc(100vh - 48px); /* Adjusted for new topbar height */
+      height: calc(100vh - 48px);
+      /* Adjusted for new topbar height */
     }
 
     .grid-wrap {
-  display: grid;
-  gap: 0px; /* CHANGE FROM 4px TO 2px */
-  grid-template-columns: 1fr 1fr;
-  align-items: start;
-  position: relative;
-  height: 100%;
-  max-height: calc(100vh - 54px);
-}
+      display: grid;
+      gap: 0px;
+      /* CHANGE FROM 4px TO 2px */
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+      position: relative;
+      height: 100%;
+      max-height: calc(100vh - 54px);
+    }
 
 
     @media (max-width:1100px) {
@@ -234,26 +239,30 @@ $user_preferences_json = json_encode($user_preferences);
       }
     }
 
-  .panel {
-  background: white;
-  border-radius: 6px;
-  padding: 4px; /* CHANGE FROM 6px TO 4px */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  position: relative;
-  min-height: 120px; /* CHANGE FROM 140px TO 120px */
-  max-height: 100%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
+    .panel {
+      background: white;
+      border-radius: 6px;
+      padding: 4px;
+      /* CHANGE FROM 6px TO 4px */
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      position: relative;
+      min-height: 120px;
+      /* CHANGE FROM 140px TO 120px */
+      max-height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
 
     /* Resizable panels */
     .resizable-panel {
       overflow: auto;
       min-width: 250px;
-      min-height: 140px; /* Reduced from 200px */
+      min-height: 140px;
+      /* Reduced from 200px */
       max-width: 100%;
       border: 1px solid #e5e7eb;
+
     }
 
     /* Make sure the main grid items don't stretch */
@@ -267,6 +276,25 @@ $user_preferences_json = json_encode($user_preferences);
       background: #6b7280;
       opacity: 0;
       transition: opacity 0.2s ease;
+      z-index: 5;
+
+
+
+    }
+
+    .resize-handle-v,
+    .resize-handle-corner {
+      will-change: transform;
+      pointer-events: auto;
+      /* Ensure they're clickable */
+    }
+
+    .drivers-list,
+    .orders-list,
+    .routes-list {
+      overflow-y: auto;
+      max-height: 100%;
+      flex: 1;
     }
 
     .resize-handle:hover,
@@ -294,7 +322,8 @@ $user_preferences_json = json_encode($user_preferences);
       bottom: 0;
       height: 4px;
       cursor: ns-resize;
-      
+
+
     }
 
     /* Corner resize handle */
@@ -304,6 +333,7 @@ $user_preferences_json = json_encode($user_preferences);
       width: 12px;
       height: 12px;
       cursor: nw-resize;
+      transform-origin: bottom right;
       background: linear-gradient(-45deg, transparent 30%, #6b7280 30%, #6b7280 70%, transparent 70%);
     }
 
@@ -328,82 +358,97 @@ $user_preferences_json = json_encode($user_preferences);
     }
 
     .left-column {
-  position: relative;
-  height: 100%;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0px; /* CHANGE FROM 4px TO 2px */
+      position: relative;
+      height: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0px;
+      /* CHANGE FROM 4px TO 2px */
 
     }
 
-  .right-column {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0px; /* CHANGE FROM 4px TO 2px */
-}
+    .right-column {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0px;
+      /* CHANGE FROM 4px TO 2px */
+    }
 
 
     /* Compact table styling */
     .panel table {
       width: 100%;
-      font-size: 13px; /* Reduced from default */
+      font-size: 13px;
+      /* Reduced from default */
     }
 
-   .panel table thead th {
-  padding: 3px 6px; /* CHANGE FROM 4px 8px TO 3px 6px */
-  font-size: 11px;
-  font-weight: 600;
-}
+    .panel table thead th {
+      padding: 3px 6px;
+      /* CHANGE FROM 4px 8px TO 3px 6px */
+      font-size: 11px;
+      font-weight: 600;
+    }
 
     .panel table tbody td {
-  padding: 2px 6px; /* CHANGE FROM 3px 8px TO 2px 6px */
-  line-height: 1.2;
-}
+      padding: 2px 6px;
+      /* CHANGE FROM 3px 8px TO 2px 6px */
+      line-height: 1.2;
+    }
 
 
     .panel table tbody tr {
-      height: auto; /* Let content determine height */
+      height: auto;
+      /* Let content determine height */
     }
 
     /* Compact section headers */
     .section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 4px; /* CHANGE FROM 6px TO 4px */
-}
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      /* CHANGE FROM 6px TO 4px */
+    }
 
     .section-header h2 {
-      font-size: 16px; /* Reduced from 18px (text-lg) */
+      font-size: 16px;
+      /* Reduced from 18px (text-lg) */
       font-weight: 600;
       margin: 0;
     }
 
-  .workflow-indicator {
-  font-size: 10px;
-  color: #6B7280;
-  margin-top: 1px; /* CHANGE FROM 2px TO 1px */
-  margin-bottom: 2px; /* CHANGE FROM 4px TO 2px */
-  font-style: italic;
-  line-height: 1.2;
-}
+    .workflow-indicator {
+      font-size: 10px;
+      color: #6B7280;
+      margin-top: 1px;
+      /* CHANGE FROM 2px TO 1px */
+      margin-bottom: 2px;
+      /* CHANGE FROM 4px TO 2px */
+      font-style: italic;
+      line-height: 1.2;
+    }
 
     .workflow-step {
-      font-size: 9px; /* Reduced from 10px */
+      font-size: 9px;
+      /* Reduced from 10px */
       color: #6B7280;
       background: #F3F4F6;
-      padding: 2px 4px; /* Reduced from 2px 6px */
-      border-radius: 3px; /* Reduced from 4px */
+      padding: 2px 4px;
+      /* Reduced from 2px 6px */
+      border-radius: 3px;
+      /* Reduced from 4px */
       font-weight: 500;
     }
 
     /* Compact status pills */
     .status-pill {
       font-weight: 700;
-      font-size: 10px; /* Reduced from 12px */
-      padding: 2px 6px; /* Reduced from 4px 8px */
+      font-size: 10px;
+      /* Reduced from 12px */
+      padding: 2px 6px;
+      /* Reduced from 4px 8px */
       border-radius: 999px;
     }
 
@@ -505,11 +550,13 @@ $user_preferences_json = json_encode($user_preferences);
     /* Assigned status indicators */
     .assigned-indicator {
       display: inline-block;
-      font-size: 9px; /* Reduced from 10px */
+      font-size: 9px;
+      /* Reduced from 10px */
       color: #10b981;
       font-weight: 600;
       background: rgba(16, 185, 129, 0.1);
-      padding: 1px 3px; /* Reduced from 2px 4px */
+      padding: 1px 3px;
+      /* Reduced from 2px 4px */
       border-radius: 3px;
       margin-left: 4px;
     }
@@ -532,21 +579,25 @@ $user_preferences_json = json_encode($user_preferences);
     }
 
     #map {
-      height: 100%; /* Use full available height */
+      height: 100%;
+      /* Use full available height */
       min-height: 200px;
-      border-radius: 6px; /* Match panel border radius */
+      border-radius: 6px;
+      /* Match panel border radius */
     }
 
     /* Loading spinner */
     .loading-spinner {
       display: none;
-      width: 14px; /* Reduced from 16px */
+      width: 14px;
+      /* Reduced from 16px */
       height: 14px;
       border: 2px solid #f3f3f3;
       border-top: 2px solid #10B981;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin-left: 6px; /* Reduced from 8px */
+      margin-left: 6px;
+      /* Reduced from 8px */
     }
 
     @keyframes spin {
@@ -608,18 +659,33 @@ $user_preferences_json = json_encode($user_preferences);
 
     /* Compact link styling */
     .panel a {
-      font-size: 12px; /* Reduced from 14px (text-sm) */
+      font-size: 12px;
+      /* Reduced from 14px (text-sm) */
     }
+
     /* Default heights for panels (first login) */
-#driversPanel { height: 180px; }
-#routeOrdersPanel { height: 200px; }
-#ordersPanel { height: 190px; }
-#mapPanel { height: 310px; }
-#routesPanel { height: 275px; }
+    #driversPanel {
+      height: 180px;
+    }
 
+    #routeOrdersPanel {
+      height: 200px;
+    }
 
+    #ordersPanel {
+      height: 190px;
+    }
+
+    #mapPanel {
+      height: 310px;
+    }
+
+    #routesPanel {
+      height: 275px;
+    }
   </style>
 </head>
+
 <body>
 
   <div class="app-shell">
@@ -704,7 +770,7 @@ $user_preferences_json = json_encode($user_preferences);
             </a>
           <?php endif; ?>
 
-         
+
 
           <a href="<?php echo SITE_URL; ?>pages/manifests/index.php"
             class="<?php echo (strpos($_SERVER['PHP_SELF'], 'routes') !== false) ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'; ?> group flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all">
@@ -764,24 +830,24 @@ $user_preferences_json = json_encode($user_preferences);
       </div>
 
       <div class="content">
-       
+
 
         <div class="grid-wrap" id="dashboardGrid">
           <!-- LEFT COLUMN: Drivers THEN Route Orders THEN Orders -->
           <div class="left-column" id="leftColumn">
             <div class="column-resizer" id="columnResizer"></div>
-            
+
             <!-- Drivers Section -->
             <div class="panel resizable-panel " id="driversPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
-              
+
               <div class="section-header">
                 <div class="flex items-center gap-2">
                   <h2 class="text-lg font-semibold">Drivers</h2>
                   <span class="workflow-step">Step 2: Assign Routes</span>
                 </div>
-               <a href="../pages/riders/index.php" class="text-indigo-600 text-sm">Manage</a>
+                <a href="../pages/riders/index.php" class="text-indigo-600 text-sm">Manage</a>
               </div>
               <div class="workflow-indicator">Drag routes here to assign to drivers</div>
               <div id="driversList" class="drivers-list">
@@ -795,7 +861,8 @@ $user_preferences_json = json_encode($user_preferences);
                   <tbody id="driversTableBody">
                     <?php if ($riders_result && mysqli_num_rows($riders_result) > 0): ?>
                       <?php while ($r = mysqli_fetch_assoc($riders_result)): ?>
-                        <tr class="bg-white border-b hover:bg-gray-50 drop-zone" data-driver-id="<?php echo intval($r['id']); ?>">
+                        <tr class="bg-white border-b hover:bg-gray-50 drop-zone"
+                          data-driver-id="<?php echo intval($r['id']); ?>">
                           <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">
                             <?php echo htmlspecialchars($r['name'] ?? ''); ?>
                             <div class="loading-spinner"></div>
@@ -867,7 +934,8 @@ $user_preferences_json = json_encode($user_preferences);
                               <span class="text-green-600 font-semibold">
                                 Route <?php echo $order['manifest_id']; ?>
                                 <?php if ($order['assigned_rider_name']): ?>
-                                  <br><span class="text-gray-500"><?php echo htmlspecialchars($order['assigned_rider_name']); ?></span>
+                                  <br><span
+                                    class="text-gray-500"><?php echo htmlspecialchars($order['assigned_rider_name']); ?></span>
                                 <?php endif; ?>
                               </span>
                             <?php else: ?>
@@ -890,7 +958,7 @@ $user_preferences_json = json_encode($user_preferences);
             <div class="panel resizable-panel" id="ordersPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
-              
+
               <div class="section-header">
                 <div class="flex items-center gap-2">
                   <h2 class="text-lg font-semibold">Unassigned Orders</h2>
@@ -902,7 +970,7 @@ $user_preferences_json = json_encode($user_preferences);
                   <a href="orders/index.php" class="text-indigo-600 text-sm">View all →</a>
                 </div>
               </div>
-              
+
               <div class="workflow-indicator">Drag orders to routes first, then assign routes to drivers</div>
               <div class="orders-list" id="ordersList">
                 <table class="w-full text-sm text-left text-gray-500">
@@ -916,7 +984,8 @@ $user_preferences_json = json_encode($user_preferences);
                   <tbody id="ordersTableBody">
                     <?php if ($recent_orders_result && mysqli_num_rows($recent_orders_result) > 0): ?>
                       <?php while ($order = mysqli_fetch_assoc($recent_orders_result)): ?>
-                        <tr class="bg-white border-b hover:bg-gray-50 draggable-row" draggable="true" data-order-id="<?php echo intval($order['id']); ?>">
+                        <tr class="bg-white border-b hover:bg-gray-50 draggable-row" draggable="true"
+                          data-order-id="<?php echo intval($order['id']); ?>">
                           <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">
                             <?php echo htmlspecialchars($order['order_number']); ?>
                           </td>
@@ -929,7 +998,9 @@ $user_preferences_json = json_encode($user_preferences);
                         </tr>
                       <?php endwhile; ?>
                     <?php else: ?>
-                      <tr><td colspan="3" class="text-center py-4">No unassigned orders found</td></tr>
+                      <tr>
+                        <td colspan="3" class="text-center py-4">No unassigned orders found</td>
+                      </tr>
                     <?php endif; ?>
                   </tbody>
                 </table>
@@ -942,7 +1013,7 @@ $user_preferences_json = json_encode($user_preferences);
             <div class="panel resizable-panel " id="mapPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
-              
+
               <div class="flex justify-between items-center ">
                 <h2 class="text-lg font-semibold">Drivers Location Map</h2>
                 <div class="text-sm text-gray-500" id="lastUpdate">Last update: 0 drivers</div>
@@ -953,18 +1024,18 @@ $user_preferences_json = json_encode($user_preferences);
             <div class="panel resizable-panel" id="routesPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
-              
+
               <div class="section-header">
                 <div class="flex items-center gap-2">
                   <h2 class="text-lg font-semibold">Routes</h2>
                   <span class="workflow-step">Collect Orders → Assign to Drivers</span>
                 </div>
                 <div class="flex items-center gap-4">
-               <a href="../pages/manifests/create.php" class="text-indigo-600 text-sm">Create Route</a>
-              <a href="../pages/manifests/index.php" class="text-indigo-600 text-sm">View all →</a>
+                  <a href="../pages/manifests/create.php" class="text-indigo-600 text-sm">Create Route</a>
+                  <a href="../pages/manifests/index.php" class="text-indigo-600 text-sm">View all →</a>
                 </div>
               </div>
-              
+
               <div class="workflow-indicator">Routes ready for assignment to drivers</div>
               <div class="routes-list" id="routesList">
                 <table class="w-full text-sm text-left text-gray-500">
@@ -979,9 +1050,9 @@ $user_preferences_json = json_encode($user_preferences);
                   <tbody id="routesTableBody">
                     <?php if ($routes_result && mysqli_num_rows($routes_result) > 0): ?>
                       <?php while ($r = mysqli_fetch_assoc($routes_result)): ?>
-                        <tr class="bg-white border-b hover:bg-gray-50 drop-zone <?php echo ($r['total_orders'] > 0) ? 'draggable-row' : ''; ?>" 
-                            data-route-id="<?php echo intval($r['id']); ?>" 
-                            <?php echo ($r['total_orders'] > 0) ? 'draggable="true"' : ''; ?>>
+                        <tr
+                          class="bg-white border-b hover:bg-gray-50 drop-zone <?php echo ($r['total_orders'] > 0) ? 'draggable-row' : ''; ?>"
+                          data-route-id="<?php echo intval($r['id']); ?>" <?php echo ($r['total_orders'] > 0) ? 'draggable="true"' : ''; ?>>
                           <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">
                             R-<?php echo intval($r['id']); ?>
                             <div class="loading-spinner"></div>
@@ -1020,11 +1091,85 @@ $user_preferences_json = json_encode($user_preferences);
 
   <script>
     // Sidebar behavior 
+    // ========== SIDEBAR DEBUGGING VERSION ==========
+    console.log('[SIDEBAR DEBUG] Script started loading at:', new Date().toISOString());
+
+    // Sidebar behavior with extensive logging
+    console.log('[SIDEBAR DEBUG] Attempting to get sidebar element...');
     const sidebar = document.getElementById('sidebar');
+    console.log('[SIDEBAR DEBUG] Sidebar element:', sidebar ? 'FOUND' : 'NOT FOUND');
+    console.log('[SIDEBAR DEBUG] Sidebar classes:', sidebar ? sidebar.className : 'N/A');
+
     let pinned = false;
-    function sidebarHover(incoming) { if (pinned) return; incoming ? sidebar.classList.add('expanded') : sidebar.classList.remove('expanded'); }
-    function toggleSidebar() { pinned = !pinned; sidebar.classList.toggle('expanded', pinned); }
-    sidebar.classList.remove('expanded');
+    console.log('[SIDEBAR DEBUG] Initial pinned state:', pinned);
+
+    function sidebarHover(incoming) {
+      console.log('[SIDEBAR DEBUG] sidebarHover called with incoming:', incoming);
+      console.log('[SIDEBAR DEBUG] Current pinned state:', pinned);
+
+      if (pinned) {
+        console.log('[SIDEBAR DEBUG] Sidebar is pinned, ignoring hover');
+        return;
+      }
+
+      const sidebar = document.getElementById('sidebar');
+      console.log('[SIDEBAR DEBUG] Sidebar element in hover:', sidebar ? 'EXISTS' : 'NULL');
+
+      if (incoming) {
+        console.log('[SIDEBAR DEBUG] Adding expanded class');
+        sidebar.classList.add('expanded');
+        console.log('[SIDEBAR DEBUG] Classes after add:', sidebar.className);
+      } else {
+        console.log('[SIDEBAR DEBUG] Removing expanded class');
+        sidebar.classList.remove('expanded');
+        console.log('[SIDEBAR DEBUG] Classes after remove:', sidebar.className);
+      }
+    }
+
+    function toggleSidebar() {
+      console.log('[SIDEBAR DEBUG] toggleSidebar called');
+      pinned = !pinned;
+      console.log('[SIDEBAR DEBUG] New pinned state:', pinned);
+
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('expanded', pinned);
+      console.log('[SIDEBAR DEBUG] Classes after toggle:', sidebar.className);
+    }
+
+    // Check if inline handlers are working
+    console.log('[SIDEBAR DEBUG] Checking if sidebarHover is accessible globally...');
+    console.log('[SIDEBAR DEBUG] typeof sidebarHover:', typeof sidebarHover);
+    console.log('[SIDEBAR DEBUG] typeof toggleSidebar:', typeof toggleSidebar);
+
+    // Force remove expanded class
+    if (sidebar) {
+      console.log('[SIDEBAR DEBUG] Force removing expanded class');
+      sidebar.classList.remove('expanded');
+      console.log('[SIDEBAR DEBUG] Final sidebar classes:', sidebar.className);
+    } else {
+      console.log('[SIDEBAR DEBUG] ERROR: Cannot remove expanded class - sidebar is null');
+    }
+
+    // Test hover functionality after a delay
+    setTimeout(() => {
+      console.log('[SIDEBAR DEBUG] Testing hover after 2 seconds...');
+      const testSidebar = document.getElementById('sidebar');
+      console.log('[SIDEBAR DEBUG] Sidebar exists?', !!testSidebar);
+
+      if (testSidebar) {
+        console.log('[SIDEBAR DEBUG] Sidebar onmouseenter:', testSidebar.onmouseenter);
+        console.log('[SIDEBAR DEBUG] Sidebar onmouseleave:', testSidebar.onmouseleave);
+
+        // Check if event listeners are attached
+        console.log('[SIDEBAR DEBUG] Attempting manual hover test...');
+        sidebarHover(true);
+
+        setTimeout(() => {
+          console.log('[SIDEBAR DEBUG] Attempting manual hover leave...');
+          sidebarHover(false);
+        }, 1000);
+      }
+    }, 2000);
 
     // Message system
     function showMessage(text, type = 'success') {
@@ -1045,22 +1190,19 @@ $user_preferences_json = json_encode($user_preferences);
     let draggedOrderId = null;
     let draggedRouteId = null;
     let draggedElement = null;
-    let dragType = null; // 'order' or 'route'
+    let dragType = null;
 
     // Route Orders Management
     let selectedRouteId = null;
     let allOrdersData = [];
 
     const routeOrdersManager = {
-      // Initialize route orders functionality
       init() {
         this.loadAllOrders();
         this.setupRouteClickHandlers();
         this.setupClearSelection();
         console.log('Route Orders Manager initialized');
       },
-
-      // Load all orders data via AJAX
       async loadAllOrders() {
         try {
           this.displayCurrentOrders();
@@ -1070,14 +1212,10 @@ $user_preferences_json = json_encode($user_preferences);
           console.error('Error loading orders:', error);
         }
       },
-
-      // Display current orders from PHP data
       displayCurrentOrders() {
         const rows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row');
         this.updateOrdersCount(rows.length);
       },
-
-      // Setup click handlers for route rows
       setupRouteClickHandlers() {
         document.addEventListener('click', (e) => {
           if (e.target.closest('.draggable-row.dragging')) return;
@@ -1088,16 +1226,12 @@ $user_preferences_json = json_encode($user_preferences);
           }
         });
       },
-
-      // Setup clear selection button
       setupClearSelection() {
         const clearBtn = document.getElementById('clearRouteSelection');
         clearBtn.addEventListener('click', () => {
           this.clearRouteSelection();
         });
       },
-
-      // Select a route and show its orders
       async selectRoute(routeId) {
         if (selectedRouteId === routeId) {
           this.clearRouteSelection();
@@ -1108,8 +1242,6 @@ $user_preferences_json = json_encode($user_preferences);
         await this.loadRouteOrders(routeId);
         this.highlightSelectedRoute(routeId);
       },
-
-      // Load orders for specific route
       async loadRouteOrders(routeId) {
         const tableBody = document.getElementById('routeOrdersTableBody');
         tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
@@ -1126,17 +1258,17 @@ $user_preferences_json = json_encode($user_preferences);
                 row.className = 'bg-white border-b hover:bg-gray-50 route-order-row';
                 row.dataset.orderId = order.id;
                 row.innerHTML = `
-                  <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">${order.order_number}</td>
-                  <td class="py-2 px-4">${order.customer_name || 'N/A'}</td>
-                  <td class="py-2 px-4">
-                    <span class="status-pill status-${order.status}">
-                      ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                    </span>
-                  </td>
-                  <td class="py-2 px-4 text-xs">
-                    <span class="text-green-600 font-semibold">Route ${routeId}</span>
-                  </td>
-                `;
+              <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">${order.order_number}</td>
+              <td class="py-2 px-4">${order.customer_name || 'N/A'}</td>
+              <td class="py-2 px-4">
+                <span class="status-pill status-${order.status}">
+                  ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                </span>
+              </td>
+              <td class="py-2 px-4 text-xs">
+                <span class="text-green-600 font-semibold">Route ${routeId}</span>
+              </td>
+            `;
                 tableBody.appendChild(row);
               });
               const noOrdersRow = document.getElementById('noRouteOrdersRow');
@@ -1156,8 +1288,6 @@ $user_preferences_json = json_encode($user_preferences);
           this.updateOrdersCount(0);
         }
       },
-
-      // Clear route selection and show all orders
       clearRouteSelection() {
         selectedRouteId = null;
         this.updateRouteSelectionUI(null);
@@ -1168,8 +1298,6 @@ $user_preferences_json = json_encode($user_preferences);
         this.updateOrdersCount(allRows.length);
         this.highlightSelectedRoute(null);
       },
-
-      // Update UI elements based on route selection
       updateRouteSelectionUI(routeId) {
         const title = document.getElementById('routeOrdersTitle');
         const workflowStep = document.getElementById('routeOrdersWorkflowStep');
@@ -1188,8 +1316,6 @@ $user_preferences_json = json_encode($user_preferences);
           clearBtn.classList.add('hidden');
         }
       },
-
-      // Highlight selected route in routes table
       highlightSelectedRoute(routeId) {
         document.querySelectorAll('#routesTableBody tr').forEach(row => {
           row.classList.remove('route-selected');
@@ -1199,8 +1325,6 @@ $user_preferences_json = json_encode($user_preferences);
           if (routeRow) routeRow.classList.add('route-selected');
         }
       },
-
-      // Update orders count display
       updateOrdersCount(count) {
         if (count === undefined) {
           const visibleRows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row[style=""], #routeOrdersTableBody tr.route-order-row:not([style])');
@@ -1209,8 +1333,6 @@ $user_preferences_json = json_encode($user_preferences);
         const countElement = document.getElementById('routeOrdersCount');
         countElement.textContent = `${count} order${count !== 1 ? 's' : ''}`;
       },
-
-      // Refresh route orders data
       refresh() {
         setTimeout(() => {
           if (selectedRouteId) {
@@ -1221,6 +1343,11 @@ $user_preferences_json = json_encode($user_preferences);
         }, 500);
       }
     };
+
+    // REST OF YOUR CODE CONTINUES HERE...
+    // (Include all your drag and drop, map initialization, and resizing code)
+
+    console.log('[SIDEBAR DEBUG] End of script definitions');
 
     // DRAG AND DROP IMPLEMENTATION
 
@@ -1505,7 +1632,7 @@ $user_preferences_json = json_encode($user_preferences);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
- 
+
     setTimeout(() => {
       map.invalidateSize();
     }, 300);
@@ -1556,128 +1683,155 @@ $user_preferences_json = json_encode($user_preferences);
     }
 
     // Resizable panels functionality
-   function initializeResizablePanels() {
-  initializePanelResizing();
-  initializeColumnResizing();
-  console.log('Resizable panels initialized with database storage');
-}
+    function initializeResizablePanels() {
+      initializePanelResizing();
+      initializeColumnResizing();
+      console.log('Resizable panels initialized with database storage');
+    }
     // Initialize individual panel resizing
-  function initializePanelResizing() {
-  document.querySelectorAll('.resizable-panel').forEach(panel => {
-    const resizeHandleV = panel.querySelector('.resize-handle-v');
-    const resizeHandleCorner = panel.querySelector('.resize-handle-corner');
-    if (resizeHandleV) initializeResizeHandle(resizeHandleV, panel, 'vertical');
-    if (resizeHandleCorner) initializeResizeHandle(resizeHandleCorner, panel, 'both');
-  });
-}
-    // Initialize column resizing
-   function initializeColumnResizing() {
-  const columnResizer = document.getElementById('columnResizer');
-  const leftColumn = document.getElementById('leftColumn');
-  const dashboardGrid = document.getElementById('dashboardGrid');
-
-  if (!columnResizer || !leftColumn || !dashboardGrid) return;
-
-  let isResizing = false;
-  let startX = 0;
-  let startWidth = 0;
-
-  columnResizer.addEventListener('mousedown', (e) => {
-    isResizing = true;
-    startX = e.clientX;
-    startWidth = leftColumn.offsetWidth;
-    columnResizer.classList.add('dragging');
-    document.addEventListener('mousemove', handleColumnResize);
-    document.addEventListener('mouseup', stopColumnResize);
-    e.preventDefault();
-  });
-
-  function handleColumnResize(e) {
-    if (!isResizing) return;
-    const deltaX = e.clientX - startX;
-    const newWidth = Math.max(250, Math.min(startWidth + deltaX, window.innerWidth - 300));
-    const percentage = (newWidth / dashboardGrid.offsetWidth) * 100;
-    dashboardGrid.style.gridTemplateColumns = `${percentage}% 1fr`;
-  }
-
-  function stopColumnResize() {
-    isResizing = false;
-    columnResizer.classList.remove('dragging');
-    
-    // Save grid columns to database
-    const gridColumns = dashboardGrid.style.gridTemplateColumns;
-    saveLayoutToDatabase('dashboardGrid', null, null, gridColumns);
-    
-    document.removeEventListener('mousemove', handleColumnResize);
-    document.removeEventListener('mouseup', stopColumnResize);
-  }
-}
-
-// Initialize resize handle for panels with DB save
-function initializeResizeHandle(handle, panel, direction) {
-  let isResizing = false;
-  let startX = 0, startY = 0, startWidth = 0, startHeight = 0;
-
-  handle.addEventListener('mousedown', (e) => {
-    isResizing = true;
-    panel.classList.add('resizing');
-    startX = e.clientX;
-    startY = e.clientY;
-    startWidth = parseInt(document.defaultView.getComputedStyle(panel).width, 10);
-    startHeight = parseInt(document.defaultView.getComputedStyle(panel).height, 10);
-    document.addEventListener('mousemove', handleResize);
-    document.addEventListener('mouseup', stopResize);
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-  });
-
-  function handleResize(e) {
-    if (!isResizing) return;
-    if (direction === 'vertical' || direction === 'both') {
-      const newHeight = Math.max(200, startHeight + e.clientY - startY);
-      panel.style.height = newHeight + 'px';
-    }
-    if (direction === 'horizontal' || direction === 'both') {
-      const newWidth = Math.max(250, startWidth + e.clientX - startX);
-      panel.style.width = newWidth + 'px';
-    }
-    if (panel.id === 'mapPanel') {
-      setTimeout(() => map.invalidateSize(), 100);
-    }
-  }
-
-
-    // Make resize handles sticky when scrolling
-    function makeResizeHandlesSticky() {
+    function initializePanelResizing() {
       document.querySelectorAll('.resizable-panel').forEach(panel => {
-        const handleV = panel.querySelector('.resize-handle-v');
-        const handleCorner = panel.querySelector('.resize-handle-corner');
-        
-        if (!handleV && !handleCorner) return;
-        
-        // Update handle positions on scroll
-        panel.addEventListener('scroll', () => {
-          const scrollTop = panel.scrollTop;
-          const scrollHeight = panel.scrollHeight;
-          const clientHeight = panel.clientHeight;
-          
-          // Calculate how much to offset the handles
-          const maxScroll = scrollHeight - clientHeight;
-          const offset = Math.min(scrollTop, maxScroll);
-          
-          if (handleV) {
-            handleV.style.transform = `translateY(${offset}px)`;
-          }
-          if (handleCorner) {
-            handleCorner.style.transform = `translateY(${offset}px)`;
-          }
-        });
+        const resizeHandleV = panel.querySelector('.resize-handle-v');
+        const resizeHandleCorner = panel.querySelector('.resize-handle-corner');
+        if (resizeHandleV) initializeResizeHandle(resizeHandleV, panel, 'vertical');
+        if (resizeHandleCorner) initializeResizeHandle(resizeHandleCorner, panel, 'both');
       });
-      
-      console.log('Sticky resize handles initialized');
+    }
+    // Initialize column resizing
+    function initializeColumnResizing() {
+      const columnResizer = document.getElementById('columnResizer');
+      const leftColumn = document.getElementById('leftColumn');
+      const dashboardGrid = document.getElementById('dashboardGrid');
+
+      if (!columnResizer || !leftColumn || !dashboardGrid) return;
+
+      let isResizing = false;
+      let startX = 0;
+      let startWidth = 0;
+
+      columnResizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startX = e.clientX;
+        startWidth = leftColumn.offsetWidth;
+        columnResizer.classList.add('dragging');
+        document.addEventListener('mousemove', handleColumnResize);
+        document.addEventListener('mouseup', stopColumnResize);
+        e.preventDefault();
+      });
+
+      function handleColumnResize(e) {
+        if (!isResizing) return;
+        const deltaX = e.clientX - startX;
+        const newWidth = Math.max(250, Math.min(startWidth + deltaX, window.innerWidth - 300));
+        const percentage = (newWidth / dashboardGrid.offsetWidth) * 100;
+        dashboardGrid.style.gridTemplateColumns = `${percentage}% 1fr`;
+      }
+
+      function stopColumnResize() {
+        isResizing = false;
+        columnResizer.classList.remove('dragging');
+
+        // Save grid columns to database
+        const gridColumns = dashboardGrid.style.gridTemplateColumns;
+        saveLayoutToDatabase('dashboardGrid', null, null, gridColumns);
+
+        document.removeEventListener('mousemove', handleColumnResize);
+        document.removeEventListener('mouseup', stopColumnResize);
+      }
     }
 
+    // Initialize resize handle for panels with DB save
+    function initializeResizeHandle(handle, panel, direction) {
+      let isResizing = false;
+      let startX = 0, startY = 0, startWidth = 0, startHeight = 0;
+
+      handle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        panel.classList.add('resizing');
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = parseInt(document.defaultView.getComputedStyle(panel).width, 10);
+        startHeight = parseInt(document.defaultView.getComputedStyle(panel).height, 10);
+        document.addEventListener('mousemove', handleResize);
+        document.addEventListener('mouseup', stopResize);
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      });
+
+      function handleResize(e) {
+        if (!isResizing) return;
+        if (direction === 'vertical' || direction === 'both') {
+          const newHeight = Math.max(200, startHeight + e.clientY - startY);
+          panel.style.height = newHeight + 'px';
+        }
+        if (direction === 'horizontal' || direction === 'both') {
+          const newWidth = Math.max(250, startWidth + e.clientX - startX);
+          panel.style.width = newWidth + 'px';
+        }
+        if (panel.id === 'mapPanel') {
+          setTimeout(() => map.invalidateSize(), 100);
+        }
+      }
+
+
+      // Make resize handles sticky when scrolling
+
+      function makeResizeHandlesSticky() {
+        document.querySelectorAll('.resizable-panel').forEach(panel => {
+          const handleV = panel.querySelector('.resize-handle-v');
+          const handleCorner = panel.querySelector('.resize-handle-corner');
+
+          if (!handleV && !handleCorner) return;
+
+          // Update handle positions on scroll
+          panel.addEventListener('scroll', () => {
+            const scrollTop = panel.scrollTop;
+            const scrollHeight = panel.scrollHeight;
+            const clientHeight = panel.clientHeight;
+
+            // Calculate how much we've scrolled
+            const maxScroll = scrollHeight - clientHeight;
+
+            if (maxScroll > 0) {
+              // Only apply transform if there's actual scrolling happening
+              const offset = scrollTop;
+
+              if (handleV) {
+                handleV.style.transform = `translateY(${offset}px)`;
+                handleV.style.transition = 'none'; // Remove transition during scroll
+              }
+              if (handleCorner) {
+                handleCorner.style.transform = `translate(0, ${offset}px)`;
+                handleCorner.style.transition = 'none'; // Remove transition during scroll
+              }
+            } else {
+              // Reset if no scroll
+              if (handleV) handleV.style.transform = 'translateY(0)';
+              if (handleCorner) handleCorner.style.transform = 'translate(0, 0)';
+            }
+          });
+        });
+
+        console.log('Sticky resize handles initialized');
+      }
+
+
+
+
+      function stopResize() {
+        isResizing = false;
+        panel.classList.remove('resizing');
+
+        // Save to database instead of localStorage
+        saveLayoutToDatabase(panel.id, panel.style.width, panel.style.height);
+
+        document.removeEventListener('mousemove', handleResize);
+        document.removeEventListener('mouseup', stopResize);
+      }
+    }
+
+    const userPreferences = <?php echo $user_preferences_json; ?> || {};
     const defaultGridColumns = '60% 40%';
 
     const defaultSizes = {
@@ -1689,81 +1843,46 @@ function initializeResizeHandle(handle, panel, direction) {
       mapPanel: { width: '100%', height: '310px' },
       routesPanel: { width: '100%', height: '275px' }
     };
+    async function saveLayoutToDatabase(panelId, width, height, gridColumns = null) {
+      try {
+        const response = await fetch('../api/save_dashboard_layout.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            panel_id: panelId,
+            width: width,
+            height: height,
+            grid_columns: gridColumns
+          })
+        });
 
-    // Restore saved sizes with fallback to defaults
+        const result = await response.json();
+        if (!result.success) {
+          console.error('Failed to save layout:', result.message);
+        } else {
+          console.log(`Layout saved for ${panelId}`);
+        }
+      } catch (error) {
+        console.error('Error saving layout:', error);
+      }
+    }
+
+
     function applySavedSizes() {
       document.querySelectorAll('.resizable-panel').forEach(panel => {
-        const saved = JSON.parse(localStorage.getItem('panel-size-' + panel.id));
-        const fallback = defaultSizes[panel.id] || {};
-        panel.style.width = (saved && saved.width) || fallback.width || '100%';
-        panel.style.height = (saved && saved.height) || fallback.height || '220px';
+        const panelId = panel.id;
+        const savedFromDB = userPreferences[panelId];
+        const fallback = defaultSizes[panelId] || {};
+
+        panel.style.width = (savedFromDB && savedFromDB.width) || fallback.width || '100%';
+        panel.style.height = (savedFromDB && savedFromDB.height) || fallback.height || '220px';
       });
+
+      const dashboardGrid = document.getElementById('dashboardGrid');
+      if (userPreferences['dashboardGrid'] && userPreferences['dashboardGrid'].grid_columns) {
+        dashboardGrid.style.gridTemplateColumns = userPreferences['dashboardGrid'].grid_columns;
+      }
     }
-
-  function stopResize() {
-    isResizing = false;
-    panel.classList.remove('resizing');
-    
-    // Save to database instead of localStorage
-    saveLayoutToDatabase(panel.id, panel.style.width, panel.style.height);
-    
-    document.removeEventListener('mousemove', handleResize);
-    document.removeEventListener('mouseup', stopResize);
-  }
-}
-
-    const userPreferences = <?php echo $user_preferences_json; ?> || {};
-   const defaultGridColumns = '60% 40%';
-
-const defaultSizes = {
-  // Left Column Panels
-  driversPanel: { width: '100%', height: '180px' },
-  routeOrdersPanel: { width: '100%', height: '200px' },
-  ordersPanel: { width: '100%', height: '190px' },
-  // Right Column Panels
-  mapPanel: { width: '100%', height: '310px' },
-  routesPanel: { width: '100%', height: '275px' }
-};
-    async function saveLayoutToDatabase(panelId, width, height, gridColumns = null) {
-  try {
-    const response = await fetch('../api/save_dashboard_layout.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        panel_id: panelId,
-        width: width,
-        height: height,
-        grid_columns: gridColumns
-      })
-    });
-
-    const result = await response.json();
-    if (!result.success) {
-      console.error('Failed to save layout:', result.message);
-    } else {
-      console.log(`Layout saved for ${panelId}`);
-    }
-  } catch (error) {
-    console.error('Error saving layout:', error);
-  }
-}
-
-
-function applySavedSizes() {
-  document.querySelectorAll('.resizable-panel').forEach(panel => {
-    const panelId = panel.id;
-    const savedFromDB = userPreferences[panelId];
-    const fallback = defaultSizes[panelId] || {};
-    
-    panel.style.width = (savedFromDB && savedFromDB.width) || fallback.width || '100%';
-    panel.style.height = (savedFromDB && savedFromDB.height) || fallback.height || '220px';
-  });
-
-  const dashboardGrid = document.getElementById('dashboardGrid');
-  if (userPreferences['dashboardGrid'] && userPreferences['dashboardGrid'].grid_columns) {
-    dashboardGrid.style.gridTemplateColumns = userPreferences['dashboardGrid'].grid_columns;
-  }
-}
     // Initialize everything
     document.addEventListener('DOMContentLoaded', () => {
       console.log('DOM loaded, initializing...');
@@ -1778,7 +1897,8 @@ function applySavedSizes() {
 
       initializeDragAndDrop();
       initializeResizablePanels();
-      makeResizeHandlesSticky(); // NEW: Initialize sticky resize handles
+      makeResizeHandlesSticky();
+
 
       // Delay init a little longer so layout is stable
       setTimeout(() => routeOrdersManager.init(), 200);
@@ -1786,9 +1906,7 @@ function applySavedSizes() {
 
     window.addEventListener('load', fixMap);
     window.addEventListener('resize', fixMap);
-</script>
+  </script>
 
   <style>
-</body>
-
-</html>
+    </body></html>
