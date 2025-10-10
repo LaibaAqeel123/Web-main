@@ -1021,13 +1021,11 @@ $user_preferences_json = json_encode($user_preferences);
   <div id="messageContainer"></div>
 
 
-   
 <script>
-// ========== SIDEBAR ==========
+  // ========== SIDEBAR ==========
 const sidebar = document.getElementById('sidebar');
 let pinned = false;
 
-// Ensure sidebar starts collapsed
 if (sidebar && sidebar.classList.contains('expanded')) {
   sidebar.classList.remove('expanded');
 }
@@ -1082,17 +1080,11 @@ const routeOrdersManager = {
     this.loadAllOrders();
     this.setupRouteClickHandlers();
     this.setupClearSelection();
-    console.log('Route Orders Manager initialized');
   },
   
   async loadAllOrders() {
-    try {
-      this.displayCurrentOrders();
-      this.updateOrdersCount();
-      console.log('Route orders initialized with current data');
-    } catch (error) {
-      console.error('Error loading orders:', error);
-    }
+    this.displayCurrentOrders();
+    this.updateOrdersCount();
   },
   
   displayCurrentOrders() {
@@ -1169,12 +1161,10 @@ const routeOrdersManager = {
         }
         this.updateOrdersCount(orders.length);
       } else {
-        console.error('Failed to load route orders:', orders.error);
         tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">${orders.error || 'Failed to load data.'}</td></tr>`;
         this.updateOrdersCount(0);
       }
     } catch (error) {
-      console.error('Fetch error:', error);
       tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">Failed to connect to server.</td></tr>`;
       this.updateOrdersCount(0);
     }
@@ -1247,7 +1237,6 @@ const routeOrdersManager = {
 function setupDraggableOrders() {
   const orderRows = document.querySelectorAll('#ordersTableBody tr.draggable-row[data-order-id]');
   orderRows.forEach(row => {
-    // Remove existing listeners by cloning
     const newRow = row.cloneNode(true);
     row.parentNode.replaceChild(newRow, row);
     
@@ -1260,7 +1249,6 @@ function setupDraggableOrders() {
       e.dataTransfer.setData('text/plain', draggedOrderId);
       e.dataTransfer.effectAllowed = 'move';
       createDragGhost(newRow, e);
-      console.log(`Started dragging order: ${draggedOrderId}`);
     });
 
     newRow.addEventListener('dragend', () => {
@@ -1269,16 +1257,13 @@ function setupDraggableOrders() {
       draggedOrderId = null;
       draggedElement = null;
       dragType = null;
-      console.log('Order drag ended');
     });
   });
-  console.log(`Setup ${orderRows.length} draggable order rows`);
 }
 
 function setupDraggableRoutes() {
   const routeRows = document.querySelectorAll('#routesTableBody tr.draggable-row[data-route-id][draggable="true"]');
   routeRows.forEach(row => {
-    // Remove existing listeners by cloning
     const newRow = row.cloneNode(true);
     row.parentNode.replaceChild(newRow, row);
     
@@ -1291,7 +1276,6 @@ function setupDraggableRoutes() {
       e.dataTransfer.setData('text/plain', draggedRouteId);
       e.dataTransfer.effectAllowed = 'move';
       createDragGhost(newRow, e);
-      console.log(`Started dragging route: ${draggedRouteId}`);
     });
 
     newRow.addEventListener('dragend', () => {
@@ -1300,10 +1284,8 @@ function setupDraggableRoutes() {
       draggedRouteId = null;
       draggedElement = null;
       dragType = null;
-      console.log('Route drag ended');
     });
   });
-  console.log(`Setup ${routeRows.length} draggable route rows`);
 }
 
 function createDragGhost(row, e) {
@@ -1350,7 +1332,6 @@ function setupRouteDropTargets() {
       await assignOrderToRoute(orderId, routeId, newRow);
     });
   });
-  console.log(`Setup ${routeRows.length} route drop targets`);
 }
 
 function setupDriverDropTargets() {
@@ -1382,7 +1363,6 @@ function setupDriverDropTargets() {
       await assignRouteToDriver(routeId, riderId, newRow);
     });
   });
-  console.log(`Setup ${driverRows.length} driver drop targets`);
 }
 
 async function assignOrderToRoute(orderId, routeId, targetRow) {
@@ -1390,7 +1370,6 @@ async function assignOrderToRoute(orderId, routeId, targetRow) {
   if (spinner) spinner.style.display = 'inline-block';
 
   try {
-    console.log(`Assigning order ${orderId} to route ${routeId}`);
     const response = await fetch('../api/assign_order_to_route.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1401,7 +1380,6 @@ async function assignOrderToRoute(orderId, routeId, targetRow) {
     });
 
     const result = await response.json();
-    console.log('Assignment result:', result);
 
     if (result.success) {
       if (draggedElement && draggedElement.dataset.orderId == orderId) {
@@ -1417,7 +1395,6 @@ async function assignOrderToRoute(orderId, routeId, targetRow) {
       showMessage(result.message || 'Failed to add order to route', 'error');
     }
   } catch (error) {
-    console.error('Assignment error:', error);
     showMessage('Network error occurred', 'error');
   } finally {
     if (spinner) spinner.style.display = 'none';
@@ -1429,7 +1406,6 @@ async function assignRouteToDriver(routeId, riderId, targetRow) {
   if (spinner) spinner.style.display = 'inline-block';
 
   try {
-    console.log(`Assigning route ${routeId} to rider ${riderId}`);
     const response = await fetch('../api/assign_route_to_rider.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1440,7 +1416,6 @@ async function assignRouteToDriver(routeId, riderId, targetRow) {
     });
 
     const result = await response.json();
-    console.log('Route assignment result:', result);
 
     if (result.success) {
       if (draggedElement && draggedElement.dataset.routeId == routeId) {
@@ -1454,7 +1429,6 @@ async function assignRouteToDriver(routeId, riderId, targetRow) {
       showMessage(result.message || 'Failed to assign route to driver', 'error');
     }
   } catch (error) {
-    console.error('Route assignment error:', error);
     showMessage('Network error occurred', 'error');
   } finally {
     if (spinner) spinner.style.display = 'none';
@@ -1503,155 +1477,110 @@ function getDriverName(riderId) {
 }
 
 function initializeDragAndDrop() {
-  console.log('Initializing drag and drop functionality...');
   setupDraggableOrders();
   setupDraggableRoutes();
   setupRouteDropTargets();
   setupDriverDropTargets();
-  console.log('Drag and drop initialization complete');
 }
 
-// ========== MAP INITIALIZATION ==========
+// ========== MAP INITIALIZATION - ONLY MAP LOGS HERE ==========
 const drivers = <?php echo json_encode($riders_locations); ?> || [];
 const markers = {};
 let map = null;
-
 function initializeMap() {
+  console.log('[MAP] === initializeMap() CALLED ===');
+  console.log('[MAP] Document readyState:', document.readyState);
+  console.log('[MAP] Drivers data:', drivers);
+
   try {
     const mapContainer = document.getElementById('map');
+    console.log('[MAP] Map container found:', !!mapContainer);
+
     if (!mapContainer) {
-      console.error('Map container not found');
-      setTimeout(initializeMap, 200); // Retry
+      console.error('[MAP] ❌ Map container NOT found, retrying in 200ms');
+      setTimeout(initializeMap, 200);
       return;
     }
-    
-    // Force container to have dimensions
+
     const mapPanel = document.getElementById('mapPanel');
+    console.log('[MAP] Map panel found:', !!mapPanel);
+    console.log('[MAP] Map panel height:', mapPanel ? mapPanel.style.height : 'N/A');
+
     if (mapPanel && mapPanel.style.height) {
       const height = parseInt(mapPanel.style.height) || 310;
-      mapContainer.style.height = (height - 60) + 'px'; // Account for header
+      mapContainer.style.height = (height - 60) + 'px';
+      console.log('[MAP] Set container height to:', mapContainer.style.height);
     } else {
-      mapContainer.style.height = '250px'; // Fallback
+      mapContainer.style.height = '250px';
+      console.log('[MAP] Using fallback height: 250px');
     }
-    
-    if (map) {
+
+    // 🧩 FIX 1: Prevent "already initialized" errors
+    if (mapContainer._leaflet_id) {
+      console.warn('[MAP] Existing Leaflet instance detected — cleaning up');
+      mapContainer._leaflet_id = null;
+    }
+
+    // Remove any old map if exists
+    if (typeof map !== 'undefined' && map) {
+      console.log('[MAP] Existing map found, removing it');
       try {
         map.remove();
-      } catch(e) {
-        console.log('Error removing old map:', e);
+      } catch (e) {
+        console.log('[MAP] Error removing old map:', e);
       }
       map = null;
     }
-    
-    // Initialize immediately
+
+    console.log('[MAP] Creating new Leaflet map...');
     map = L.map('map', {
       center: [51.5074, -0.1278],
       zoom: 10,
       minZoom: 8,
-      maxZoom: 18
+      maxZoom: 18,
     });
+    console.log('[MAP] ✓ Leaflet map created');
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+      attribution: '© OpenStreetMap contributors',
     }).addTo(map);
-    
-    // Multiple invalidation attempts
+    console.log('[MAP] ✓ Tile layer added');
+
+    console.log('[MAP] Scheduling invalidateSize() calls...');
     requestAnimationFrame(() => {
+      console.log('[MAP] invalidateSize() - requestAnimationFrame');
       map.invalidateSize();
-      setTimeout(() => map.invalidateSize(), 50);
-      setTimeout(() => map.invalidateSize(), 150);
-      setTimeout(() => map.invalidateSize(), 300);
-      setTimeout(() => map.invalidateSize(), 600);
+
+      [50, 150, 300, 600].forEach((delay) => {
+        setTimeout(() => {
+          console.log(`[MAP] invalidateSize() - ${delay}ms`);
+          map.invalidateSize();
+        }, delay);
+      });
     });
-    
+
     addMapMarkers();
-    console.log('Map initialized successfully');
-    
+    console.log('[MAP] ✅ Map initialized successfully');
+
+    // 🧩 FIX 2: Ensure map becomes visible after page navigation
+    setTimeout(() => {
+      console.log('[MAP] 🔄 Final visibility fix (invalidateSize after 800ms)');
+      if (map) map.invalidateSize();
+    }, 800);
+
   } catch (error) {
-    console.error('Error initializing map:', error);
-    setTimeout(initializeMap, 500); // Retry on error
+    console.error('[MAP] ❌ Error initializing map:', error);
+    console.error('[MAP] Error stack:', error.stack);
+    setTimeout(initializeMap, 500);
   }
 }
 
-function addMapMarkers() {
-  if (!map) {
-    console.error('Map not initialized yet');
-    return;
-  }
-  
-  Object.values(markers).forEach(marker => marker.remove());
-  Object.keys(markers).forEach(key => delete markers[key]);
 
-  drivers.forEach(loc => {
-    const lat = parseFloat(loc.lat || loc.latitude || 0);
-    const lng = parseFloat(loc.lng || loc.longitude || 0);
-    if (!isFinite(lat) || !isFinite(lng)) return;
-
-    const id = loc.driver_id || loc.id;
-    const icon = L.divIcon({
-      className: '',
-      html: `<div style="text-align:center">
-        <div style="width:12px;height:12px;background:#10B981;border:2px solid white;border-radius:50%;box-shadow:0 0 0 3px rgba(16,185,129,0.3)"></div>
-        <div style="background:#fff;padding:2px 6px;border-radius:6px;margin-top:4px;font-size:11px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.1);color:#374151">${loc.driver_name || 'Driver'}</div>
-      </div>`
-    });
-
-    const marker = L.marker([lat, lng], { icon }).addTo(map);
-    if (loc.created_at) {
-      marker.bindPopup(`
-        <div style="text-align:center;">
-          <strong>${loc.driver_name || 'Driver'}</strong><br/>
-          <small>Last update: ${new Date(loc.created_at).toLocaleString()}</small>
-        </div>
-      `);
-    }
-    markers[id] = marker;
-  });
-
-  const allCoords = Object.values(markers).map(m => m.getLatLng());
-  const lastUpdateEl = document.getElementById('lastUpdate');
-  if (allCoords.length) {
-    const londonBounds = L.latLngBounds([[51.28, -0.51], [51.69, 0.33]]);
-    map.fitBounds(londonBounds);
-    if (lastUpdateEl) lastUpdateEl.innerText = `Last update: ${allCoords.length} drivers`;
-  } else {
-    map.setView([51.5074, -0.1278], 10);
-    if (lastUpdateEl) lastUpdateEl.innerText = 'Last update: 0 drivers';
-  }
-}
-function fixMap() {
-  if (!map) {
-    console.log('Map not initialized, forcing initialization...');
-    initializeMap();
-    return;
-  }
-  
-  // Check if map container still has the leaflet content
-  const mapContainer = document.getElementById('map');
-  if (mapContainer && !mapContainer.querySelector('.leaflet-container')) {
-    console.log('Map container empty, reinitializing...');
-    map = null;
-    initializeMap();
-    return;
-  }
-  
-  setTimeout(() => {
-    try {
-      map.invalidateSize();
-      console.log('Map size invalidated');
-    } catch (error) {
-      console.error('Error fixing map:', error);
-      map = null;
-      initializeMap();
-    }
-  }, 250);
-}
 // ========== RESIZABLE PANELS ==========
 
 function initializeResizablePanels() {
   initializePanelResizing();
   initializeColumnResizing();
-  console.log('Resizable panels initialized');
 }
 
 function initializePanelResizing() {
@@ -1757,13 +1686,8 @@ async function saveLayoutToDatabase(panelId, width, height, gridColumns = null) 
     });
 
     const result = await response.json();
-    if (!result.success) {
-      console.error('Failed to save layout:', result.message);
-    } else {
-      console.log(`Layout saved for ${panelId}`);
-    }
   } catch (error) {
-    console.error('Error saving layout:', error);
+    // Silent fail
   }
 }
 
@@ -1794,56 +1718,94 @@ function applySavedSizes() {
 
 // ========== APP INITIALIZATION ==========
 function initializeApp() {
-  console.log('Initializing app...');
+  console.log('[MAP] ========================================');
+  console.log('[MAP] APP INITIALIZATION STARTED');
+  console.log('[MAP] ========================================');
+  console.log('[MAP] Time:', new Date().toISOString());
+  console.log('[MAP] Document readyState:', document.readyState);
+  console.log('[MAP] Window loaded:', document.readyState === 'complete');
   
   try {
+    console.log('[MAP] Step 1: Applying saved sizes...');
     applySavedSizes();
+    
+    console.log('[MAP] Step 2: Initializing map...');
     initializeMap();
+    
+    console.log('[MAP] Step 3: Initializing resizable panels...');
     initializeResizablePanels();
+    
+    console.log('[MAP] Step 4: Initializing drag and drop...');
     initializeDragAndDrop();
     
+    console.log('[MAP] Step 5: Initializing route orders manager (300ms delay)...');
     setTimeout(() => {
       routeOrdersManager.init();
-      console.log('App initialization complete');
+      console.log('[MAP] ========================================');
+      console.log('[MAP] APP INITIALIZATION COMPLETE');
+      console.log('[MAP] ========================================');
     }, 300);
     
   } catch (error) {
-    console.error('Error during initialization:', error);
+    console.error('[MAP] ❌❌❌ Error during initialization:', error);
+    console.error('[MAP] Error stack:', error.stack);
   }
 }
+
 // Run initialization
+console.log('[MAP] ========================================');
+console.log('[MAP] SCRIPT LOADED');
+console.log('[MAP] Document readyState:', document.readyState);
+console.log('[MAP] ========================================');
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeApp);
+  console.log('[MAP] Document still loading, adding DOMContentLoaded listener');
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('[MAP] DOMContentLoaded event fired');
+    initializeApp();
+  });
 } else {
+  console.log('[MAP] Document already loaded, initializing immediately');
   initializeApp();
 }
 
 window.addEventListener('load', () => {
+  console.log('[MAP] ========================================');
+  console.log('[MAP] WINDOW LOAD EVENT FIRED');
+  console.log('[MAP] ========================================');
   fixMap();
   if (!draggedOrderId && !draggedRouteId) {
-    console.log('Reinitializing on window load...');
+    console.log('[MAP] Reinitializing drag and drop on window load');
     initializeDragAndDrop();
   }
 });
 
-window.addEventListener('resize', fixMap);
+window.addEventListener('resize', () => {
+  console.log('[MAP] Window resize event');
+  fixMap();
+});
 
-// Page visibility change handler - reinitialize map when returning to page
-// Page visibility change handler - reinitialize map when returning to page
+// Page visibility change handler
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
-    console.log('Page became visible, checking map...');
+    console.log('[MAP] ========================================');
+    console.log('[MAP] PAGE BECAME VISIBLE');
+    console.log('[MAP] ========================================');
     
     const mapContainer = document.getElementById('map');
     const hasLeafletContent = mapContainer && mapContainer.querySelector('.leaflet-container');
     
+    console.log('[MAP] Map exists:', !!map);
+    console.log('[MAP] Container has leaflet content:', hasLeafletContent);
+    
     if (!map || !hasLeafletContent) {
-      console.log('Map missing or empty, forcing reinitialization...');
+      console.log('[MAP] Map missing or empty, forcing reinitialization in 150ms');
       map = null;
       setTimeout(() => {
         initializeMap();
       }, 150);
     } else {
+      console.log('[MAP] Map looks good, calling fixMap() in 100ms');
       setTimeout(fixMap, 100);
     }
   }
@@ -1851,16 +1813,23 @@ document.addEventListener('visibilitychange', () => {
 
 // Window focus event
 window.addEventListener('focus', () => {
-  console.log('Window focused, checking map...');
+  console.log('[MAP] ========================================');
+  console.log('[MAP] WINDOW FOCUS EVENT');
+  console.log('[MAP] ========================================');
+  
   setTimeout(() => {
     const mapContainer = document.getElementById('map');
     const hasLeafletContent = mapContainer && mapContainer.querySelector('.leaflet-container');
     
+    console.log('[MAP] Map exists:', !!map);
+    console.log('[MAP] Container has leaflet content:', hasLeafletContent);
+    
     if (!map || !hasLeafletContent) {
-      console.log('Map not found on focus, reinitializing...');
+      console.log('[MAP] Map not found on focus, reinitializing');
       map = null;
       initializeMap();
     } else {
+      console.log('[MAP] Map found, calling fixMap()');
       fixMap();
     }
   }, 200);
@@ -1868,47 +1837,30 @@ window.addEventListener('focus', () => {
 
 // Page show event (fires when navigating back via browser history)
 window.addEventListener('pageshow', (event) => {
-  console.log('Page show event, forcing map check...');
+  console.log('[MAP] ========================================');
+  console.log('[MAP] PAGE SHOW EVENT');
+  console.log('[MAP] Event persisted (from cache):', event.persisted);
+  console.log('[MAP] ========================================');
   
   setTimeout(() => {
     const mapContainer = document.getElementById('map');
     const hasLeafletContent = mapContainer && mapContainer.querySelector('.leaflet-container');
     
+    console.log('[MAP] Map exists:', !!map);
+    console.log('[MAP] Container has leaflet content:', hasLeafletContent);
+    
     if (!map || !hasLeafletContent || event.persisted) {
-      console.log('Forcing full map reinitialization...');
+      console.log('[MAP] Forcing full map reinitialization');
       map = null;
       initializeMap();
     }
   }, 150);
 });
-// Additional check: Reinitialize when page gains focus
-window.addEventListener('focus', () => {
-  console.log('Window focused, checking map...');
-  setTimeout(() => {
-    if (!map) {
-      console.log('Map not found on focus, reinitializing...');
-      initializeMap();
-    } else {
-      fixMap();
-    }
-  }, 200);
-});
 
-// Page show event (fires when navigating back via browser history)
-window.addEventListener('pageshow', (event) => {
-  console.log('Page show event, checking map...');
-  
-  // Force reinitialization if coming from cache
-  if (event.persisted || !map) {
-    console.log('Reinitializing from page cache...');
-    setTimeout(() => {
-      initializeMap();
-    }, 100);
-  }
-});
 </script>
 
-  <style>
+
+
 </body>
 
 </html>
