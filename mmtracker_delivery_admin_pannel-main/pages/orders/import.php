@@ -1211,6 +1211,7 @@ $db_fields = [
         .import-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
         .skip-details { max-height: 150px; overflow-y: auto; background-color: #e1f5fe; border: 1px solid #b3e5fc; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 0.875rem; }
         .skip-details strong { color: #01579b; }
+        
     </style>
 </head>
 <body class="bg-gray-100">
