@@ -1129,8 +1129,13 @@ const routeOrdersManager = {
     
     tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
 
+    // Get the correct API path
+    const currentPath = window.location.pathname;
+    const isInPagesFolder = currentPath.includes('/pages/');
+    const apiPath = isInPagesFolder ? '../api/get_route_orders.php' : 'api/get_route_orders.php';
+
     try {
-      const response = await fetch(`../api/get_route_orders.php?manifest_id=${routeId}`);
+      const response = await fetch(`${apiPath}?manifest_id=${routeId}`);
       const orders = await response.json();
 
       if (response.ok) {
@@ -1234,26 +1239,40 @@ const routeOrdersManager = {
 
 // ========== DRAG AND DROP ==========
 
+// Track which elements have been set up to avoid duplicate event listeners
+const setupTracking = {
+  orders: new Set(),
+  routes: new Set(),
+  routeDrops: new Set(),
+  driverDrops: new Set()
+};
+
 function setupDraggableOrders() {
   const orderRows = document.querySelectorAll('#ordersTableBody tr.draggable-row[data-order-id]');
+  console.log('🔵 [DRAG-ORDER] Found', orderRows.length, 'order rows');
+  
   orderRows.forEach(row => {
-    const newRow = row.cloneNode(true);
-    row.parentNode.replaceChild(newRow, row);
+    const orderId = row.dataset.orderId;
+    if (setupTracking.orders.has(orderId)) return;
+    setupTracking.orders.add(orderId);
     
-    newRow.addEventListener('dragstart', (e) => {
+    row.addEventListener('dragstart', (e) => {
+      console.log('🟢 [DRAG-ORDER] DRAGSTART - Order ID:', row.dataset.orderId);
       document.body.classList.add('dragging-active');
-      draggedOrderId = newRow.dataset.orderId;
-      draggedElement = newRow;
+      draggedOrderId = row.dataset.orderId;
+      draggedElement = row;
       dragType = 'order';
-      newRow.classList.add('dragging');
+      row.classList.add('dragging');
       e.dataTransfer.setData('text/plain', draggedOrderId);
       e.dataTransfer.effectAllowed = 'move';
-      createDragGhost(newRow, e);
+      console.log('🟢 [DRAG-ORDER] dragType set to:', dragType);
+      createDragGhost(row, e);
     });
 
-    newRow.addEventListener('dragend', () => {
+    row.addEventListener('dragend', () => {
+      console.log('🔴 [DRAG-ORDER] DRAGEND');
       document.body.classList.remove('dragging-active');
-      newRow.classList.remove('dragging');
+      row.classList.remove('dragging');
       draggedOrderId = null;
       draggedElement = null;
       dragType = null;
@@ -1262,29 +1281,64 @@ function setupDraggableOrders() {
 }
 
 function setupDraggableRoutes() {
-  const routeRows = document.querySelectorAll('#routesTableBody tr.draggable-row[data-route-id][draggable="true"]');
+  const routeRows = document.querySelectorAll('#routesTableBody tr[data-route-id]');
+  console.log('🔵 [DRAG-ROUTE] Found', routeRows.length, 'route rows');
+  
   routeRows.forEach(row => {
-    const newRow = row.cloneNode(true);
-    row.parentNode.replaceChild(newRow, row);
+    const routeId = row.dataset.routeId;
     
-    newRow.addEventListener('dragstart', (e) => {
-      document.body.classList.add('dragging-active');
-      draggedRouteId = newRow.dataset.routeId;
-      draggedElement = newRow;
-      dragType = 'route';
-      newRow.classList.add('dragging');
-      e.dataTransfer.setData('text/plain', draggedRouteId);
-      e.dataTransfer.effectAllowed = 'move';
-      createDragGhost(newRow, e);
-    });
+    const ordersCountSpan = row.querySelector('.orders-count');
+    const orderCount = ordersCountSpan ? parseInt(ordersCountSpan.textContent) || 0 : 0;
+    
+    console.log('🔵 [DRAG-ROUTE] Route ID:', routeId, '| Orders:', orderCount, '| Draggable:', orderCount > 0);
+    
+    if (orderCount > 0) {
+      row.setAttribute('draggable', 'true');
+      row.classList.add('draggable-row');
+      
+      // Remove old listener if it exists and add new one
+      if (setupTracking.routes.has(routeId)) {
+        const oldRow = row;
+        const newRow = row.cloneNode(true);
+        row.parentNode.replaceChild(newRow, row);
+        setupTracking.routes.delete(routeId);
+        // Now set up the new row
+        setupSingleDraggableRoute(newRow, routeId);
+      } else {
+        setupSingleDraggableRoute(row, routeId);
+      }
+    } else {
+      row.removeAttribute('draggable');
+      row.classList.remove('draggable-row');
+      setupTracking.routes.delete(routeId);
+    }
+  });
+}
 
-    newRow.addEventListener('dragend', () => {
-      document.body.classList.remove('dragging-active');
-      newRow.classList.remove('dragging');
-      draggedRouteId = null;
-      draggedElement = null;
-      dragType = null;
-    });
+function setupSingleDraggableRoute(row, routeId) {
+  setupTracking.routes.add(routeId);
+  
+  row.addEventListener('dragstart', (e) => {
+    console.log('🟢 [DRAG-ROUTE] ✅ DRAGSTART - Route ID:', routeId);
+    document.body.classList.add('dragging-active');
+    draggedRouteId = routeId;
+    draggedElement = row;
+    dragType = 'route';
+    row.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', routeId);
+    e.dataTransfer.effectAllowed = 'move';
+    console.log('🟢 [DRAG-ROUTE] dragType set to:', dragType);
+    console.log('🟢 [DRAG-ROUTE] draggedRouteId:', draggedRouteId);
+    createDragGhost(row, e);
+  });
+
+  row.addEventListener('dragend', () => {
+    console.log('🔴 [DRAG-ROUTE] DRAGEND - Route ID:', routeId);
+    document.body.classList.remove('dragging-active');
+    row.classList.remove('dragging');
+    draggedRouteId = null;
+    draggedElement = null;
+    dragType = null;
   });
 }
 
@@ -1304,73 +1358,109 @@ function createDragGhost(row, e) {
 }
 
 function setupRouteDropTargets() {
-  const routeRows = document.querySelectorAll('#routesTableBody tr.drop-zone[data-route-id]');
+  const routeRows = document.querySelectorAll('#routesTableBody tr[data-route-id]');
+  console.log('🔵 [DROP-ROUTE] Setting up', routeRows.length, 'route drop targets (for orders)');
+  
   routeRows.forEach(row => {
-    const newRow = row.cloneNode(true);
-    row.parentNode.replaceChild(newRow, row);
+    const routeId = row.dataset.routeId;
+    if (setupTracking.routeDrops.has(routeId)) return;
+    setupTracking.routeDrops.add(routeId);
     
-    newRow.addEventListener('dragover', (e) => {
+    row.classList.add('drop-zone');
+    
+    row.addEventListener('dragover', (e) => {
       if (dragType !== 'order') return;
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      newRow.classList.add('drag-over-order');
+      row.classList.add('drag-over-order');
     });
 
-    newRow.addEventListener('dragleave', (e) => {
-      if (!newRow.contains(e.relatedTarget)) {
-        newRow.classList.remove('drag-over-order');
+    row.addEventListener('dragleave', (e) => {
+      if (!row.contains(e.relatedTarget)) {
+        row.classList.remove('drag-over-order');
       }
     });
 
-    newRow.addEventListener('drop', async (e) => {
+    row.addEventListener('drop', async (e) => {
       e.preventDefault();
-      newRow.classList.remove('drag-over-order');
+      row.classList.remove('drag-over-order');
       if (dragType !== 'order') return;
       const orderId = e.dataTransfer.getData('text/plain');
-      const routeId = newRow.dataset.routeId;
+      console.log('🟢 [DROP-ROUTE] Order', orderId, 'dropped on Route', routeId);
       if (!orderId || !routeId) return;
-      await assignOrderToRoute(orderId, routeId, newRow);
+      await assignOrderToRoute(orderId, routeId, row);
     });
   });
 }
 
 function setupDriverDropTargets() {
-  const driverRows = document.querySelectorAll('#driversTableBody tr.drop-zone[data-driver-id]');
+  const driverRows = document.querySelectorAll('#driversTableBody tr[data-driver-id]');
+  console.log('🔵 [DROP-DRIVER] Setting up', driverRows.length, 'driver drop targets (for routes)');
+  
   driverRows.forEach(row => {
-    const newRow = row.cloneNode(true);
-    row.parentNode.replaceChild(newRow, row);
+    const driverId = row.dataset.driverId;
+    if (setupTracking.driverDrops.has(driverId)) return;
+    setupTracking.driverDrops.add(driverId);
     
-    newRow.addEventListener('dragover', (e) => {
-      if (dragType !== 'route') return;
+    row.classList.add('drop-zone');
+    
+    row.addEventListener('dragover', (e) => {
+      console.log('🟡 [DROP-DRIVER] DRAGOVER detected | dragType:', dragType);
+      if (dragType !== 'route') {
+        console.log('🔴 [DROP-DRIVER] Wrong dragType - expected "route", got:', dragType);
+        return;
+      }
+      console.log('🟢 [DROP-DRIVER] ✅ DRAGOVER accepted for route');
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      newRow.classList.add('drag-over-route');
+      row.classList.add('drag-over-route');
     });
 
-    newRow.addEventListener('dragleave', (e) => {
-      if (!newRow.contains(e.relatedTarget)) {
-        newRow.classList.remove('drag-over-route');
+    row.addEventListener('dragleave', (e) => {
+      if (!row.contains(e.relatedTarget)) {
+        row.classList.remove('drag-over-route');
       }
     });
 
-    newRow.addEventListener('drop', async (e) => {
+    row.addEventListener('drop', async (e) => {
       e.preventDefault();
-      newRow.classList.remove('drag-over-route');
-      if (dragType !== 'route') return;
+      console.log('🟢 [DROP-DRIVER] ✅ DROP EVENT TRIGGERED');
+      row.classList.remove('drag-over-route');
+      
+      if (dragType !== 'route') {
+        console.log('🔴 [DROP-DRIVER] ❌ Wrong dragType on drop:', dragType);
+        return;
+      }
+      
       const routeId = e.dataTransfer.getData('text/plain');
-      const riderId = newRow.dataset.driverId;
-      if (!routeId || !riderId) return;
-      await assignRouteToDriver(routeId, riderId, newRow);
+      console.log('🟢 [DROP-DRIVER] Route ID:', routeId, '| Driver ID:', driverId);
+      
+      if (!routeId || !driverId) {
+        console.log('🔴 [DROP-DRIVER] ❌ Missing route or driver ID');
+        return;
+      }
+      
+      console.log('🟢 [DROP-DRIVER] ✅ Calling assignRouteToDriver()');
+      await assignRouteToDriver(routeId, driverId, row);
     });
   });
 }
 
 async function assignOrderToRoute(orderId, routeId, targetRow) {
+  console.log('🟢 [ASSIGN-ORDER] Starting assignment...');
   const spinner = targetRow.querySelector('.loading-spinner');
   if (spinner) spinner.style.display = 'inline-block';
 
+  // Get the correct API path
+  const currentPath = window.location.pathname;
+  const isInPagesFolder = currentPath.includes('/pages/');
+  const apiPath = isInPagesFolder ? '../api/assign_order_to_route.php' : 'api/assign_order_to_route.php';
+  
+  console.log('🔵 [ASSIGN-ORDER] API Path:', apiPath);
+  console.log('🔵 [ASSIGN-ORDER] Current Path:', currentPath);
+
   try {
-    const response = await fetch('../api/assign_order_to_route.php', {
+    const response = await fetch(apiPath, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1379,34 +1469,58 @@ async function assignOrderToRoute(orderId, routeId, targetRow) {
       })
     });
 
+    console.log('🔵 [ASSIGN-ORDER] Response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('🔴 [ASSIGN-ORDER] Response error:', errorText);
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+
     const result = await response.json();
+    console.log('🔵 [ASSIGN-ORDER] Response:', result);
 
     if (result.success) {
+      console.log('🟢 [ASSIGN-ORDER] ✅ Success!');
       if (draggedElement && draggedElement.dataset.orderId == orderId) {
         draggedElement.remove();
       }
       updateRouteRow(routeId, targetRow);
       showMessage(`Order #${getOrderNumber(orderId)} added to Route R-${routeId}`, 'success');
+      
       setTimeout(() => {
+        console.log('🔵 [ASSIGN-ORDER] Reinitializing drag/drop handlers...');
         setupDraggableRoutes();
+        setupDriverDropTargets();
         routeOrdersManager.refresh();
       }, 100);
     } else {
+      console.log('🔴 [ASSIGN-ORDER] ❌ Failed:', result.message);
       showMessage(result.message || 'Failed to add order to route', 'error');
     }
   } catch (error) {
-    showMessage('Network error occurred', 'error');
+    console.log('🔴 [ASSIGN-ORDER] ❌ Error:', error);
+    showMessage('Network error: ' + error.message, 'error');
   } finally {
     if (spinner) spinner.style.display = 'none';
   }
 }
 
 async function assignRouteToDriver(routeId, riderId, targetRow) {
+  console.log('🟢 [ASSIGN-ROUTE] Starting assignment...');
   const spinner = targetRow.querySelector('.loading-spinner');
   if (spinner) spinner.style.display = 'inline-block';
 
+  // Get the correct API path
+  const currentPath = window.location.pathname;
+  const isInPagesFolder = currentPath.includes('/pages/');
+  const apiPath = isInPagesFolder ? '../api/assign_route_to_rider.php' : 'api/assign_route_to_rider.php';
+  
+  console.log('🔵 [ASSIGN-ROUTE] API Path:', apiPath);
+  console.log('🔵 [ASSIGN-ROUTE] Current Path:', currentPath);
+
   try {
-    const response = await fetch('../api/assign_route_to_rider.php', {
+    const response = await fetch(apiPath, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1415,9 +1529,19 @@ async function assignRouteToDriver(routeId, riderId, targetRow) {
       })
     });
 
+    console.log('🔵 [ASSIGN-ROUTE] Response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('🔴 [ASSIGN-ROUTE] Response error:', errorText);
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+
     const result = await response.json();
+    console.log('🔵 [ASSIGN-ROUTE] Response:', result);
 
     if (result.success) {
+      console.log('🟢 [ASSIGN-ROUTE] ✅ Success!');
       if (draggedElement && draggedElement.dataset.routeId == routeId) {
         const driverCell = draggedElement.querySelector('td:nth-child(2)');
         if (driverCell) driverCell.textContent = getDriverName(riderId);
@@ -1426,10 +1550,12 @@ async function assignRouteToDriver(routeId, riderId, targetRow) {
       showMessage(`Route R-${routeId} assigned to ${getDriverName(riderId)}`, 'success');
       routeOrdersManager.refresh();
     } else {
+      console.log('🔴 [ASSIGN-ROUTE] ❌ Failed:', result.message);
       showMessage(result.message || 'Failed to assign route to driver', 'error');
     }
   } catch (error) {
-    showMessage('Network error occurred', 'error');
+    console.log('🔴 [ASSIGN-ROUTE] ❌ Error:', error);
+    showMessage('Network error: ' + error.message, 'error');
   } finally {
     if (spinner) spinner.style.display = 'none';
   }
@@ -1477,104 +1603,144 @@ function getDriverName(riderId) {
 }
 
 function initializeDragAndDrop() {
+  console.log('═══════════════════════════════════════════');
+  console.log('🔵 [DRAG-DROP] INITIALIZING DRAG AND DROP');
+  console.log('═══════════════════════════════════════════');
+  
+  // Clear tracking on re-initialization
+  setupTracking.orders.clear();
+  setupTracking.routes.clear();
+  setupTracking.routeDrops.clear();
+  setupTracking.driverDrops.clear();
+  
   setupDraggableOrders();
+  console.log('✅ [DRAG-DROP] Orders setup complete');
+  
   setupDraggableRoutes();
+  console.log('✅ [DRAG-DROP] Routes setup complete');
+  
   setupRouteDropTargets();
+  console.log('✅ [DRAG-DROP] Route drop targets setup complete');
+  
   setupDriverDropTargets();
+  console.log('✅ [DRAG-DROP] Driver drop targets setup complete');
+  
+  console.log('═══════════════════════════════════════════');
+  console.log('✅ [DRAG-DROP] INITIALIZATION COMPLETE');
+  console.log('═══════════════════════════════════════════');
 }
 
-// ========== MAP INITIALIZATION - ONLY MAP LOGS HERE ==========
-const drivers = <?php echo json_encode($riders_locations); ?> || [];
-const markers = {};
+// ========== MAP INITIALIZATION ==========
 let map = null;
-function initializeMap() {
-  console.log('[MAP] === initializeMap() CALLED ===');
-  console.log('[MAP] Document readyState:', document.readyState);
-  console.log('[MAP] Drivers data:', drivers);
+const markers = {};
 
+function addMapMarkers() {
+  if (!map) return;
+
+  Object.values(markers).forEach(marker => marker.remove());
+  Object.keys(markers).forEach(key => delete markers[key]);
+
+  if (drivers.length === 0) {
+    document.getElementById('lastUpdate').textContent = 'Last update: 0 drivers';
+    return;
+  }
+
+  const bounds = [];
+  
+  drivers.forEach(driver => {
+    if (driver.latitude && driver.longitude) {
+      const lat = parseFloat(driver.latitude);
+      const lng = parseFloat(driver.longitude);
+      
+      const marker = L.marker([lat, lng]).addTo(map);
+      marker.bindPopup(`
+        <strong>${driver.rider_name || 'Unknown'}</strong><br>
+        Last seen: ${driver.created_at || 'Unknown'}
+      `);
+      
+      markers[driver.rider_id] = marker;
+      bounds.push([lat, lng]);
+    }
+  });
+
+  if (bounds.length > 0) {
+    map.fitBounds(bounds, { padding: [50, 50] });
+  }
+
+  document.getElementById('lastUpdate').textContent = `Last update: ${drivers.length} driver${drivers.length !== 1 ? 's' : ''}`;
+}
+
+function fixMap() {
+  if (map) {
+    map.invalidateSize();
+    setTimeout(() => {
+      if (map) map.invalidateSize();
+    }, 100);
+  } else {
+    initializeMap();
+  }
+}
+
+function initializeMap() {
   try {
     const mapContainer = document.getElementById('map');
-    console.log('[MAP] Map container found:', !!mapContainer);
 
     if (!mapContainer) {
-      console.error('[MAP] ❌ Map container NOT found, retrying in 200ms');
       setTimeout(initializeMap, 200);
       return;
     }
 
     const mapPanel = document.getElementById('mapPanel');
-    console.log('[MAP] Map panel found:', !!mapPanel);
-    console.log('[MAP] Map panel height:', mapPanel ? mapPanel.style.height : 'N/A');
 
     if (mapPanel && mapPanel.style.height) {
       const height = parseInt(mapPanel.style.height) || 310;
       mapContainer.style.height = (height - 60) + 'px';
-      console.log('[MAP] Set container height to:', mapContainer.style.height);
     } else {
       mapContainer.style.height = '250px';
-      console.log('[MAP] Using fallback height: 250px');
     }
 
-    // 🧩 FIX 1: Prevent "already initialized" errors
     if (mapContainer._leaflet_id) {
-      console.warn('[MAP] Existing Leaflet instance detected — cleaning up');
       mapContainer._leaflet_id = null;
     }
 
-    // Remove any old map if exists
-    if (typeof map !== 'undefined' && map) {
-      console.log('[MAP] Existing map found, removing it');
+    if (map) {
       try {
         map.remove();
-      } catch (e) {
-        console.log('[MAP] Error removing old map:', e);
-      }
+      } catch (e) {}
       map = null;
     }
 
-    console.log('[MAP] Creating new Leaflet map...');
     map = L.map('map', {
       center: [51.5074, -0.1278],
       zoom: 10,
       minZoom: 8,
       maxZoom: 18,
     });
-    console.log('[MAP] ✓ Leaflet map created');
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
     }).addTo(map);
-    console.log('[MAP] ✓ Tile layer added');
 
-    console.log('[MAP] Scheduling invalidateSize() calls...');
     requestAnimationFrame(() => {
-      console.log('[MAP] invalidateSize() - requestAnimationFrame');
       map.invalidateSize();
 
       [50, 150, 300, 600].forEach((delay) => {
         setTimeout(() => {
-          console.log(`[MAP] invalidateSize() - ${delay}ms`);
-          map.invalidateSize();
+          if (map) map.invalidateSize();
         }, delay);
       });
     });
 
     addMapMarkers();
-    console.log('[MAP] ✅ Map initialized successfully');
 
-    // 🧩 FIX 2: Ensure map becomes visible after page navigation
     setTimeout(() => {
-      console.log('[MAP] 🔄 Final visibility fix (invalidateSize after 800ms)');
       if (map) map.invalidateSize();
     }, 800);
 
   } catch (error) {
-    console.error('[MAP] ❌ Error initializing map:', error);
-    console.error('[MAP] Error stack:', error.stack);
     setTimeout(initializeMap, 500);
   }
 }
-
 
 // ========== RESIZABLE PANELS ==========
 
@@ -1658,8 +1824,8 @@ function initializeResizeHandle(handle, panel, direction) {
       const newWidth = Math.max(250, startWidth + e.clientX - startX);
       panel.style.width = newWidth + 'px';
     }
-    if (panel.id === 'mapPanel') {
-      setTimeout(() => map && map.invalidateSize(), 100);
+    if (panel.id === 'mapPanel' && map) {
+      setTimeout(() => map.invalidateSize(), 100);
     }
   }
 
@@ -1674,7 +1840,7 @@ function initializeResizeHandle(handle, panel, direction) {
 
 async function saveLayoutToDatabase(panelId, width, height, gridColumns = null) {
   try {
-    const response = await fetch('../api/save_dashboard_layout.php', {
+    await fetch('../api/save_dashboard_layout.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1684,23 +1850,21 @@ async function saveLayoutToDatabase(panelId, width, height, gridColumns = null) 
         grid_columns: gridColumns
       })
     });
-
-    const result = await response.json();
   } catch (error) {
     // Silent fail
   }
 }
 
-const userPreferences = <?php echo $user_preferences_json; ?> || {};
-const defaultSizes = {
-  driversPanel: { width: '100%', height: '180px' },
-  routeOrdersPanel: { width: '100%', height: '200px' },
-  ordersPanel: { width: '100%', height: '190px' },
-  mapPanel: { width: '100%', height: '310px' },
-  routesPanel: { width: '100%', height: '275px' }
-};
-
 function applySavedSizes() {
+  const userPreferences = window.userPreferences || {};
+  const defaultSizes = {
+    driversPanel: { width: '100%', height: '180px' },
+    routeOrdersPanel: { width: '100%', height: '200px' },
+    ordersPanel: { width: '100%', height: '190px' },
+    mapPanel: { width: '100%', height: '310px' },
+    routesPanel: { width: '100%', height: '275px' }
+  };
+
   document.querySelectorAll('.resizable-panel').forEach(panel => {
     const panelId = panel.id;
     const savedFromDB = userPreferences[panelId];
@@ -1718,145 +1882,104 @@ function applySavedSizes() {
 
 // ========== APP INITIALIZATION ==========
 function initializeApp() {
-  console.log('[MAP] ========================================');
-  console.log('[MAP] APP INITIALIZATION STARTED');
-  console.log('[MAP] ========================================');
-  console.log('[MAP] Time:', new Date().toISOString());
-  console.log('[MAP] Document readyState:', document.readyState);
-  console.log('[MAP] Window loaded:', document.readyState === 'complete');
+  console.log('═══════════════════════════════════════════');
+  console.log('🚀 APP INITIALIZATION STARTED');
+  console.log('═══════════════════════════════════════════');
   
   try {
-    console.log('[MAP] Step 1: Applying saved sizes...');
     applySavedSizes();
-    
-    console.log('[MAP] Step 2: Initializing map...');
     initializeMap();
-    
-    console.log('[MAP] Step 3: Initializing resizable panels...');
     initializeResizablePanels();
     
-    console.log('[MAP] Step 4: Initializing drag and drop...');
+    console.log('🔵 [INIT] Initializing drag and drop...');
     initializeDragAndDrop();
     
-    console.log('[MAP] Step 5: Initializing route orders manager (300ms delay)...');
     setTimeout(() => {
       routeOrdersManager.init();
-      console.log('[MAP] ========================================');
-      console.log('[MAP] APP INITIALIZATION COMPLETE');
-      console.log('[MAP] ========================================');
+      console.log('═══════════════════════════════════════════');
+      console.log('✅ APP INITIALIZATION COMPLETE');
+      console.log('═══════════════════════════════════════════');
     }, 300);
+
+    // Safety recheck for drag/drop
+    setTimeout(() => {
+      console.log('🔵 [INIT] Safety recheck - reinitializing drag/drop...');
+      initializeDragAndDrop();
+    }, 1500);
     
   } catch (error) {
-    console.error('[MAP] ❌❌❌ Error during initialization:', error);
-    console.error('[MAP] Error stack:', error.stack);
+    console.error('❌ Error during initialization:', error);
   }
 }
 
-// Run initialization
-console.log('[MAP] ========================================');
-console.log('[MAP] SCRIPT LOADED');
-console.log('[MAP] Document readyState:', document.readyState);
-console.log('[MAP] ========================================');
+function delayedInitialize() {
+  setTimeout(() => {
+    console.log('🔵 [INIT] DOM ready - starting initialization after 400ms delay');
+    initializeApp();
+  }, 400);
+}
+
+// ========== EVENT LISTENERS ==========
 
 if (document.readyState === 'loading') {
-  console.log('[MAP] Document still loading, adding DOMContentLoaded listener');
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('[MAP] DOMContentLoaded event fired');
-    initializeApp();
-  });
+  document.addEventListener('DOMContentLoaded', delayedInitialize);
 } else {
-  console.log('[MAP] Document already loaded, initializing immediately');
-  initializeApp();
+  delayedInitialize();
 }
 
 window.addEventListener('load', () => {
-  console.log('[MAP] ========================================');
-  console.log('[MAP] WINDOW LOAD EVENT FIRED');
-  console.log('[MAP] ========================================');
   fixMap();
   if (!draggedOrderId && !draggedRouteId) {
-    console.log('[MAP] Reinitializing drag and drop on window load');
+    console.log('🔵 [INIT] Window loaded - reinitializing drag/drop');
     initializeDragAndDrop();
   }
 });
 
 window.addEventListener('resize', () => {
-  console.log('[MAP] Window resize event');
   fixMap();
 });
 
-// Page visibility change handler
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
-    console.log('[MAP] ========================================');
-    console.log('[MAP] PAGE BECAME VISIBLE');
-    console.log('[MAP] ========================================');
-    
     const mapContainer = document.getElementById('map');
     const hasLeafletContent = mapContainer && mapContainer.querySelector('.leaflet-container');
     
-    console.log('[MAP] Map exists:', !!map);
-    console.log('[MAP] Container has leaflet content:', hasLeafletContent);
-    
     if (!map || !hasLeafletContent) {
-      console.log('[MAP] Map missing or empty, forcing reinitialization in 150ms');
       map = null;
       setTimeout(() => {
         initializeMap();
       }, 150);
     } else {
-      console.log('[MAP] Map looks good, calling fixMap() in 100ms');
       setTimeout(fixMap, 100);
     }
   }
 });
 
-// Window focus event
 window.addEventListener('focus', () => {
-  console.log('[MAP] ========================================');
-  console.log('[MAP] WINDOW FOCUS EVENT');
-  console.log('[MAP] ========================================');
-  
   setTimeout(() => {
     const mapContainer = document.getElementById('map');
     const hasLeafletContent = mapContainer && mapContainer.querySelector('.leaflet-container');
     
-    console.log('[MAP] Map exists:', !!map);
-    console.log('[MAP] Container has leaflet content:', hasLeafletContent);
-    
     if (!map || !hasLeafletContent) {
-      console.log('[MAP] Map not found on focus, reinitializing');
       map = null;
       initializeMap();
     } else {
-      console.log('[MAP] Map found, calling fixMap()');
       fixMap();
     }
   }, 200);
 });
 
-// Page show event (fires when navigating back via browser history)
 window.addEventListener('pageshow', (event) => {
-  console.log('[MAP] ========================================');
-  console.log('[MAP] PAGE SHOW EVENT');
-  console.log('[MAP] Event persisted (from cache):', event.persisted);
-  console.log('[MAP] ========================================');
-  
   setTimeout(() => {
     const mapContainer = document.getElementById('map');
     const hasLeafletContent = mapContainer && mapContainer.querySelector('.leaflet-container');
     
-    console.log('[MAP] Map exists:', !!map);
-    console.log('[MAP] Container has leaflet content:', hasLeafletContent);
-    
     if (!map || !hasLeafletContent || event.persisted) {
-      console.log('[MAP] Forcing full map reinitialization');
       map = null;
       initializeMap();
     }
   }, 150);
 });
-
 </script>
 
 
