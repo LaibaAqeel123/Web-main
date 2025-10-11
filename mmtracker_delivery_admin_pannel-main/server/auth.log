@@ -33,7 +33,6 @@
 [2025-09-17 15:03:02] User #25 (mn) logged in successfully from IP ::1.
 [2025-09-17 16:14:44] User #25 (mn) logged in successfully from IP ::1.
 [2025-09-17 16:17:07] User #25 (mn) logged in successfully from IP ::1.
-<<<<<<< HEAD
 [2025-09-21 08:33:52] User #25 (mn) logged in successfully from IP ::1.
 [2025-09-21 12:05:07] User #25 (mn) logged in successfully from IP ::1.
 [2025-09-21 12:07:37] User #25 (mn) logged in successfully from IP ::1.
@@ -59,13 +58,6 @@
 [2025-09-22 09:38:20] User #25 (mn) logged in successfully from IP ::1.
 [2025-09-22 15:11:25] User #25 (mn) logged in successfully from IP ::1.
 [2025-09-22 16:54:50] User #25 (mn) logged in successfully from IP ::1.
-=======
-[2025-09-18 19:17:45] User #25 (Muhammad Naveed) logged out from IP ::1.
-[2025-09-18 19:17:47] User #25 (mn) logged in successfully from IP ::1.
-[2025-09-18 19:17:51] User #25 (Muhammad Naveed) logged out from IP ::1.
-[2025-09-18 19:17:58] User #25 (mn) logged in successfully from IP ::1.
-[2025-09-22 17:08:55] User #25 (mn) logged in successfully from IP ::1.
->>>>>>> 58316d5408f378aa4b3cc44678087670050dcdc2
 [2025-09-23 10:59:33] User #25 (mn) logged in successfully from IP ::1.
 [2025-09-23 12:23:22] User #25 (mn) logged in successfully from IP ::1.
 [2025-09-23 12:25:57] User #25 (mn) logged in successfully from IP ::1.
@@ -163,17 +155,10 @@
 [2025-09-25 16:39:28] User #25 (Muhammad Naveed) logged out from IP ::1.
 [2025-09-25 16:39:31] User #25 (mn) logged in successfully from IP ::1.
 [2025-09-25 16:42:16] User #25 (mn) logged in successfully from IP ::1.
-<<<<<<< HEAD
 [2025-09-25 18:03:04] User #25 (Muhammad Naveed) logged out from IP ::1.
 [2025-09-25 18:03:06] User #25 (mn) logged in successfully from IP ::1.
 [2025-09-27 15:48:51] User #25 (mn) logged in successfully from IP ::1.
-=======
-[2025-09-25 18:21:15] User #25 (mn) logged in successfully from IP ::1.
-[2025-09-25 18:26:45] User #25 (Muhammad Naveed) logged out from IP ::1.
-[2025-09-25 18:26:49] User #25 (Muhammad Naveed) logged out from IP ::1.
->>>>>>> e06d2d615392ce2f5090996aaca2a19bb9a86a07
 [2025-09-28 03:23:30] User #25 (mn) logged in successfully from IP ::1.
-<<<<<<< HEAD
 [2025-09-29 19:46:28] User #25 (Muhammad Naveed) logged out from IP ::1.
 [2025-10-01 18:14:14] User #25 (Muhammad Naveed) logged out from IP ::1.
 [2025-10-01 18:14:15] User #25 (mn) logged in successfully from IP ::1.
@@ -181,10 +166,6 @@
 [2025-10-01 18:19:27] User #25 (mn) logged in successfully from IP ::1.
 [2025-10-01 18:19:40] User #25 (Muhammad Naveed) logged out from IP ::1.
 [2025-10-01 18:19:43] User #25 (mn) logged in successfully from IP ::1.
-=======
-[2025-09-29 03:58:11] User #25 (mn) logged in successfully from IP ::1.
-[2025-09-29 04:03:16] User #25 (mn) logged in successfully from IP ::1.
->>>>>>> main
 [2025-10-04 11:03:37] User #25 (mn) logged in successfully from IP ::1.
 [2025-10-04 11:22:23] User #25 (Muhammad Naveed) logged out from IP ::1.
 [2025-10-04 11:22:25] User #25 (mn) logged in successfully from IP ::1.
@@ -528,3 +509,17 @@
 [2025-10-07 10:03:50] User #25 (Muhammad Naveed) logged out from IP ::1.
 [2025-10-07 10:05:18] User #25 (mn) logged in successfully from IP ::1.
 [2025-10-09 12:09:08] User #25 (mn) logged in successfully from IP ::1.
+[2025-10-11 11:31:22] User #25 (Muhammad Naveed) logged out from IP ::1.
+[2025-10-11 11:31:28] User #25 (mn) logged in successfully from IP ::1.
+[2025-10-11 11:35:16] User #25 (Muhammad Naveed) logged out from IP ::1.
+[2025-10-11 11:35:17] User #Unknown (Unknown) logged out from IP ::1.
+[2025-10-11 11:35:19] User #Unknown (Unknown) logged out from IP ::1.
+[2025-10-11 11:35:19] User #Unknown (Unknown) logged out from IP ::1.
+[2025-10-11 11:35:20] User #Unknown (Unknown) logged out from IP ::1.
+[2025-10-11 11:35:20] User #Unknown (Unknown) logged out from IP ::1.
+[2025-10-11 11:35:20] User #Unknown (Unknown) logged out from IP ::1.
+[2025-10-11 11:35:23] User #Unknown (Unknown) logged out from IP ::1.
+[2025-10-11 11:35:25] User #25 (mn) logged in successfully from IP ::1.
+[2025-10-11 11:36:01] User #25 (mn) logged in successfully from IP ::1.
+[2025-10-11 11:43:00] User #25 (Muhammad Naveed) logged out from IP ::1.
+[2025-10-11 11:43:01] User #25 (mn) logged in successfully from IP ::1.
