@@ -3,10 +3,41 @@ ob_start();
 require_once '../../includes/config.php';
 requireLogin();
 
-// WooCommerce API Configuration
-define('WOOCOMMERCE_STORE_URL', 'https://intern.neptasolutions.co.uk');
-define('WOOCOMMERCE_CONSUMER_KEY', 'ck_45c0bbb7f77388f48c3dde2a4f9c4aeaab6a0e3d');
-define('WOOCOMMERCE_CONSUMER_SECRET', 'cs_e55eda86d1eb997248d3243aff3937450bf4ecae');
+// Fetch WooCommerce API Keys from DB
+$wooKeys = [
+    "WooCommerce Store URL"       => null,
+    "WooCommerce Consumer Key"    => null,
+    "WooCommerce Consumer Secret" => null
+];
+
+foreach ($wooKeys as $desc => $val) {
+    $descEsc = mysqli_real_escape_string($conn, $desc);
+    $query   = "SELECT api_key FROM ApiKeys WHERE description = '$descEsc' LIMIT 1";
+    $result  = mysqli_query($conn, $query);
+
+    if ($row = mysqli_fetch_assoc($result)) {
+        $wooKeys[$desc] = $row['api_key'];
+    }
+}
+
+// Validate all keys exist
+$missingKeys = [];
+foreach ($wooKeys as $desc => $val) {
+    if (empty($val)) {
+        $missingKeys[] = $desc;
+    }
+}
+
+if (!empty($missingKeys)) {
+    die("Error: Missing WooCommerce API keys in database. Please ensure the following keys exist: " . implode(", ", $missingKeys));
+}
+
+// Define constants using DB values
+define('WOOCOMMERCE_STORE_URL', $wooKeys["WooCommerce Store URL"]);
+define('WOOCOMMERCE_CONSUMER_KEY', $wooKeys["WooCommerce Consumer Key"]);
+define('WOOCOMMERCE_CONSUMER_SECRET', $wooKeys["WooCommerce Consumer Secret"]);
+
+
 
 // --- Handle Cancel Request ---
 if (isset($_GET['cancel']) && $_GET['cancel'] == '1') {
