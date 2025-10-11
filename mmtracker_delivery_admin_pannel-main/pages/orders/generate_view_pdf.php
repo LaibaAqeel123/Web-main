@@ -24,10 +24,7 @@ if (ob_get_length() > 0) {
     ob_clean();
 }
 
-$order_id = null;
-if (isset($_GET['id'])) {
-    $order_id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
-}
+$order_id = isset($_GET['id']) ? filter_var($_GET['id'], FILTER_VALIDATE_INT) : null;
 
 if (!$order_id) {
     while (ob_get_level() > 0) {
@@ -108,7 +105,7 @@ try {
         ob_end_clean();
     }
     
-    // Set headers for inline PDF display
+    // Set headers for PDF response
     header('Content-Type: application/pdf');
     header('Content-Disposition: inline; filename="Proof_of_Delivery_' . $order_id . '.pdf"');
     header('Content-Transfer-Encoding: binary');
