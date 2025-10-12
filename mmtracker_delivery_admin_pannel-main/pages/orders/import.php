@@ -37,8 +37,6 @@ define('WOOCOMMERCE_STORE_URL', $wooKeys["WooCommerce Store URL"]);
 define('WOOCOMMERCE_CONSUMER_KEY', $wooKeys["WooCommerce Consumer Key"]);
 define('WOOCOMMERCE_CONSUMER_SECRET', $wooKeys["WooCommerce Consumer Secret"]);
 
-
-
 // --- Handle Cancel Request ---
 if (isset($_GET['cancel']) && $_GET['cancel'] == '1') {
     if (isset($_SESSION['import_file_path']) && file_exists($_SESSION['import_file_path'])) {
@@ -243,7 +241,7 @@ function testWooCommerceConnection() {
                 'status' => $status,
                 'date_created' => $order['date_created'] ?? 'N/A',
                 'total' => $order['total'] ?? '0.00',
-                'customer_name' => trim(($order['billing']['first_name'] ?? '') . ' ' . ($order['billing']['last_name'] ?? ''))
+                'customer_name' => trim(($order['billing']['first_name'] ?? '') . ' (' . ($order['billing']['last_name'] ?? ''))
             ];
         }
         
@@ -595,6 +593,7 @@ $woocommerce_orders = [];
 $show_mapping_interface = false;
 $show_woocommerce_preview = false;
 
+// FIX: Check for session state at the very beginning before any processing
 if (isset($_SESSION['import_file_path']) && isset($_SESSION['import_csv_headers']) && isset($_SESSION['import_company_id'])) {
     $show_mapping_interface = true;
     $uploaded_file_path = $_SESSION['import_file_path'];
@@ -680,7 +679,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fetch_woocommerce']) 
                 // Add success message for debugging
                 $success = "Successfully fetched " . count($fetched_orders) . " orders from WooCommerce.";
                 
-                header("Location: import.php");
+                // FIX: Use JavaScript redirect instead of header redirect for better reliability
+                echo '<script>window.location.href = "import.php";</script>';
                 exit();
             }
             
@@ -693,7 +693,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fetch_woocommerce']) 
 }
 
 // Handle WooCommerce import confirmation - ENHANCED WITH SKIP DUPLICATES FEEDBACK
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_woocommerce_import']) && $show_woocommerce_preview) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_woocommerce_import'])) {
+    // Check if we have the session data needed for import
     if (isset($_SESSION['woocommerce_orders']) && isset($_SESSION['import_company_id'])) {
         $woocommerce_orders = $_SESSION['woocommerce_orders'];
         $company_id = $_SESSION['import_company_id'];
@@ -720,19 +721,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_woocommerce_i
                 $error = "Some orders failed to import due to validation errors. See details below.";
             }
             
+            // Clear session immediately after processing
+            unset($_SESSION['woocommerce_orders']);
+            unset($_SESSION['import_company_id']);
+            $show_woocommerce_preview = false;
+            
         } catch (Exception $e) {
             $error = "Import processing error: " . $e->getMessage();
+            // Clear session on error too
+            unset($_SESSION['woocommerce_orders']);
+            unset($_SESSION['import_company_id']);
+            $show_woocommerce_preview = false;
         }
-        
-        // Clear session
-        unset($_SESSION['woocommerce_orders']);
-        unset($_SESSION['import_company_id']);
-        $show_woocommerce_preview = false;
     } else {
         $error = "WooCommerce import session expired. Please fetch orders again.";
         $show_woocommerce_preview = false;
     }
 }
+
 // --- Step 1: Handle File Upload POST ---
 // Only process upload if NOT already in mapping state from session
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['order_csv']) && !$show_mapping_interface) {
@@ -780,13 +786,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['order_csv']) && !$sh
                                 $_SESSION['import_file_path'] = $uploaded_file_path;
                                 $_SESSION['import_company_id'] = $company_id;
                                 $_SESSION['import_csv_headers'] = $csv_headers;
-                                // $_SESSION['upload_success_message'] = "File uploaded. Proceed to mapping."; // Optional flash message
                                 
-                                // --- > REDIRECT HERE < ---
-                                header("Location: import.php");
+                                // FIX: Use JavaScript redirect instead of header redirect
+                                echo '<script>window.location.href = "import.php";</script>';
                                 exit();
-                                // --- > END REDIRECT < ---
-
+                                
                             } else {
                                  $upload_error = 'Could not read headers from the uploaded CSV file.';
                                  unlink($dest_path); // Clean up
@@ -798,8 +802,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['order_csv']) && !$sh
                     } else {
                         $upload_error = 'Error moving uploaded file. Check server logs and permissions.';
                     }
-                                    }
-                                } else {
+                }
+            } else {
                 $upload_error = 'Invalid file type. Please upload a CSV file.';
             }
         } elseif ($_FILES['order_csv']['error'] == UPLOAD_ERR_NO_FILE) {
@@ -822,7 +826,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_mapping']) && 
         $company_id = $_SESSION['import_company_id'];
         $mapping = $_POST['map'] ?? []; // Get the mapping array [csv_index => db_field_key]
 
-
         // ** 1. Validate Mapping **
         $required_mappings = [
             'order_group_id', 'customer_name', 'delivery_address_line1', 
@@ -837,9 +840,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_mapping']) && 
         foreach ($required_mappings as $req) {
             if (!in_array($req, $mapped_fields)) {
                 $error = "Mapping validation failed. Please map the required field: '$req'.";
-                                    break;
-                                }
-                            }
+                break;
+            }
+        }
         if (!$error) {
              if (!in_array('customer_email', $mapped_fields) && !in_array('customer_phone', $mapped_fields)) {
                   $error = "Mapping validation failed. Please map either 'Customer Email' or 'Customer Phone'.";
@@ -1029,7 +1032,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_mapping']) && 
                              if ($qty <= 0) {
                                  $current_order_errors[] = "Row #" . ($product_row_index+1) . ": Skipped product row: Invalid quantity ('$qty') for QR '$qrcode'.";
                                  continue;
-                    }
+                            }
 
                              // Determine lookup key (QR Code ONLY)
                              if (!empty($qrcode)) { $product_lookup_key = $qrcode; $lookup_type = 'qrcode'; }
@@ -1069,8 +1072,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_mapping']) && 
                                              $product_cache[$company_id]['name_'.$name] = $product_id; // Cache by name
                                              if (!empty($qrcode)) {
                                                  $product_cache[$company_id]['qrcode_'.$qrcode] = $product_id; // Cache by QR if exists
-                    }
-                } else {
+                                            }
+                                        } else {
                                               // Failed to create product - Critical error for this line
                                               $error_msg = "Row #" . ($product_row_index+1) . ": Failed to auto-create product '$name': " . mysqli_stmt_error($create_stmt);
                                               $current_order_errors[] = $error_msg;
@@ -1119,11 +1122,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_mapping']) && 
                         mysqli_stmt_close($log_stmt);
                         
                         // Everything OK for this order
-            mysqli_commit($conn);
+                        mysqli_commit($conn);
                         $import_results['success']++;
 
                     } catch (Exception $e) {
-            mysqli_rollback($conn);
+                        mysqli_rollback($conn);
                         $order_success = false;
                         $import_results['failed']++;
                         $current_order_errors[] = $e->getMessage(); // Add the main exception
@@ -1163,9 +1166,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_mapping']) && 
     } else {
         $error = "Import session expired or invalid. Please upload the file again.";
         $show_mapping_interface = false;
+    }
 }
-}
-
 
 // Define potential database fields the CSV columns can map to
 $db_fields = [
@@ -1189,8 +1191,6 @@ $db_fields = [
     'requires_signature_proof' => 'Requires Signature Proof (1 or true)',
     // 'organization_id' => 'Organization ID', // Add if needed
 ];
-
-
 ?>
 
 <!DOCTYPE html>
@@ -1287,7 +1287,7 @@ $db_fields = [
                             <p class="text-blue-100 mt-2">Upload CSV files with order data</p>
                         </div>
                         <div class="p-6">
-                            <form action="import.php" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <form action="import.php" method="POST" enctype="multipart/form-data" class="space-y-4" id="csvUploadForm">
                                 <?php if (isSuperAdmin()): ?>
                                 <div>
                                     <label for="csv_company_id" class="block text-sm font-medium text-gray-700 mb-1">Select Company *</label>
@@ -1316,9 +1316,15 @@ $db_fields = [
                                 </div>
 
                                 <div class="flex justify-end">
-                                    <button type="submit"
+                                    <button type="submit" id="csvUploadBtn"
                                             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        Upload CSV & Map Columns
+                                        <span id="csvUploadText">Upload CSV & Map Columns</span>
+                                        <span id="csvUploadSpinner" class="hidden ml-2">
+                                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </span>
                                     </button>
                                 </div>
                             </form>
@@ -1332,7 +1338,7 @@ $db_fields = [
                             <p class="text-blue-100 mt-2">Fetch orders directly from WooCommerce</p>
                         </div>
                         <div class="p-6">
-                            <form action="import.php" method="POST" class="space-y-4">
+                            <form action="import.php" method="POST" class="space-y-4" id="wooCommerceForm">
                                 <input type="hidden" name="fetch_woocommerce" value="1">
                                 
                                 <?php if (isSuperAdmin()): ?>
@@ -1401,9 +1407,15 @@ $db_fields = [
                                             class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                         Test Connection & Diagnose
                                     </button>
-                                    <button type="submit"
+                                    <button type="submit" id="wooCommerceBtn"
                                             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        Fetch WooCommerce Orders
+                                        <span id="wooCommerceText">Fetch WooCommerce Orders</span>
+                                        <span id="wooCommerceSpinner" class="hidden ml-2">
+                                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </span>
                                     </button>
                                 </div>
                             </form>
@@ -1481,10 +1493,11 @@ $db_fields = [
                         </div>
 
                         <form action="import.php" method="POST" class="flex justify-between">
+                            <input type="hidden" name="confirm_woocommerce_import" value="1">
                             <a href="import.php?cancel=1" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
                                 Cancel Import
                             </a>
-                            <button type="submit" name="confirm_woocommerce_import" value="1"
+                            <button type="submit"
                                     class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                 Confirm & Import All Orders
                             </button>
@@ -1565,97 +1578,134 @@ $db_fields = [
                 this.value = thirtyDaysAgo.toISOString().split('T')[0];
             }
         });
+
         // Auto-map CSV columns based on header names
-document.addEventListener('DOMContentLoaded', function() {
-    // Mapping rules: CSV header patterns -> database field values
-    const autoMappingRules = {
-        // Order identifiers
-        'order_group_id': 'order_group_id',
-        'order_id': 'order_group_id',
-        'group_id': 'order_group_id',
-        
-        // Customer info
-        'customer_name': 'customer_name',
-        'customer_email': 'customer_email', 
-        'customer_phone': 'customer_phone',
-        'name': 'customer_name',
-        'email': 'customer_email',
-        'phone': 'customer_phone',
-        
-        // Address fields
-        'delivery_address_line1': 'delivery_address_line1',
-        'address_line1': 'delivery_address_line1',
-        'address': 'delivery_address_line1',
-        'delivery_address_line2': 'delivery_address_line2', 
-        'address_line2': 'delivery_address_line2',
-        'delivery_city': 'delivery_city',
-        'city': 'delivery_city',
-        'delivery_state': 'delivery_state',
-        'state': 'delivery_state',
-        'delivery_postal_code': 'delivery_postal_code',
-        'postal_code': 'delivery_postal_code',
-        'postcode': 'delivery_postal_code',
-        
-        // Product fields
-        'product_qrcode': 'product_qrcode',
-        'product_sku': 'product_qrcode',
-        'sku': 'product_qrcode',
-        'qrcode': 'product_qrcode',
-        'product_name': 'product_name',
-        'product_quantity': 'product_quantity',
-        'quantity': 'product_quantity',
-        'qty': 'product_quantity',
-        'product_price': 'product_price',
-        'price': 'product_price',
-        'order_notes': 'order_notes',
-        'notes': 'order_notes'
-    };
-    
-    // Auto-map function
-    function autoMapColumns() {
-        const selects = document.querySelectorAll('select[name^="map["]');
-        
-        selects.forEach(function(select) {
-            const row = select.closest('tr');
-            const headerCell = row.querySelector('td:first-child');
-            const headerText = headerCell.textContent.toLowerCase().trim();
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mapping rules: CSV header patterns -> database field values
+            const autoMappingRules = {
+                // Order identifiers
+                'order_group_id': 'order_group_id',
+                'order_id': 'order_group_id',
+                'group_id': 'order_group_id',
+                
+                // Customer info
+                'customer_name': 'customer_name',
+                'customer_email': 'customer_email', 
+                'customer_phone': 'customer_phone',
+                'name': 'customer_name',
+                'email': 'customer_email',
+                'phone': 'customer_phone',
+                
+                // Address fields
+                'delivery_address_line1': 'delivery_address_line1',
+                'address_line1': 'delivery_address_line1',
+                'address': 'delivery_address_line1',
+                'delivery_address_line2': 'delivery_address_line2', 
+                'address_line2': 'delivery_address_line2',
+                'delivery_city': 'delivery_city',
+                'city': 'delivery_city',
+                'delivery_state': 'delivery_state',
+                'state': 'delivery_state',
+                'delivery_postal_code': 'delivery_postal_code',
+                'postal_code': 'delivery_postal_code',
+                'postcode': 'delivery_postal_code',
+                
+                // Product fields
+                'product_qrcode': 'product_qrcode',
+                'product_sku': 'product_qrcode',
+                'sku': 'product_qrcode',
+                'qrcode': 'product_qrcode',
+                'product_name': 'product_name',
+                'product_quantity': 'product_quantity',
+                'quantity': 'product_quantity',
+                'qty': 'product_quantity',
+                'product_price': 'product_price',
+                'price': 'product_price',
+                'order_notes': 'order_notes',
+                'notes': 'order_notes'
+            };
             
-            // Try exact match first
-            if (autoMappingRules[headerText]) {
-                select.value = autoMappingRules[headerText];
-                return;
+            // Auto-map function
+            function autoMapColumns() {
+                const selects = document.querySelectorAll('select[name^="map["]');
+                
+                selects.forEach(function(select) {
+                    const row = select.closest('tr');
+                    const headerCell = row.querySelector('td:first-child');
+                    const headerText = headerCell.textContent.toLowerCase().trim();
+                    
+                    // Try exact match first
+                    if (autoMappingRules[headerText]) {
+                        select.value = autoMappingRules[headerText];
+                        return;
+                    }
+                    
+                    // Try partial matches
+                    for (const [pattern, fieldValue] of Object.entries(autoMappingRules)) {
+                        if (headerText.includes(pattern) || pattern.includes(headerText)) {
+                            select.value = fieldValue;
+                            break;
+                        }
+                    }
+                });
             }
             
-            // Try partial matches
-            for (const [pattern, fieldValue] of Object.entries(autoMappingRules)) {
-                if (headerText.includes(pattern) || pattern.includes(headerText)) {
-                    select.value = fieldValue;
-                    break;
-                }
+            // Add auto-map button
+            const form = document.querySelector('form[action="import.php"]');
+            if (form) {
+                const buttonContainer = form.querySelector('.flex.justify-between');
+                const autoMapButton = document.createElement('button');
+                autoMapButton.type = 'button';
+                autoMapButton.className = 'bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 mr-2';
+                autoMapButton.textContent = 'Auto-Map Columns';
+                autoMapButton.onclick = autoMapColumns;
+                
+                buttonContainer.insertBefore(autoMapButton, buttonContainer.lastElementChild);
+            }
+            
+            // Auto-map on page load
+            autoMapColumns();
+        });
+
+        // Add loading states for form submissions
+        document.addEventListener('DOMContentLoaded', function() {
+            const csvForm = document.getElementById('csvUploadForm');
+            const wooForm = document.getElementById('wooCommerceForm');
+            
+            if (csvForm) {
+                csvForm.addEventListener('submit', function() {
+                    const btn = document.getElementById('csvUploadBtn');
+                    const text = document.getElementById('csvUploadText');
+                    const spinner = document.getElementById('csvUploadSpinner');
+                    
+                    if (btn && text && spinner) {
+                        btn.disabled = true;
+                        text.textContent = 'Uploading...';
+                        spinner.classList.remove('hidden');
+                    }
+                });
+            }
+            
+            if (wooForm) {
+                wooForm.addEventListener('submit', function(e) {
+                    // Only show loading for the main fetch button, not test connection
+                    if (!e.submitter || !e.submitter.name || e.submitter.name !== 'test_woocommerce') {
+                        const btn = document.getElementById('wooCommerceBtn');
+                        const text = document.getElementById('wooCommerceText');
+                        const spinner = document.getElementById('wooCommerceSpinner');
+                        
+                        if (btn && text && spinner) {
+                            btn.disabled = true;
+                            text.textContent = 'Fetching Orders...';
+                            spinner.classList.remove('hidden');
+                        }
+                    }
+                });
             }
         });
-    }
-    
-    // Add auto-map button
-    const form = document.querySelector('form[action="import.php"]');
-    if (form) {
-        const buttonContainer = form.querySelector('.flex.justify-between');
-        const autoMapButton = document.createElement('button');
-        autoMapButton.type = 'button';
-        autoMapButton.className = 'bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 mr-2';
-        autoMapButton.textContent = 'Auto-Map Columns';
-        autoMapButton.onclick = autoMapColumns;
-        
-        buttonContainer.insertBefore(autoMapButton, buttonContainer.lastElementChild);
-    }
-    
-    // Auto-map on page load
-    autoMapColumns();
-});
     </script>
 </body>
 </html>
 <?php
 ob_end_flush();
-exit;
 ?>
