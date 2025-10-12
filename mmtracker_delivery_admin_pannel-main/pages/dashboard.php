@@ -116,13 +116,13 @@ $preferences_result = mysqli_query($conn, $preferences_sql);
 
 $user_preferences = [];
 if ($preferences_result) {
-    while ($pref = mysqli_fetch_assoc($preferences_result)) {
-        $user_preferences[$pref['panel_id']] = [
-            'width' => $pref['width'],
-            'height' => $pref['height'],
-            'grid_columns' => $pref['grid_columns']
-        ];
-    }
+  while ($pref = mysqli_fetch_assoc($preferences_result)) {
+    $user_preferences[$pref['panel_id']] = [
+      'width' => $pref['width'],
+      'height' => $pref['height'],
+      'grid_columns' => $pref['grid_columns']
+    ];
+  }
 }
 
 // Convert to JSON for JavaScript
@@ -138,7 +138,7 @@ $user_preferences_json = json_encode($user_preferences);
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
- <style>
+  <style>
     .app-shell {
       display: flex;
       min-height: 100vh;
@@ -203,29 +203,34 @@ $user_preferences_json = json_encode($user_preferences);
     .topbar {
       background: #0b1724;
       color: #fff;
-      padding: 8px 16px; /* Reduced from 12px 20px */
+      padding: 8px 16px;
+      /* Reduced from 12px 20px */
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 48px; /* Fixed height, reduced from ~60px */
+      height: 48px;
+      /* Fixed height, reduced from ~60px */
     }
 
     .content {
-      padding: 6px; /* Reduced from 12px */
+      padding: 6px;
+      /* Reduced from 12px */
       flex: 1;
       overflow: auto;
-      height: calc(100vh - 48px); /* Adjusted for new topbar height */
+      height: calc(100vh - 48px);
+      /* Adjusted for new topbar height */
     }
 
     .grid-wrap {
-  display: grid;
-  gap: 0px; /* CHANGE FROM 4px TO 2px */
-  grid-template-columns: 1fr 1fr;
-  align-items: start;
-  position: relative;
-  height: 100%;
-  max-height: calc(100vh - 54px);
-}
+      display: grid;
+      gap: 0px;
+      /* CHANGE FROM 4px TO 2px */
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+      position: relative;
+      height: 100%;
+      max-height: calc(100vh - 54px);
+    }
 
 
     @media (max-width:1100px) {
@@ -234,24 +239,27 @@ $user_preferences_json = json_encode($user_preferences);
       }
     }
 
-  .panel {
-  background: white;
-  border-radius: 6px;
-  padding: 4px; /* CHANGE FROM 6px TO 4px */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  position: relative;
-  min-height: 120px; /* CHANGE FROM 140px TO 120px */
-  max-height: 100%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
+    .panel {
+      background: white;
+      border-radius: 6px;
+      padding: 4px;
+      /* CHANGE FROM 6px TO 4px */
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      position: relative;
+      min-height: 120px;
+      /* CHANGE FROM 140px TO 120px */
+      max-height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
 
     /* Resizable panels */
     .resizable-panel {
       overflow: auto;
       min-width: 250px;
-      min-height: 140px; /* Reduced from 200px */
+      min-height: 140px;
+      /* Reduced from 200px */
       max-width: 100%;
       border: 1px solid #e5e7eb;
     }
@@ -267,6 +275,16 @@ $user_preferences_json = json_encode($user_preferences);
       background: #6b7280;
       opacity: 0;
       transition: opacity 0.2s ease;
+      z-index: 100;
+
+    }
+
+    .drivers-list,
+    .orders-list,
+    .routes-list {
+      overflow-y: auto;
+      
+      flex: 1;
     }
 
     .resize-handle:hover,
@@ -294,7 +312,14 @@ $user_preferences_json = json_encode($user_preferences);
       bottom: 0;
       height: 4px;
       cursor: ns-resize;
-      
+
+    }
+
+    .resize-handle-v,
+    .resize-handle-corner {
+      will-change: transform;
+      pointer-events: auto;
+      transition: none !important;
     }
 
     /* Corner resize handle */
@@ -328,82 +353,97 @@ $user_preferences_json = json_encode($user_preferences);
     }
 
     .left-column {
-  position: relative;
-  height: 100%;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0px; /* CHANGE FROM 4px TO 2px */
+      position: relative;
+      height: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0px;
+      /* CHANGE FROM 4px TO 2px */
 
     }
 
-  .right-column {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0px; /* CHANGE FROM 4px TO 2px */
-}
+    .right-column {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0px;
+      /* CHANGE FROM 4px TO 2px */
+    }
 
 
     /* Compact table styling */
     .panel table {
       width: 100%;
-      font-size: 13px; /* Reduced from default */
+      font-size: 13px;
+      /* Reduced from default */
     }
 
-   .panel table thead th {
-  padding: 3px 6px; /* CHANGE FROM 4px 8px TO 3px 6px */
-  font-size: 11px;
-  font-weight: 600;
-}
+    .panel table thead th {
+      padding: 3px 6px;
+      /* CHANGE FROM 4px 8px TO 3px 6px */
+      font-size: 11px;
+      font-weight: 600;
+    }
 
     .panel table tbody td {
-  padding: 2px 6px; /* CHANGE FROM 3px 8px TO 2px 6px */
-  line-height: 1.2;
-}
+      padding: 2px 6px;
+      /* CHANGE FROM 3px 8px TO 2px 6px */
+      line-height: 1.2;
+    }
 
 
     .panel table tbody tr {
-      height: auto; /* Let content determine height */
+      height: auto;
+      /* Let content determine height */
     }
 
     /* Compact section headers */
     .section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 4px; /* CHANGE FROM 6px TO 4px */
-}
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      /* CHANGE FROM 6px TO 4px */
+    }
 
     .section-header h2 {
-      font-size: 16px; /* Reduced from 18px (text-lg) */
+      font-size: 16px;
+      /* Reduced from 18px (text-lg) */
       font-weight: 600;
       margin: 0;
     }
 
-  .workflow-indicator {
-  font-size: 10px;
-  color: #6B7280;
-  margin-top: 1px; /* CHANGE FROM 2px TO 1px */
-  margin-bottom: 2px; /* CHANGE FROM 4px TO 2px */
-  font-style: italic;
-  line-height: 1.2;
-}
+    .workflow-indicator {
+      font-size: 10px;
+      color: #6B7280;
+      margin-top: 1px;
+      /* CHANGE FROM 2px TO 1px */
+      margin-bottom: 2px;
+      /* CHANGE FROM 4px TO 2px */
+      font-style: italic;
+      line-height: 1.2;
+    }
 
     .workflow-step {
-      font-size: 9px; /* Reduced from 10px */
+      font-size: 9px;
+      /* Reduced from 10px */
       color: #6B7280;
       background: #F3F4F6;
-      padding: 2px 4px; /* Reduced from 2px 6px */
-      border-radius: 3px; /* Reduced from 4px */
+      padding: 2px 4px;
+      /* Reduced from 2px 6px */
+      border-radius: 3px;
+      /* Reduced from 4px */
       font-weight: 500;
     }
 
     /* Compact status pills */
     .status-pill {
       font-weight: 700;
-      font-size: 10px; /* Reduced from 12px */
-      padding: 2px 6px; /* Reduced from 4px 8px */
+      font-size: 10px;
+      /* Reduced from 12px */
+      padding: 2px 6px;
+      /* Reduced from 4px 8px */
       border-radius: 999px;
     }
 
@@ -505,11 +545,13 @@ $user_preferences_json = json_encode($user_preferences);
     /* Assigned status indicators */
     .assigned-indicator {
       display: inline-block;
-      font-size: 9px; /* Reduced from 10px */
+      font-size: 9px;
+      /* Reduced from 10px */
       color: #10b981;
       font-weight: 600;
       background: rgba(16, 185, 129, 0.1);
-      padding: 1px 3px; /* Reduced from 2px 4px */
+      padding: 1px 3px;
+      /* Reduced from 2px 4px */
       border-radius: 3px;
       margin-left: 4px;
     }
@@ -532,23 +574,28 @@ $user_preferences_json = json_encode($user_preferences);
     }
 
     #map {
-  height: 100% !important; /* Force height */
-  min-height: 250px !important; /* Ensure minimum */
-  width: 100%;
-  border-radius: 6px;
-  position: relative; /* Add this */
-}
+      height: 100% !important;
+      /* Force height */
+      min-height: 250px !important;
+      /* Ensure minimum */
+      width: 100%;
+      border-radius: 6px;
+      position: relative;
+      /* Add this */
+    }
 
     /* Loading spinner */
     .loading-spinner {
       display: none;
-      width: 14px; /* Reduced from 16px */
+      width: 14px;
+      /* Reduced from 16px */
       height: 14px;
       border: 2px solid #f3f3f3;
       border-top: 2px solid #10B981;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin-left: 6px; /* Reduced from 8px */
+      margin-left: 6px;
+      /* Reduced from 8px */
     }
 
     @keyframes spin {
@@ -610,18 +657,33 @@ $user_preferences_json = json_encode($user_preferences);
 
     /* Compact link styling */
     .panel a {
-      font-size: 12px; /* Reduced from 14px (text-sm) */
+      font-size: 12px;
+      /* Reduced from 14px (text-sm) */
     }
+
     /* Default heights for panels (first login) */
-#driversPanel { height: 180px; }
-#routeOrdersPanel { height: 200px; }
-#ordersPanel { height: 190px; }
-#mapPanel { height: 310px; }
-#routesPanel { height: 275px; }
+    #driversPanel {
+      height: 180px;
+    }
 
+    #routeOrdersPanel {
+      height: 200px;
+    }
 
+    #ordersPanel {
+      height: 190px;
+    }
+
+    #mapPanel {
+      height: 310px;
+    }
+
+    #routesPanel {
+      height: 275px;
+    }
   </style>
 </head>
+
 <body>
 
   <div class="app-shell">
@@ -706,7 +768,7 @@ $user_preferences_json = json_encode($user_preferences);
             </a>
           <?php endif; ?>
 
-         
+
 
           <a href="<?php echo SITE_URL; ?>pages/manifests/index.php"
             class="<?php echo (strpos($_SERVER['PHP_SELF'], 'routes') !== false) ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'; ?> group flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all">
@@ -766,24 +828,24 @@ $user_preferences_json = json_encode($user_preferences);
       </div>
 
       <div class="content">
-       
+
 
         <div class="grid-wrap" id="dashboardGrid">
           <!-- LEFT COLUMN: Drivers THEN Route Orders THEN Orders -->
           <div class="left-column" id="leftColumn">
             <div class="column-resizer" id="columnResizer"></div>
-            
+
             <!-- Drivers Section -->
             <div class="panel resizable-panel " id="driversPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
-              
+
               <div class="section-header">
                 <div class="flex items-center gap-2">
                   <h2 class="text-lg font-semibold">Drivers</h2>
                   <span class="workflow-step">Step 2: Assign Routes</span>
                 </div>
-              <a href="<?php echo SITE_URL; ?>pages/riders/index.php" class="text-indigo-600 text-sm">Manage</a>
+                <a href="<?php echo SITE_URL; ?>pages/riders/index.php" class="text-indigo-600 text-sm">Manage</a>
               </div>
               <div class="workflow-indicator">Drag routes here to assign to drivers</div>
               <div id="driversList" class="drivers-list">
@@ -797,7 +859,8 @@ $user_preferences_json = json_encode($user_preferences);
                   <tbody id="driversTableBody">
                     <?php if ($riders_result && mysqli_num_rows($riders_result) > 0): ?>
                       <?php while ($r = mysqli_fetch_assoc($riders_result)): ?>
-                        <tr class="bg-white border-b hover:bg-gray-50 drop-zone" data-driver-id="<?php echo intval($r['id']); ?>">
+                        <tr class="bg-white border-b hover:bg-gray-50 drop-zone"
+                          data-driver-id="<?php echo intval($r['id']); ?>">
                           <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">
                             <?php echo htmlspecialchars($r['name'] ?? ''); ?>
                             <div class="loading-spinner"></div>
@@ -869,7 +932,8 @@ $user_preferences_json = json_encode($user_preferences);
                               <span class="text-green-600 font-semibold">
                                 Route <?php echo $order['manifest_id']; ?>
                                 <?php if ($order['assigned_rider_name']): ?>
-                                  <br><span class="text-gray-500"><?php echo htmlspecialchars($order['assigned_rider_name']); ?></span>
+                                  <br><span
+                                    class="text-gray-500"><?php echo htmlspecialchars($order['assigned_rider_name']); ?></span>
                                 <?php endif; ?>
                               </span>
                             <?php else: ?>
@@ -892,19 +956,21 @@ $user_preferences_json = json_encode($user_preferences);
             <div class="panel resizable-panel" id="ordersPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
-              
+
               <div class="section-header">
                 <div class="flex items-center gap-2">
                   <h2 class="text-lg font-semibold">Unassigned Orders</h2>
                   <span class="workflow-step">Step 1: Add to Routes</span>
                 </div>
                 <div class="flex items-center gap-4">
-                <a href="<?php echo SITE_URL; ?>pages/orders/create.php" class="text-indigo-600 text-sm">Create Order</a>
-<a href="<?php echo SITE_URL; ?>pages/orders/import.php" class="text-indigo-600 text-sm">Import Order</a>
-<a href="<?php echo SITE_URL; ?>pages/orders/index.php" class="text-indigo-600 text-sm">View all →</a>
+                  <a href="<?php echo SITE_URL; ?>pages/orders/create.php" class="text-indigo-600 text-sm">Create
+                    Order</a>
+                  <a href="<?php echo SITE_URL; ?>pages/orders/import.php" class="text-indigo-600 text-sm">Import
+                    Order</a>
+                  <a href="<?php echo SITE_URL; ?>pages/orders/index.php" class="text-indigo-600 text-sm">View all →</a>
                 </div>
               </div>
-              
+
               <div class="workflow-indicator">Drag orders to routes first, then assign routes to drivers</div>
               <div class="orders-list" id="ordersList">
                 <table class="w-full text-sm text-left text-gray-500">
@@ -918,7 +984,8 @@ $user_preferences_json = json_encode($user_preferences);
                   <tbody id="ordersTableBody">
                     <?php if ($recent_orders_result && mysqli_num_rows($recent_orders_result) > 0): ?>
                       <?php while ($order = mysqli_fetch_assoc($recent_orders_result)): ?>
-                        <tr class="bg-white border-b hover:bg-gray-50 draggable-row" draggable="true" data-order-id="<?php echo intval($order['id']); ?>">
+                        <tr class="bg-white border-b hover:bg-gray-50 draggable-row" draggable="true"
+                          data-order-id="<?php echo intval($order['id']); ?>">
                           <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">
                             <?php echo htmlspecialchars($order['order_number']); ?>
                           </td>
@@ -931,7 +998,9 @@ $user_preferences_json = json_encode($user_preferences);
                         </tr>
                       <?php endwhile; ?>
                     <?php else: ?>
-                      <tr><td colspan="3" class="text-center py-4">No unassigned orders found</td></tr>
+                      <tr>
+                        <td colspan="3" class="text-center py-4">No unassigned orders found</td>
+                      </tr>
                     <?php endif; ?>
                   </tbody>
                 </table>
@@ -944,7 +1013,7 @@ $user_preferences_json = json_encode($user_preferences);
             <div class="panel resizable-panel " id="mapPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
-              
+
               <div class="flex justify-between items-center ">
                 <h2 class="text-lg font-semibold">Drivers Location Map</h2>
                 <div class="text-sm text-gray-500" id="lastUpdate">Last update: 0 drivers</div>
@@ -955,18 +1024,20 @@ $user_preferences_json = json_encode($user_preferences);
             <div class="panel resizable-panel" id="routesPanel">
               <div class="resize-handle resize-handle-v"></div>
               <div class="resize-handle resize-handle-corner"></div>
-              
+
               <div class="section-header">
                 <div class="flex items-center gap-2">
                   <h2 class="text-lg font-semibold">Routes</h2>
                   <span class="workflow-step">Collect Orders → Assign to Drivers</span>
                 </div>
                 <div class="flex items-center gap-4">
-              <a href="<?php echo SITE_URL; ?>pages/manifests/create.php" class="text-indigo-600 text-sm">Create Route</a>
-<a href="<?php echo SITE_URL; ?>pages/manifests/index.php" class="text-indigo-600 text-sm">View all →</a>
+                  <a href="<?php echo SITE_URL; ?>pages/manifests/create.php" class="text-indigo-600 text-sm">Create
+                    Route</a>
+                  <a href="<?php echo SITE_URL; ?>pages/manifests/index.php" class="text-indigo-600 text-sm">View all
+                    →</a>
                 </div>
               </div>
-              
+
               <div class="workflow-indicator">Routes ready for assignment to drivers</div>
               <div class="routes-list" id="routesList">
                 <table class="w-full text-sm text-left text-gray-500">
@@ -981,9 +1052,9 @@ $user_preferences_json = json_encode($user_preferences);
                   <tbody id="routesTableBody">
                     <?php if ($routes_result && mysqli_num_rows($routes_result) > 0): ?>
                       <?php while ($r = mysqli_fetch_assoc($routes_result)): ?>
-                        <tr class="bg-white border-b hover:bg-gray-50 drop-zone <?php echo ($r['total_orders'] > 0) ? 'draggable-row' : ''; ?>" 
-                            data-route-id="<?php echo intval($r['id']); ?>" 
-                            <?php echo ($r['total_orders'] > 0) ? 'draggable="true"' : ''; ?>>
+                        <tr
+                          class="bg-white border-b hover:bg-gray-50 drop-zone <?php echo ($r['total_orders'] > 0) ? 'draggable-row' : ''; ?>"
+                          data-route-id="<?php echo intval($r['id']); ?>" <?php echo ($r['total_orders'] > 0) ? 'draggable="true"' : ''; ?>>
                           <td class="py-2 px-4 font-medium text-gray-900 whitespace-nowrap">
                             R-<?php echo intval($r['id']); ?>
                             <div class="loading-spinner"></div>
@@ -1021,8 +1092,8 @@ $user_preferences_json = json_encode($user_preferences);
   <div id="messageContainer"></div>
 
 
-<script>
-  // ========== SIDEBAR ==========
+  <script>
+    // ========== SIDEBAR ==========
 const sidebar = document.getElementById('sidebar');
 let pinned = false;
 
@@ -1034,7 +1105,7 @@ function sidebarHover(incoming) {
   if (pinned) return;
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
-  
+
   if (incoming) {
     sidebar.classList.add('expanded');
   } else {
@@ -1081,17 +1152,17 @@ const routeOrdersManager = {
     this.setupRouteClickHandlers();
     this.setupClearSelection();
   },
-  
+
   async loadAllOrders() {
     this.displayCurrentOrders();
     this.updateOrdersCount();
   },
-  
+
   displayCurrentOrders() {
     const rows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row');
     this.updateOrdersCount(rows.length);
   },
-  
+
   setupRouteClickHandlers() {
     document.addEventListener('click', (e) => {
       if (e.target.closest('.draggable-row.dragging')) return;
@@ -1102,7 +1173,7 @@ const routeOrdersManager = {
       }
     });
   },
-  
+
   setupClearSelection() {
     const clearBtn = document.getElementById('clearRouteSelection');
     if (clearBtn) {
@@ -1111,7 +1182,7 @@ const routeOrdersManager = {
       });
     }
   },
-  
+
   async selectRoute(routeId) {
     if (selectedRouteId === routeId) {
       this.clearRouteSelection();
@@ -1122,11 +1193,11 @@ const routeOrdersManager = {
     await this.loadRouteOrders(routeId);
     this.highlightSelectedRoute(routeId);
   },
-  
+
   async loadRouteOrders(routeId) {
     const tableBody = document.getElementById('routeOrdersTableBody');
     if (!tableBody) return;
-    
+
     tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
 
     // Get the correct API path
@@ -1174,7 +1245,7 @@ const routeOrdersManager = {
       this.updateOrdersCount(0);
     }
   },
-  
+
   clearRouteSelection() {
     selectedRouteId = null;
     this.updateRouteSelectionUI(null);
@@ -1185,7 +1256,7 @@ const routeOrdersManager = {
     this.updateOrdersCount(allRows.length);
     this.highlightSelectedRoute(null);
   },
-  
+
   updateRouteSelectionUI(routeId) {
     const title = document.getElementById('routeOrdersTitle');
     const workflowStep = document.getElementById('routeOrdersWorkflowStep');
@@ -1204,7 +1275,7 @@ const routeOrdersManager = {
       if (clearBtn) clearBtn.classList.add('hidden');
     }
   },
-  
+
   highlightSelectedRoute(routeId) {
     document.querySelectorAll('#routesTableBody tr').forEach(row => {
       row.classList.remove('route-selected');
@@ -1214,7 +1285,7 @@ const routeOrdersManager = {
       if (routeRow) routeRow.classList.add('route-selected');
     }
   },
-  
+
   updateOrdersCount(count) {
     if (count === undefined) {
       const visibleRows = document.querySelectorAll('#routeOrdersTableBody tr.route-order-row[style=""], #routeOrdersTableBody tr.route-order-row:not([style])');
@@ -1225,7 +1296,7 @@ const routeOrdersManager = {
       countElement.textContent = `${count} order${count !== 1 ? 's' : ''}`;
     }
   },
-  
+
   refresh() {
     setTimeout(() => {
       if (selectedRouteId) {
@@ -1250,12 +1321,12 @@ const setupTracking = {
 function setupDraggableOrders() {
   const orderRows = document.querySelectorAll('#ordersTableBody tr.draggable-row[data-order-id]');
   console.log('🔵 [DRAG-ORDER] Found', orderRows.length, 'order rows');
-  
+
   orderRows.forEach(row => {
     const orderId = row.dataset.orderId;
     if (setupTracking.orders.has(orderId)) return;
     setupTracking.orders.add(orderId);
-    
+
     row.addEventListener('dragstart', (e) => {
       console.log('🟢 [DRAG-ORDER] DRAGSTART - Order ID:', row.dataset.orderId);
       document.body.classList.add('dragging-active');
@@ -1283,19 +1354,19 @@ function setupDraggableOrders() {
 function setupDraggableRoutes() {
   const routeRows = document.querySelectorAll('#routesTableBody tr[data-route-id]');
   console.log('🔵 [DRAG-ROUTE] Found', routeRows.length, 'route rows');
-  
+
   routeRows.forEach(row => {
     const routeId = row.dataset.routeId;
-    
+
     const ordersCountSpan = row.querySelector('.orders-count');
     const orderCount = ordersCountSpan ? parseInt(ordersCountSpan.textContent) || 0 : 0;
-    
+
     console.log('🔵 [DRAG-ROUTE] Route ID:', routeId, '| Orders:', orderCount, '| Draggable:', orderCount > 0);
-    
+
     if (orderCount > 0) {
       row.setAttribute('draggable', 'true');
       row.classList.add('draggable-row');
-      
+
       // Remove old listener if it exists and add new one
       if (setupTracking.routes.has(routeId)) {
         const oldRow = row;
@@ -1317,7 +1388,7 @@ function setupDraggableRoutes() {
 
 function setupSingleDraggableRoute(row, routeId) {
   setupTracking.routes.add(routeId);
-  
+
   row.addEventListener('dragstart', (e) => {
     console.log('🟢 [DRAG-ROUTE] ✅ DRAGSTART - Route ID:', routeId);
     document.body.classList.add('dragging-active');
@@ -1360,14 +1431,14 @@ function createDragGhost(row, e) {
 function setupRouteDropTargets() {
   const routeRows = document.querySelectorAll('#routesTableBody tr[data-route-id]');
   console.log('🔵 [DROP-ROUTE] Setting up', routeRows.length, 'route drop targets (for orders)');
-  
+
   routeRows.forEach(row => {
     const routeId = row.dataset.routeId;
     if (setupTracking.routeDrops.has(routeId)) return;
     setupTracking.routeDrops.add(routeId);
-    
+
     row.classList.add('drop-zone');
-    
+
     row.addEventListener('dragover', (e) => {
       if (dragType !== 'order') return;
       e.preventDefault();
@@ -1396,14 +1467,14 @@ function setupRouteDropTargets() {
 function setupDriverDropTargets() {
   const driverRows = document.querySelectorAll('#driversTableBody tr[data-driver-id]');
   console.log('🔵 [DROP-DRIVER] Setting up', driverRows.length, 'driver drop targets (for routes)');
-  
+
   driverRows.forEach(row => {
     const driverId = row.dataset.driverId;
     if (setupTracking.driverDrops.has(driverId)) return;
     setupTracking.driverDrops.add(driverId);
-    
+
     row.classList.add('drop-zone');
-    
+
     row.addEventListener('dragover', (e) => {
       console.log('🟡 [DROP-DRIVER] DRAGOVER detected | dragType:', dragType);
       if (dragType !== 'route') {
@@ -1426,20 +1497,20 @@ function setupDriverDropTargets() {
       e.preventDefault();
       console.log('🟢 [DROP-DRIVER] ✅ DROP EVENT TRIGGERED');
       row.classList.remove('drag-over-route');
-      
+
       if (dragType !== 'route') {
         console.log('🔴 [DROP-DRIVER] ❌ Wrong dragType on drop:', dragType);
         return;
       }
-      
+
       const routeId = e.dataTransfer.getData('text/plain');
       console.log('🟢 [DROP-DRIVER] Route ID:', routeId, '| Driver ID:', driverId);
-      
+
       if (!routeId || !driverId) {
         console.log('🔴 [DROP-DRIVER] ❌ Missing route or driver ID');
         return;
       }
-      
+
       console.log('🟢 [DROP-DRIVER] ✅ Calling assignRouteToDriver()');
       await assignRouteToDriver(routeId, driverId, row);
     });
@@ -1455,7 +1526,7 @@ async function assignOrderToRoute(orderId, routeId, targetRow) {
   const currentPath = window.location.pathname;
   const isInPagesFolder = currentPath.includes('/pages/');
   const apiPath = isInPagesFolder ? '../api/assign_order_to_route.php' : 'api/assign_order_to_route.php';
-  
+
   console.log('🔵 [ASSIGN-ORDER] API Path:', apiPath);
   console.log('🔵 [ASSIGN-ORDER] Current Path:', currentPath);
 
@@ -1470,7 +1541,7 @@ async function assignOrderToRoute(orderId, routeId, targetRow) {
     });
 
     console.log('🔵 [ASSIGN-ORDER] Response status:', response.status);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.log('🔴 [ASSIGN-ORDER] Response error:', errorText);
@@ -1487,7 +1558,7 @@ async function assignOrderToRoute(orderId, routeId, targetRow) {
       }
       updateRouteRow(routeId, targetRow);
       showMessage(`Order #${getOrderNumber(orderId)} added to Route R-${routeId}`, 'success');
-      
+
       setTimeout(() => {
         console.log('🔵 [ASSIGN-ORDER] Reinitializing drag/drop handlers...');
         setupDraggableRoutes();
@@ -1515,7 +1586,7 @@ async function assignRouteToDriver(routeId, riderId, targetRow) {
   const currentPath = window.location.pathname;
   const isInPagesFolder = currentPath.includes('/pages/');
   const apiPath = isInPagesFolder ? '../api/assign_route_to_rider.php' : 'api/assign_route_to_rider.php';
-  
+
   console.log('🔵 [ASSIGN-ROUTE] API Path:', apiPath);
   console.log('🔵 [ASSIGN-ROUTE] Current Path:', currentPath);
 
@@ -1530,7 +1601,7 @@ async function assignRouteToDriver(routeId, riderId, targetRow) {
     });
 
     console.log('🔵 [ASSIGN-ROUTE] Response status:', response.status);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.log('🔴 [ASSIGN-ROUTE] Response error:', errorText);
@@ -1606,25 +1677,25 @@ function initializeDragAndDrop() {
   console.log('═══════════════════════════════════════════');
   console.log('🔵 [DRAG-DROP] INITIALIZING DRAG AND DROP');
   console.log('═══════════════════════════════════════════');
-  
+
   // Clear tracking on re-initialization
   setupTracking.orders.clear();
   setupTracking.routes.clear();
   setupTracking.routeDrops.clear();
   setupTracking.driverDrops.clear();
-  
+
   setupDraggableOrders();
   console.log('✅ [DRAG-DROP] Orders setup complete');
-  
+
   setupDraggableRoutes();
   console.log('✅ [DRAG-DROP] Routes setup complete');
-  
+
   setupRouteDropTargets();
   console.log('✅ [DRAG-DROP] Route drop targets setup complete');
-  
+
   setupDriverDropTargets();
   console.log('✅ [DRAG-DROP] Driver drop targets setup complete');
-  
+
   console.log('═══════════════════════════════════════════');
   console.log('✅ [DRAG-DROP] INITIALIZATION COMPLETE');
   console.log('═══════════════════════════════════════════');
@@ -1646,18 +1717,18 @@ function addMapMarkers() {
   }
 
   const bounds = [];
-  
+
   drivers.forEach(driver => {
     if (driver.latitude && driver.longitude) {
       const lat = parseFloat(driver.latitude);
       const lng = parseFloat(driver.longitude);
-      
+
       const marker = L.marker([lat, lng]).addTo(map);
       marker.bindPopup(`
         <strong>${driver.rider_name || 'Unknown'}</strong><br>
         Last seen: ${driver.created_at || 'Unknown'}
       `);
-      
+
       markers[driver.rider_id] = marker;
       bounds.push([lat, lng]);
     }
@@ -1706,7 +1777,7 @@ function initializeMap() {
     if (map) {
       try {
         map.remove();
-      } catch (e) {}
+      } catch (e) { }
       map = null;
     }
 
@@ -1743,18 +1814,71 @@ function initializeMap() {
 }
 
 // ========== RESIZABLE PANELS ==========
-
 function initializeResizablePanels() {
+  // Clear any existing initialization flags
+  document.querySelectorAll('.resizable-panel').forEach(panel => {
+    panel._resizeInitialized = false;
+  });
+
   initializePanelResizing();
   initializeColumnResizing();
+  makeResizeHandlesSticky();
+}
+
+function makeResizeHandlesSticky() {
+  document.querySelectorAll('.resizable-panel').forEach(panel => {
+    const handleV = panel.querySelector('.resize-handle-v');
+    const handleCorner = panel.querySelector('.resize-handle-corner');
+
+    if (!handleV && !handleCorner) return;
+
+    panel.addEventListener('scroll', () => {
+      const offset = panel.scrollTop;
+
+      if (handleV) {
+        handleV.style.transform = `translateY(${offset}px)`;
+      }
+      if (handleCorner) {
+        handleCorner.style.transform = `translateY(${offset}px)`;
+      }
+    }, { passive: true });
+  });
+
+  console.log('✅ Sticky resize handles initialized');
 }
 
 function initializePanelResizing() {
+  // First remove any existing resize handles and recreate them
   document.querySelectorAll('.resizable-panel').forEach(panel => {
+    // Remove existing resize handles
+    const existingHandles = panel.querySelectorAll('.resize-handle');
+    existingHandles.forEach(handle => handle.remove());
+    
+    // Create fresh resize handles
+    const resizeHandleV = document.createElement('div');
+    resizeHandleV.className = 'resize-handle resize-handle-v';
+    
+    const resizeHandleCorner = document.createElement('div');
+    resizeHandleCorner.className = 'resize-handle resize-handle-corner';
+    
+    panel.appendChild(resizeHandleV);
+    panel.appendChild(resizeHandleCorner);
+    
+    // Mark as not initialized
+    panel._resizeInitialized = false;
+  });
+
+  // Now initialize with fresh handles
+  document.querySelectorAll('.resizable-panel').forEach(panel => {
+    if (panel._resizeInitialized) return;
+    
     const resizeHandleV = panel.querySelector('.resize-handle-v');
     const resizeHandleCorner = panel.querySelector('.resize-handle-corner');
+    
     if (resizeHandleV) initializeResizeHandle(resizeHandleV, panel, 'vertical');
     if (resizeHandleCorner) initializeResizeHandle(resizeHandleCorner, panel, 'both');
+    
+    panel._resizeInitialized = true;
   });
 }
 
@@ -1869,7 +1993,7 @@ function applySavedSizes() {
     const panelId = panel.id;
     const savedFromDB = userPreferences[panelId];
     const fallback = defaultSizes[panelId] || {};
-    
+
     panel.style.width = (savedFromDB && savedFromDB.width) || fallback.width || '100%';
     panel.style.height = (savedFromDB && savedFromDB.height) || fallback.height || '220px';
   });
@@ -1880,20 +2004,46 @@ function applySavedSizes() {
   }
 }
 
+// ========== NAVIGATION FIX ==========
+function reinitializeOnNavigation() {
+  console.log('🔄 Checking if reinitialization needed...');
+  
+  const panels = document.querySelectorAll('.resizable-panel');
+  const firstPanel = panels[0];
+  
+  // Check if resize functionality is working
+  if (firstPanel && (!firstPanel._resizeInitialized || !firstPanel.querySelector('.resize-handle-v'))) {
+    console.log('🔄 Reinitializing resize functionality...');
+    
+    // Force complete reinitialization
+    initializeApp();
+    
+    // Mark as initialized
+    panels.forEach(panel => {
+      panel._resizeInitialized = true;
+    });
+  }
+}
+
 // ========== APP INITIALIZATION ==========
 function initializeApp() {
   console.log('═══════════════════════════════════════════');
   console.log('🚀 APP INITIALIZATION STARTED');
   console.log('═══════════════════════════════════════════');
-  
+
   try {
+    // Reset all initialization flags
+    document.querySelectorAll('.resizable-panel').forEach(panel => {
+      panel._resizeInitialized = false;
+    });
+
     applySavedSizes();
     initializeMap();
     initializeResizablePanels();
-    
+
     console.log('🔵 [INIT] Initializing drag and drop...');
     initializeDragAndDrop();
-    
+
     setTimeout(() => {
       routeOrdersManager.init();
       console.log('═══════════════════════════════════════════');
@@ -1901,14 +2051,16 @@ function initializeApp() {
       console.log('═══════════════════════════════════════════');
     }, 300);
 
-    // Safety recheck for drag/drop
+    // Safety recheck for navigation issues
     setTimeout(() => {
-      console.log('🔵 [INIT] Safety recheck - reinitializing drag/drop...');
-      initializeDragAndDrop();
-    }, 1500);
-    
+      console.log('🔵 [INIT] Navigation safety check...');
+      reinitializeOnNavigation();
+    }, 1000);
+
   } catch (error) {
     console.error('❌ Error during initialization:', error);
+    // Retry on error
+    setTimeout(initializeApp, 500);
   }
 }
 
@@ -1920,67 +2072,54 @@ function delayedInitialize() {
 }
 
 // ========== EVENT LISTENERS ==========
-
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', delayedInitialize);
 } else {
   delayedInitialize();
 }
 
+// Reinitialize on various page events
 window.addEventListener('load', () => {
   fixMap();
-  if (!draggedOrderId && !draggedRouteId) {
-    console.log('🔵 [INIT] Window loaded - reinitializing drag/drop');
-    initializeDragAndDrop();
-  }
+  setTimeout(reinitializeOnNavigation, 200);
 });
 
 window.addEventListener('resize', () => {
   fixMap();
 });
 
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) {
-    const mapContainer = document.getElementById('map');
-    const hasLeafletContent = mapContainer && mapContainer.querySelector('.leaflet-container');
-    
-    if (!map || !hasLeafletContent) {
-      map = null;
-      setTimeout(() => {
-        initializeMap();
-      }, 150);
-    } else {
-      setTimeout(fixMap, 100);
-    }
+// FIX FOR NAVIGATION: Reinitialize when returning to dashboard
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    console.log('🔄 Page restored from cache - reinitializing...');
+    setTimeout(initializeApp, 300);
   }
 });
 
-window.addEventListener('focus', () => {
-  setTimeout(() => {
-    const mapContainer = document.getElementById('map');
-    const hasLeafletContent = mapContainer && mapContainer.querySelector('.leaflet-container');
-    
-    if (!map || !hasLeafletContent) {
-      map = null;
-      initializeMap();
-    } else {
-      fixMap();
+// Monitor URL changes for navigation
+let currentUrl = window.location.href;
+setInterval(() => {
+  if (window.location.href !== currentUrl) {
+    currentUrl = window.location.href;
+    if (currentUrl.includes('dashboard.php')) {
+      console.log('🔄 Navigation to dashboard detected - reinitializing...');
+      setTimeout(initializeApp, 500);
     }
-  }, 200);
+  }
+}, 200);
+
+// Reinitialize when page becomes visible again
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    setTimeout(reinitializeOnNavigation, 200);
+  }
 });
 
-window.addEventListener('pageshow', (event) => {
-  setTimeout(() => {
-    const mapContainer = document.getElementById('map');
-    const hasLeafletContent = mapContainer && mapContainer.querySelector('.leaflet-container');
-    
-    if (!map || !hasLeafletContent || event.persisted) {
-      map = null;
-      initializeMap();
-    }
-  }, 150);
+// Force reinitialization when focusing on the window
+window.addEventListener('focus', () => {
+  setTimeout(reinitializeOnNavigation, 300);
 });
-</script>
+  </script>
 
 
 

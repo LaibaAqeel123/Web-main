@@ -4,7 +4,7 @@ requireLogin();
 
 $order = null;
 $status_logs = [];
-$route = null; // Changed from $manifest to $route
+$route = null;
 $products = [];
 
 if (isset($_GET['id'])) {
@@ -13,7 +13,7 @@ if (isset($_GET['id'])) {
     // Check access rights
     $company_condition = !isSuperAdmin() ? "AND o.company_id = " . $_SESSION['company_id'] : "";
 
-    // Fetch order details with company name, organization, products, customer, and address
+    // Fetch order details
     $query = "SELECT o.*, 
                c.name as company_name, 
                org.name as organization_name, org.id as organization_id,
@@ -73,7 +73,7 @@ if (isset($_GET['id'])) {
         $status_logs[] = $log;
     }
 
-    // Fetch route details if assigned - Backend uses 'rider' terminology
+    // Fetch route details if assigned
     $route_query = "SELECT m.*, u.name as rider_name 
                       FROM Manifests m
                       LEFT JOIN ManifestOrders mo ON m.id = mo.manifest_id
@@ -96,6 +96,7 @@ if (isset($_GET['id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Order - <?php echo SITE_NAME; ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body class="bg-gray-100">
@@ -123,22 +124,25 @@ if (isset($_GET['id'])) {
                         Order #<?php echo htmlspecialchars($order['order_number']); ?>
                     </h1>
                     <div class="space-x-2">
-                        <!-- CHANGED: Show POD PDF button for ALL order statuses in GREEN color -->
-                        <a href="generate_view_pdf.php?id=<?php echo $order['id']; ?>" target="_blank"
-                            class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 inline-flex items-center">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <!-- UPDATED: POD PDF button with JavaScript blob method -->
+                        <button onclick="openPDFInNewTab(<?php echo $order['id']; ?>)" 
+                                class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 inline-flex items-center transition-colors duration-200">
+                            <i class="fas fa-file-pdf mr-2"></i>
                             View POD PDF
-                        </a>
+                        </button>
                         <a href="edit.php?id=<?php echo $order['id']; ?>"
-                            class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+                            class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 inline-flex items-center transition-colors duration-200">
+                            <i class="fas fa-edit mr-2"></i>
                             Edit Order
                         </a>
-                        <a href="index.php" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+                        <a href="index.php" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 inline-flex items-center transition-colors duration-200">
+                            <i class="fas fa-arrow-left mr-2"></i>
                             Back to Orders
                         </a>
                     </div>
                 </div>
 
+                <!-- Rest of your content remains exactly the same -->
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <!-- Order Details -->
                     <div class="space-y-6">
@@ -272,13 +276,11 @@ if (isset($_GET['id'])) {
                                                 <img src="<?php echo SITE_URL . 'api/' . htmlspecialchars($order['proof_signature_path']); ?>"
                                                      alt="Signature Proof"
                                                      class="max-w-full h-auto rounded-lg border border-gray-300 shadow-sm bg-white p-2 cursor-pointer hover:shadow-md transition-shadow"> 
-                                                     <!-- Added bg-white and padding for better signature visibility -->
                                             </a>
                                         </div>
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>
-                            <!-- End Delivery Proofs Section -->
                         </div>
                     </div>
 
@@ -336,7 +338,6 @@ if (isset($_GET['id'])) {
                                                         echo 'bg-blue-500';
                                                 }
                                                 ?>">
-                                                            <!-- Status Icon -->
                                                             <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
@@ -384,11 +385,62 @@ if (isset($_GET['id'])) {
         </div>
 
         <script>
+            // Function to open PDF in new tab using blob
+            function openPDFInNewTab(orderId) {
+                // Show loading state
+                const button = event.target;
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generating PDF...';
+                button.disabled = true;
+
+                // Fetch the PDF
+                fetch(`generate_view_pdf.php?id=${orderId}&t=${Date.now()}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        // Create a blob URL
+                        const blobUrl = URL.createObjectURL(blob);
+                        
+                        // Open in new tab
+                        const newTab = window.open(blobUrl, '_blank');
+                        
+                        // Revoke the blob URL after the tab is opened
+                        if (newTab) {
+                            newTab.onload = function() {
+                                URL.revokeObjectURL(blobUrl);
+                            };
+                        } else {
+                            // Fallback if popup blocked
+                            const link = document.createElement('a');
+                            link.href = blobUrl;
+                            link.target = '_blank';
+                            link.download = 'proof_of_delivery.pdf';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+                        }
+                        
+                        // Restore button
+                        button.innerHTML = originalHTML;
+                        button.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error opening PDF. Please try again.');
+                        
+                        // Restore button
+                        button.innerHTML = originalHTML;
+                        button.disabled = false;
+                    });
+            }
+
             // Add print functionality if needed
             document.addEventListener('DOMContentLoaded', function() {
-                // Add any JavaScript functionality here
-
-                // Example: Print button functionality
                 const printButton = document.getElementById('printOrder');
                 if (printButton) {
                     printButton.addEventListener('click', function() {
