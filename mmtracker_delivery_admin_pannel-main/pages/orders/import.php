@@ -378,7 +378,7 @@ function fetchWooCommerceOrders($status = 'processing', $limit = 50, $date_from 
 }
 
 /**
- * Process WooCommerce orders into database - ENHANCED WITH SKIP DUPLICATES STRATEGY
+ * Process WooCommerce orders into database 
  */
 function processWooCommerceOrders($orders, $company_id, $conn) {
     $import_results = [
@@ -548,7 +548,7 @@ function processWooCommerceOrders($orders, $company_id, $conn) {
             
             $sql = "INSERT INTO Orders (order_number, company_id, customer_id, delivery_address_id, status, notes, total_amount, requires_image_proof, requires_signature_proof, organization_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = mysqli_prepare($conn, $sql);
-            // FIXED: Corrected parameter binding to match exactly 10 parameters
+            
             mysqli_stmt_bind_param($stmt, "siissdiiii", $order_number, $company_id, $customer_id, $address_id, $order_status, $order_notes, $order_total, $req_img, $req_sig, $org_id);
             if (!mysqli_stmt_execute($stmt)) throw new Exception("DB Error create order: " . mysqli_stmt_error($stmt));
             $order_id = mysqli_insert_id($conn);
@@ -1191,6 +1191,14 @@ $db_fields = [
     'requires_signature_proof' => 'Requires Signature Proof (1 or true)',
     // 'organization_id' => 'Organization ID', // Add if needed
 ];
+?>
+<?php
+// Auto-refresh once per session to fix "no file chosen" issue after login
+if (!isset($_SESSION['import_page_refreshed'])) {
+    $_SESSION['import_page_refreshed'] = true;
+    echo '<meta http-equiv="refresh" content="0;url=' . htmlspecialchars($_SERVER['REQUEST_URI']) . '">';
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
