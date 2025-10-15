@@ -1,0 +1,9 @@
+order_group_id,customer_name,customer_email,customer_phone,delivery_address_line1,delivery_address_line2,delivery_city,delivery_state,delivery_postal_code,product_qrcode,product_name,product_quantity,product_price,order_notes,requires_image_proof,requires_signature_proof
+ORD201,Christopher Hall,chris.hall@testdomain.com,07711223344,42 Baker Street,,London,London,NW1 6XE,SKU201,Gaming Mouse,1,32.99,Safe place available,1,1
+ORD201,Christopher Hall,chris.hall@testdomain.com,07711223344,42 Baker Street,,London,London,NW1 6XE,SKU202,Mouse Pad,1,9.99,Safe place available,1,1
+ORD202,Jennifer Parker,jen.parker@testdomain.com,07722334455,98 Deansgate,Floor 3,Manchester,Greater Manchester,M3 2QG,SKU203,Tablet Stand,2,28.50,Ring twice,1,1
+ORD203,William Turner,will.turner@testdomain.com,07733445566,67 New Street,Suite 12,Birmingham,West Midlands,B2 4DU,SKU204,Portable Charger,1,24.99,Leave at reception,1,1
+ORD203,William Turner,will.turner@testdomain.com,07733445566,67 New Street,Suite 12,Birmingham,West Midlands,B2 4DU,SKU205,Lightning Cable,2,15.99,Leave at reception,1,1
+ORD203,William Turner,will.turner@testdomain.com,07733445566,67 New Street,Suite 12,Birmingham,West Midlands,B2 4DU,SKU206,Phone Holder,1,18.50,Leave at reception,1,1
+ORD204,Amanda Roberts,amanda.roberts@testdomain.com,07744556677,123 Headrow,,Leeds,West Yorkshire,LS1 8TL,SKU207,Bluetooth Earbuds,1,65.00,Deliver after 5pm,1,1
+ORD205,Simon Cooper,simon.cooper@testdomain.com,07755667788,456 Castle Street,Flat 1A,Liverpool,Merseyside,L2 7LF,SKU208,Desk Lamp,1,42.99,Knock loudly,1,1

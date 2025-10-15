@@ -1,0 +1,11 @@
+order_group_id,customer_name,customer_email,customer_phone,delivery_address_line1,delivery_address_line2,delivery_city,delivery_state,delivery_postal_code,product_qrcode,product_name,product_quantity,product_price,order_notes,requires_image_proof,requires_signature_proof
+ORD101,Robert Thompson,robert.thompson@testmail.com,07811234567,145 Victoria Street,Flat 4B,London,London,SW1E 5NG,SKU101,Wireless Headphones,2,45.99,Please ring doorbell,1,1
+ORD101,Robert Thompson,robert.thompson@testmail.com,07811234567,145 Victoria Street,Flat 4B,London,London,SW1E 5NG,SKU102,Phone Case,1,12.50,Please ring doorbell,1,1
+ORD102,Michelle Davies,michelle.davies@testmail.com,07822345678,278 Oxford Road,,Manchester,Greater Manchester,M13 9GP,SKU103,Bluetooth Speaker,1,89.99,Leave with neighbor if out,1,1
+ORD102,Michelle Davies,michelle.davies@testmail.com,07822345678,278 Oxford Road,,Manchester,Greater Manchester,M13 9GP,SKU104,USB Cable,3,8.99,Leave with neighbor if out,1,1
+ORD103,Andrew Clarke,andrew.clarke@testmail.com,07833456789,156 Corporation Street,Unit 8,Birmingham,West Midlands,B4 6QD,SKU105,Laptop Stand,1,35.00,Fragile - handle with care,1,1
+ORD104,Rachel Green,rachel.green@testmail.com,07844567890,89 Briggate,,Leeds,West Yorkshire,LS1 6AZ,SKU106,Wireless Mouse,2,25.99,Call before delivery,1,1
+ORD104,Rachel Green,rachel.green@testmail.com,07844567890,89 Briggate,,Leeds,West Yorkshire,LS1 6AZ,SKU107,Keyboard,1,55.00,Call before delivery,1,1
+ORD105,James Mitchell,james.mitchell@testmail.com,07855678901,234 Bold Street,Apartment 2C,Liverpool,Merseyside,L1 4HY,SKU108,Monitor,1,199.99,Signature required,1,1
+ORD106,Sophie White,sophie.white@testmail.com,07866789012,167 Grainger Street,,Newcastle,Tyne and Wear,NE1 5AE,SKU109,Webcam,1,75.50,Leave in safe place,1,1
+ORD106,Sophie White,sophie.white@testmail.com,07866789012,167 Grainger Street,,Newcastle,Tyne and Wear,NE1 5AE,SKU110,Microphone,1,45.00,Leave in safe place,1,1
