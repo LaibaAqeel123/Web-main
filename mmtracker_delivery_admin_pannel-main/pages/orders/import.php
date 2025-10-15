@@ -1211,6 +1211,7 @@ $db_fields = [
         .import-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
         .skip-details { max-height: 150px; overflow-y: auto; background-color: #e1f5fe; border: 1px solid #b3e5fc; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 0.875rem; }
         .skip-details strong { color: #01579b; }
+        
     </style>
 </head>
 <body class="bg-gray-100">
@@ -1558,151 +1559,220 @@ $db_fields = [
             </div>
         </div>
     </div>
+<script>
+function initMMTrackerScripts() {
+    console.log('%c[MMTRACKER] initMMTrackerScripts() CALLED', 'color: cyan; font-weight: bold;');
 
-    <script>
-        // Set today as max date for date inputs
-        document.addEventListener('DOMContentLoaded', function() {
-            const today = new Date().toISOString().split('T')[0];
-            const dateInputs = document.querySelectorAll('input[type="date"]');
-            dateInputs.forEach(input => {
-                input.setAttribute('max', today);
+    const csvForm = document.getElementById('csvUploadForm');
+    const csvInput = document.getElementById('order_csv');
+    const uploadBtn = document.getElementById('csvUploadBtn');
+    const text = document.getElementById('csvUploadText');
+    const spinner = document.getElementById('csvUploadSpinner');
+
+    if (csvForm && csvInput && uploadBtn) {
+        console.log('%c[MMTRACKER] CSV form and upload button found.', 'color: lightgreen;');
+
+        // Reset any old listeners (LiteSPA fix)
+        csvInput.replaceWith(csvInput.cloneNode(true));
+        const newCsvInput = document.getElementById('order_csv');
+
+        newCsvInput.addEventListener('change', () => {
+            if (newCsvInput.files.length > 0) {
+                console.log('[MMTRACKER] File selected:', newCsvInput.files[0].name);
+            }
+        });
+
+        // Upload button click handler
+        uploadBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const liveInput = document.getElementById('order_csv');
+            if (!liveInput || liveInput.files.length === 0) {
+                alert('⚠️ Please select a CSV file before uploading.');
+                return;
+            }
+
+            console.log('[MMTRACKER] Upload button clicked. Submitting form for:', liveInput.files[0].name);
+            csvForm.submit();
+        });
+
+        // Form submission visuals
+        csvForm.addEventListener('submit', (e) => {
+            const liveInput = document.getElementById('order_csv');
+            if (!liveInput || !liveInput.files.length) {
+                e.preventDefault();
+                console.error('[MMTRACKER] ❌ No file selected on submit');
+                alert('⚠️ Please select a file before uploading.');
+                return;
+            }
+
+            console.log('[MMTRACKER] ✅ Uploading:', liveInput.files[0].name);
+            if (uploadBtn && text && spinner) {
+                uploadBtn.disabled = true;
+                text.textContent = 'Uploading...';
+                spinner.classList.remove('hidden');
+            }
+        });
+    } else {
+        console.warn('[MMTRACKER] CSV form or button missing — waiting for DOM changes.');
+    }
+
+    // --- WooCommerce Fetch Handling ---
+    const wooForm = document.getElementById('wooCommerceForm');
+    if (wooForm) {
+        wooForm.addEventListener('submit', (e) => {
+            const btn = document.getElementById('wooCommerceBtn');
+            const text = document.getElementById('wooCommerceText');
+            const spinner = document.getElementById('wooCommerceSpinner');
+            if (btn && text && spinner) {
+                btn.disabled = true;
+                text.textContent = 'Fetching Orders...';
+                spinner.classList.remove('hidden');
+            }
+        });
+        console.log('[MMTRACKER] WooCommerce form found.');
+    }
+
+    // --- Auto-date fix ---
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelectorAll('input[type="date"]').forEach(i => i.setAttribute('max', today));
+}
+
+// ✅ --- Auto-map CSV Columns Logic (from your previous working version) ---
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('%c[MMTRACKER] Auto-mapping logic initialized.', 'color: yellow;');
+
+    // Mapping rules: CSV header patterns -> database field values
+    const autoMappingRules = {
+        'order_group_id': 'order_group_id',
+        'order_id': 'order_group_id',
+        'group_id': 'order_group_id',
+
+        'customer_name': 'customer_name',
+        'customer_email': 'customer_email',
+        'customer_phone': 'customer_phone',
+        'name': 'customer_name',
+        'email': 'customer_email',
+        'phone': 'customer_phone',
+
+        'delivery_address_line1': 'delivery_address_line1',
+        'address_line1': 'delivery_address_line1',
+        'address': 'delivery_address_line1',
+        'delivery_address_line2': 'delivery_address_line2',
+        'address_line2': 'delivery_address_line2',
+        'delivery_city': 'delivery_city',
+        'city': 'delivery_city',
+        'delivery_state': 'delivery_state',
+        'state': 'delivery_state',
+        'delivery_postal_code': 'delivery_postal_code',
+        'postal_code': 'delivery_postal_code',
+        'postcode': 'delivery_postal_code',
+
+        'product_qrcode': 'product_qrcode',
+        'product_sku': 'product_qrcode',
+        'sku': 'product_qrcode',
+        'qrcode': 'product_qrcode',
+        'product_name': 'product_name',
+        'product_quantity': 'product_quantity',
+        'quantity': 'product_quantity',
+        'qty': 'product_quantity',
+        'product_price': 'product_price',
+        'price': 'product_price',
+        'order_notes': 'order_notes',
+        'notes': 'order_notes'
+    };
+
+    function autoMapColumns() {
+        const selects = document.querySelectorAll('select[name^="map["]');
+        let mappedCount = 0;
+
+        selects.forEach(function(select) {
+            const row = select.closest('tr');
+            const headerCell = row.querySelector('td:first-child');
+            if (!headerCell) return;
+
+            const headerText = headerCell.textContent.toLowerCase().trim();
+
+            if (autoMappingRules[headerText]) {
+                select.value = autoMappingRules[headerText];
+                mappedCount++;
+                return;
+            }
+
+            for (const [pattern, fieldValue] of Object.entries(autoMappingRules)) {
+                if (headerText.includes(pattern) || pattern.includes(headerText)) {
+                    select.value = fieldValue;
+                    mappedCount++;
+                    break;
+                }
+            }
+        });
+
+        console.log(`[MMTRACKER] Auto-mapped ${mappedCount} columns.`);
+    }
+
+    // Add Auto-Map Button
+    const form = document.querySelector('form[action="import.php"]');
+    if (form) {
+        const buttonContainer = form.querySelector('.flex.justify-between');
+        if (buttonContainer && !document.getElementById('autoMapBtn')) {
+            const autoMapButton = document.createElement('button');
+            autoMapButton.type = 'button';
+            autoMapButton.id = 'autoMapBtn';
+            autoMapButton.className = 'bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 mr-2';
+            autoMapButton.textContent = 'Auto-Map Columns';
+            autoMapButton.onclick = autoMapColumns;
+            buttonContainer.insertBefore(autoMapButton, buttonContainer.lastElementChild);
+        }
+    }
+
+    // Auto-map on page load
+    autoMapColumns();
+});
+
+// --- File Persistence & Rebind Logic ---
+if (!window.MMTrackerObserverInitialized) {
+    window.MMTrackerObserverInitialized = true;
+    let preservedFile = null;
+
+    document.addEventListener('change', (e) => {
+        if (e.target.id === 'order_csv' && e.target.files.length > 0) {
+            preservedFile = e.target.files[0];
+            console.log('[MMTRACKER] File preserved:', preservedFile.name);
+        }
+    });
+
+    const fileObserver = new MutationObserver(() => {
+        const input = document.getElementById('order_csv');
+        if (input && preservedFile && input.files.length === 0) {
+            const dt = new DataTransfer();
+            dt.items.add(preservedFile);
+            input.files = dt.files;
+            console.log('[MMTRACKER] File restored after DOM update:', preservedFile.name);
+        }
+
+        const csvForm = document.getElementById('csvUploadForm');
+        const uploadBtn = document.getElementById('csvUploadBtn');
+        if (csvForm && uploadBtn && !uploadBtn.dataset.listenerAttached) {
+            uploadBtn.dataset.listenerAttached = "true";
+            uploadBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const csvInput = document.getElementById('order_csv');
+                if (!csvInput || csvInput.files.length === 0) {
+                    alert('⚠️ Please select a file before uploading.');
+                    return;
+                }
+                console.log('[MMTRACKER] (Observer) Upload button clicked for:', csvInput.files[0].name);
+                csvForm.submit();
             });
-        });
+            console.log('[MMTRACKER] Upload button listener reattached after DOM update.');
+        }
+    });
 
-        // Auto-suggest date range (last 30 days)
-        document.getElementById('wc_date_from')?.addEventListener('focus', function() {
-            if (!this.value) {
-                const thirtyDaysAgo = new Date();
-                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                this.value = thirtyDaysAgo.toISOString().split('T')[0];
-            }
-        });
+    fileObserver.observe(document.body, { childList: true, subtree: true });
+    console.log('[MMTRACKER] File observer initialized once.');
+}
+</script>
 
-        // Auto-map CSV columns based on header names
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mapping rules: CSV header patterns -> database field values
-            const autoMappingRules = {
-                // Order identifiers
-                'order_group_id': 'order_group_id',
-                'order_id': 'order_group_id',
-                'group_id': 'order_group_id',
-                
-                // Customer info
-                'customer_name': 'customer_name',
-                'customer_email': 'customer_email', 
-                'customer_phone': 'customer_phone',
-                'name': 'customer_name',
-                'email': 'customer_email',
-                'phone': 'customer_phone',
-                
-                // Address fields
-                'delivery_address_line1': 'delivery_address_line1',
-                'address_line1': 'delivery_address_line1',
-                'address': 'delivery_address_line1',
-                'delivery_address_line2': 'delivery_address_line2', 
-                'address_line2': 'delivery_address_line2',
-                'delivery_city': 'delivery_city',
-                'city': 'delivery_city',
-                'delivery_state': 'delivery_state',
-                'state': 'delivery_state',
-                'delivery_postal_code': 'delivery_postal_code',
-                'postal_code': 'delivery_postal_code',
-                'postcode': 'delivery_postal_code',
-                
-                // Product fields
-                'product_qrcode': 'product_qrcode',
-                'product_sku': 'product_qrcode',
-                'sku': 'product_qrcode',
-                'qrcode': 'product_qrcode',
-                'product_name': 'product_name',
-                'product_quantity': 'product_quantity',
-                'quantity': 'product_quantity',
-                'qty': 'product_quantity',
-                'product_price': 'product_price',
-                'price': 'product_price',
-                'order_notes': 'order_notes',
-                'notes': 'order_notes'
-            };
-            
-            // Auto-map function
-            function autoMapColumns() {
-                const selects = document.querySelectorAll('select[name^="map["]');
-                
-                selects.forEach(function(select) {
-                    const row = select.closest('tr');
-                    const headerCell = row.querySelector('td:first-child');
-                    const headerText = headerCell.textContent.toLowerCase().trim();
-                    
-                    // Try exact match first
-                    if (autoMappingRules[headerText]) {
-                        select.value = autoMappingRules[headerText];
-                        return;
-                    }
-                    
-                    // Try partial matches
-                    for (const [pattern, fieldValue] of Object.entries(autoMappingRules)) {
-                        if (headerText.includes(pattern) || pattern.includes(headerText)) {
-                            select.value = fieldValue;
-                            break;
-                        }
-                    }
-                });
-            }
-            
-            // Add auto-map button
-            const form = document.querySelector('form[action="import.php"]');
-            if (form) {
-                const buttonContainer = form.querySelector('.flex.justify-between');
-                const autoMapButton = document.createElement('button');
-                autoMapButton.type = 'button';
-                autoMapButton.className = 'bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 mr-2';
-                autoMapButton.textContent = 'Auto-Map Columns';
-                autoMapButton.onclick = autoMapColumns;
-                
-                buttonContainer.insertBefore(autoMapButton, buttonContainer.lastElementChild);
-            }
-            
-            // Auto-map on page load
-            autoMapColumns();
-        });
-
-        // Add loading states for form submissions
-        document.addEventListener('DOMContentLoaded', function() {
-            const csvForm = document.getElementById('csvUploadForm');
-            const wooForm = document.getElementById('wooCommerceForm');
-            
-            if (csvForm) {
-                csvForm.addEventListener('submit', function() {
-                    const btn = document.getElementById('csvUploadBtn');
-                    const text = document.getElementById('csvUploadText');
-                    const spinner = document.getElementById('csvUploadSpinner');
-                    
-                    if (btn && text && spinner) {
-                        btn.disabled = true;
-                        text.textContent = 'Uploading...';
-                        spinner.classList.remove('hidden');
-                    }
-                });
-            }
-            
-            if (wooForm) {
-                wooForm.addEventListener('submit', function(e) {
-                    // Only show loading for the main fetch button, not test connection
-                    if (!e.submitter || !e.submitter.name || e.submitter.name !== 'test_woocommerce') {
-                        const btn = document.getElementById('wooCommerceBtn');
-                        const text = document.getElementById('wooCommerceText');
-                        const spinner = document.getElementById('wooCommerceSpinner');
-                        
-                        if (btn && text && spinner) {
-                            btn.disabled = true;
-                            text.textContent = 'Fetching Orders...';
-                            spinner.classList.remove('hidden');
-                        }
-                    }
-                });
-            }
-        });
-    </script>
 </body>
 </html>
 <?php

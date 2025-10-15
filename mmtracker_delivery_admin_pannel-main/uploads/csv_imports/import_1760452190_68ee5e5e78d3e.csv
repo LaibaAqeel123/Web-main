@@ -1,0 +1,11 @@
+order_group_id,customer_name,customer_email,customer_phone,delivery_address_line1,delivery_address_line2,delivery_city,delivery_state,delivery_postal_code,product_qrcode,product_name,product_quantity,product_price,order_notes,requires_image_proof,requires_signature_proof
+ORD001,John Smith,john.smith@email.com,07123456789,123 Main Street,Flat 2A,London,London,SW1A 1AA,QR001,Wireless Headphones,2,45.99,Please ring doorbell,1,1
+ORD001,John Smith,john.smith@email.com,07123456789,123 Main Street,Flat 2A,London,London,SW1A 1AA,QR002,Phone Case,1,12.50,Please ring doorbell,1,1
+ORD002,Sarah Johnson,sarah.johnson@email.com,07987654321,456 Oak Avenue,,Manchester,Greater Manchester,M1 1AA,QR003,Bluetooth Speaker,1,89.99,Leave with neighbor if out,1,1
+ORD002,Sarah Johnson,sarah.johnson@email.com,07987654321,456 Oak Avenue,,Manchester,Greater Manchester,M1 1AA,QR004,USB Cable,3,8.99,Leave with neighbor if out,1,1
+ORD003,Michael Brown,mike.brown@email.com,07555123456,789 High Street,Unit 5,Birmingham,West Midlands,B1 1AA,QR005,Laptop Stand,1,35.00,Fragile - handle with care,1,1
+ORD004,Emma Wilson,emma.wilson@email.com,07444987654,321 Church Lane,,Leeds,West Yorkshire,LS1 1AA,QR006,Wireless Mouse,2,25.99,Call before delivery,1,1
+ORD004,Emma Wilson,emma.wilson@email.com,07444987654,321 Church Lane,,Leeds,West Yorkshire,LS1 1AA,QR007,Keyboard,1,55.00,Call before delivery,1,1
+ORD005,David Taylor,david.taylor@email.com,07333456789,654 Park Road,Apartment 3B,Liverpool,Merseyside,L1 1AA,QR008,Monitor,1,199.99,Signature required,1,1
+ORD006,Lisa Anderson,lisa.anderson@email.com,07222654321,987 Queen Street,,Newcastle,Tyne and Wear,NE1 1AA,QR009,Webcam,1,75.50,Leave in safe place,1,1
+ORD006,Lisa Anderson,lisa.anderson@email.com,07222654321,987 Queen Street,,Newcastle,Tyne and Wear,NE1 1AA,QR010,Microphone,1,45.00,Leave in safe place,1,1
